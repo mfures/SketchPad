@@ -90,6 +90,8 @@ public class KTableModel {
 			return null;// No grid found
 		}
 
+		System.out.println("Testiram");
+
 		return null;
 	}
 

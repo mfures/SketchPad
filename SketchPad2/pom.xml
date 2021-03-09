@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>hr.fer.zemris.java.jmbag0036496186.dippro</groupId>
-  <artifactId>SketchPad</artifactId>
+  <groupId>hr.fer.zemris.java.jmbag0036496186.diprad</groupId>
+  <artifactId>SketchPad2</artifactId>
   <version>1.0</version>
 
   <!-- configuration of basic properties -->
@@ -13,6 +13,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
+	<maven.compiler.source>15</maven.compiler.source>
+    <maven.compiler.target>15</maven.compiler.target>
   </properties>
 
   <dependencies>
