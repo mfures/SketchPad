@@ -9,7 +9,14 @@ package hr.fer.zemris.diprad.util;
  * @param <K> any value
  */
 public class Pair<T, K> {
+	/**
+	 * First value in constructor
+	 */
 	public T t;
+
+	/**
+	 * Second value in constructor
+	 */
 	public K k;
 
 	/**

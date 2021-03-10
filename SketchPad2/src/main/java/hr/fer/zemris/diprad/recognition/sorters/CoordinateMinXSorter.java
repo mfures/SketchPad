@@ -7,6 +7,12 @@ import java.util.List;
 import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 
+/**
+ * Sorter that sorts lines by their smallest X coordinate
+ * 
+ * @author Matej
+ *
+ */
 public class CoordinateMinXSorter implements LineSorter {
 	@Override
 	public void sort(List<Line> lines) {

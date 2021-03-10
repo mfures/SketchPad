@@ -47,9 +47,9 @@ public class KTableModel {
 		List<GraphicalObject> objects = getObjectsInRectangle(a, b, sP.getModel());
 		List<BasicMovement> bms = handleGraphicalObjects(objects);
 
-		KTable table = recognizeTable(bms);
+		List<KTable> tables = recognizeTables(bms);
 
-		if (table == null) {
+		if (tables.isEmpty()) {
 			return;
 		}
 
@@ -68,7 +68,7 @@ public class KTableModel {
 		return bms;
 	}
 
-	private KTable recognizeTable(List<BasicMovement> bms) {
+	private List<KTable> recognizeTables(List<BasicMovement> bms) {
 		List<Line> horisontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
 
@@ -98,10 +98,113 @@ public class KTableModel {
 		}
 		System.out.println("Number of paired groups of lines:" + pairsVerHor.size());
 
-		System.out.println("Testiram");
+		List<KTable> tables = new ArrayList<>();
+		for (Pair<LineListWrapper, LineListWrapper> pairVerHor : pairsVerHor) {
+			KTable table = createTableFromVerHorPair(pairVerHor.t, pairVerHor.k);
+			if (table != null) {
+				tables.add(table);
+			}
+		}
 
+		return tables;
+	}
+
+	private KTable createTableFromVerHorPair(LineListWrapper verticalLinesWrap, LineListWrapper horisontalLinesWrap) {
+		if (!(isPowerOfTwo(verticalLinesWrap.lines.size() - 1) && isPowerOfTwo(horisontalLinesWrap.lines.size() - 1))) {
+			return null;
+		}
+
+		
 		return null;
 	}
+
+//	return null;}
+//
+//	Collections.sort(horistontalLines);Collections.sort(verticalLines);
+//
+//	if(verticalLines.size()>1&&horistontalLines.size()>1)
+//
+//	{
+//
+//	double height = horistontalLines.get(horistontalLines.size() - 1).getSemiStaticValue()
+//			- horistontalLines.get(0).getSemiStaticValue();
+//	double width = verticalLines.get(verticalLines.size() - 1).getSemiStaticValue()
+//			- verticalLines.get(0).getSemiStaticValue();
+//
+//	double avgHeight = height / (horistontalLines.size() - 1);
+//
+//	double maxHeight = 1.25 * avgHeight;
+//	double minHeight = 0.75 * avgHeight;
+//
+//	double avgWidth = width / (verticalLines.size() - 1);
+//	double maxWidth = 1.25 * avgWidth;
+//	double minWidth = 0.75 * avgWidth;
+//
+//	boolean checkFlag = true;
+//	double tmp;
+//
+//	for(
+//	Line l2:horistontalLines)
+//	{
+//		if (Math.abs(l2.getP1().x - l2.getP2().x) < 0.7 * width) {
+//			checkFlag = false;
+//			break;
+//		}
+//	}
+//
+//	for(
+//	Line l2:verticalLines)
+//	{
+//		if (Math.abs(l2.getP1().y - l2.getP2().y) < 0.7 * height) {
+//			checkFlag = false;
+//			break;
+//		}
+//	}
+//
+//	for(
+//	int i = 0;i<verticalLines.size()-1;i++)
+//	{
+//		tmp = verticalLines.get(i + 1).getSemiStaticValue() - verticalLines.get(i).getSemiStaticValue();
+//		if (tmp > maxWidth || tmp < minWidth) {
+//			checkFlag = false;
+//			break;
+//		}
+//	}
+//
+//	for(
+//	int i = 0;i<horistontalLines.size()-1;i++)
+//	{
+//		tmp = horistontalLines.get(i + 1).getSemiStaticValue() - horistontalLines.get(i).getSemiStaticValue();
+//		if (tmp > maxHeight || tmp < minHeight) {
+//			checkFlag = false;
+//			break;
+//		}
+//	}
+//
+//	if(checkFlag)
+//	{
+//				for (int i = 0; i < verticalLines.size() - 1; i++) {
+//					tmp = verticalLines.get(i + 1).getSemiStaticValue() - verticalLines.get(i).getSemiStaticValue();
+//					if (tmp > maxWidth || tmp < minWidth) {
+//						checkFlag = false;
+//						break;
+//					}
+//				}
+//
+//				if (checkFlag) {
+//					for (GraphicalObject o : objects) {
+//						model.remove(o);
+//					}
+//
+//					if (isPowerOfTwo(verticalLines.size() - 1) && isPowerOfTwo(horistontalLines.size() - 1)) {
+//						KTable table = new KTable(
+//								new Point(verticalLines.get(0).getSemiStaticValue().intValue(),
+//										horistontalLines.get(0).getSemiStaticValue().intValue()),
+//								verticalLines.size(), horistontalLines.size(), (int) width, (int) height);
+//
+//						model.add(table);
+//		return null;
+//	}
 
 	private List<Pair<LineListWrapper, LineListWrapper>> groupLinesInValidPairs(List<LineListWrapper> verticalGroups,
 			List<LineListWrapper> horisontalGroups) {
