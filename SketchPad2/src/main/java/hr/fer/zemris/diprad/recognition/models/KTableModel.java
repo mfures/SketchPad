@@ -24,6 +24,7 @@ import hr.fer.zemris.diprad.recognition.objects.One;
 import hr.fer.zemris.diprad.recognition.objects.Zero;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateMinXSorter;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateMinYSorter;
+import hr.fer.zemris.diprad.recognition.sorters.SemiStaticValueSorter;
 import hr.fer.zemris.diprad.recognition.testers.LineCoordinateDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LineDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesMinXDistanceTester;
@@ -36,6 +37,10 @@ public class KTableModel {
 	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.1;
 	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.1;
 	public static final double LINE_LENGTH_SCALE = 0.1;
+	public static final double TABLE_WIDTH_TOLERANCE = 0.35;
+	public static final double TABLE_HEIGHT_TOLERANCE = 0.35;
+	private static final double TABLE_HORISONTAL_LINE_LENTGTH_TOLERANCE = 0.7;
+	private static final double TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE = 0.7;
 
 	private SketchPad2 sP;
 
@@ -110,101 +115,92 @@ public class KTableModel {
 	}
 
 	private KTable createTableFromVerHorPair(LineListWrapper verticalLinesWrap, LineListWrapper horisontalLinesWrap) {
-		if (!(isPowerOfTwo(verticalLinesWrap.lines.size() - 1) && isPowerOfTwo(horisontalLinesWrap.lines.size() - 1))) {
+		System.out.println("Bok");
+		if (!areInputDimensionsForKTableValid(verticalLinesWrap, horisontalLinesWrap)) {
+			System.out.println("1");
 			return null;
 		}
 
-		
-		return null;
+		sortInputLinesBySemiStaticValue(verticalLinesWrap, horisontalLinesWrap);
+
+		double height = horisontalLinesWrap.lines.get(horisontalLinesWrap.lines.size() - 1).getSemiStaticValue()
+				- horisontalLinesWrap.lines.get(0).getSemiStaticValue();
+		double width = verticalLinesWrap.lines.get(verticalLinesWrap.lines.size() - 1).getSemiStaticValue()
+				- verticalLinesWrap.lines.get(0).getSemiStaticValue();
+
+		double avgHeight = height / (horisontalLinesWrap.lines.size() - 1);
+		double maxHeight = (1 + TABLE_HEIGHT_TOLERANCE) * avgHeight;
+		double minHeight = (1 - TABLE_HEIGHT_TOLERANCE) * avgHeight;
+
+		double avgWidth = width / (verticalLinesWrap.lines.size() - 1);
+		double maxWidth = (1 + TABLE_WIDTH_TOLERANCE) * avgWidth;
+		double minWidth = (1 - TABLE_WIDTH_TOLERANCE) * avgWidth;
+
+		double tmp;
+
+		if (horisontalLinesWrap.avgLength < TABLE_HORISONTAL_LINE_LENTGTH_TOLERANCE * width) {
+			System.out.println("2");
+			return null;
+		}
+		if (verticalLinesWrap.avgLength < TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE * height) {
+			System.out.println("3");
+			return null;
+		}
+
+		for (int i = 0; i < verticalLinesWrap.lines.size() - 1; i++) {
+			tmp = verticalLinesWrap.lines.get(i + 1).getSemiStaticValue()
+					- verticalLinesWrap.lines.get(i).getSemiStaticValue();
+			if (tmp > maxWidth || tmp < minWidth) {
+				System.out.println("4");
+				return null;
+			}
+		}
+
+		for (int i = 0; i < horisontalLinesWrap.lines.size() - 1; i++) {
+			tmp = horisontalLinesWrap.lines.get(i + 1).getSemiStaticValue()
+					- horisontalLinesWrap.lines.get(i).getSemiStaticValue();
+			if (tmp > maxHeight || tmp < minHeight) {
+				System.out.println("5");
+				return null;
+			}
+		}
+
+		KTable table = new KTable(
+				new Point(verticalLinesWrap.lines.get(0).getSemiStaticValue().intValue(),
+						horisontalLinesWrap.lines.get(0).getSemiStaticValue().intValue()),
+				verticalLinesWrap.lines.size(), horisontalLinesWrap.lines.size(), (int) width, (int) height);
+
+		debugDrawTable(table);
+
+		return table;
 	}
 
-//	return null;}
-//
-//	Collections.sort(horistontalLines);Collections.sort(verticalLines);
-//
-//	if(verticalLines.size()>1&&horistontalLines.size()>1)
-//
-//	{
-//
-//	double height = horistontalLines.get(horistontalLines.size() - 1).getSemiStaticValue()
-//			- horistontalLines.get(0).getSemiStaticValue();
-//	double width = verticalLines.get(verticalLines.size() - 1).getSemiStaticValue()
-//			- verticalLines.get(0).getSemiStaticValue();
-//
-//	double avgHeight = height / (horistontalLines.size() - 1);
-//
-//	double maxHeight = 1.25 * avgHeight;
-//	double minHeight = 0.75 * avgHeight;
-//
-//	double avgWidth = width / (verticalLines.size() - 1);
-//	double maxWidth = 1.25 * avgWidth;
-//	double minWidth = 0.75 * avgWidth;
-//
-//	boolean checkFlag = true;
-//	double tmp;
-//
-//	for(
-//	Line l2:horistontalLines)
-//	{
-//		if (Math.abs(l2.getP1().x - l2.getP2().x) < 0.7 * width) {
-//			checkFlag = false;
-//			break;
-//		}
-//	}
-//
-//	for(
-//	Line l2:verticalLines)
-//	{
-//		if (Math.abs(l2.getP1().y - l2.getP2().y) < 0.7 * height) {
-//			checkFlag = false;
-//			break;
-//		}
-//	}
-//
-//	for(
-//	int i = 0;i<verticalLines.size()-1;i++)
-//	{
-//		tmp = verticalLines.get(i + 1).getSemiStaticValue() - verticalLines.get(i).getSemiStaticValue();
-//		if (tmp > maxWidth || tmp < minWidth) {
-//			checkFlag = false;
-//			break;
-//		}
-//	}
-//
-//	for(
-//	int i = 0;i<horistontalLines.size()-1;i++)
-//	{
-//		tmp = horistontalLines.get(i + 1).getSemiStaticValue() - horistontalLines.get(i).getSemiStaticValue();
-//		if (tmp > maxHeight || tmp < minHeight) {
-//			checkFlag = false;
-//			break;
-//		}
-//	}
-//
-//	if(checkFlag)
-//	{
-//				for (int i = 0; i < verticalLines.size() - 1; i++) {
-//					tmp = verticalLines.get(i + 1).getSemiStaticValue() - verticalLines.get(i).getSemiStaticValue();
-//					if (tmp > maxWidth || tmp < minWidth) {
-//						checkFlag = false;
-//						break;
-//					}
-//				}
-//
-//				if (checkFlag) {
-//					for (GraphicalObject o : objects) {
-//						model.remove(o);
-//					}
-//
-//					if (isPowerOfTwo(verticalLines.size() - 1) && isPowerOfTwo(horistontalLines.size() - 1)) {
-//						KTable table = new KTable(
-//								new Point(verticalLines.get(0).getSemiStaticValue().intValue(),
-//										horistontalLines.get(0).getSemiStaticValue().intValue()),
-//								verticalLines.size(), horistontalLines.size(), (int) width, (int) height);
-//
-//						model.add(table);
-//		return null;
-//	}
+	private void debugDrawTable(KTable table) {
+		sP.getModel().add(table);
+		sP.getCanvas().repaint();
+
+	}
+
+	private void sortInputLinesBySemiStaticValue(LineListWrapper verticalLinesWrap,
+			LineListWrapper horisontalLinesWrap) {
+		LineSorter sorter = new SemiStaticValueSorter();
+		sorter.sort(horisontalLinesWrap.lines);
+		sorter.sort(verticalLinesWrap.lines);
+	}
+
+	private boolean areInputDimensionsForKTableValid(LineListWrapper verticalLinesWrap,
+			LineListWrapper horisontalLinesWrap) {
+		if (!(verticalLinesWrap.lines.size() > 1 && horisontalLinesWrap.lines.size() > 1)) {// TODO should be 2
+
+			return false;
+		}
+
+		if (!(isPowerOfTwo(verticalLinesWrap.lines.size() - 1) && isPowerOfTwo(horisontalLinesWrap.lines.size() - 1))) {
+			return false;
+		}
+
+		return true;
+	}
 
 	private List<Pair<LineListWrapper, LineListWrapper>> groupLinesInValidPairs(List<LineListWrapper> verticalGroups,
 			List<LineListWrapper> horisontalGroups) {
