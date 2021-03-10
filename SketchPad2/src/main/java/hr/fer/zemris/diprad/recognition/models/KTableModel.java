@@ -33,8 +33,8 @@ import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
 
 public class KTableModel {
-	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.07;
-	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.07;
+	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.1;
+	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.1;
 	public static final double LINE_LENGTH_SCALE = 0.1;
 
 	private SketchPad2 sP;
@@ -96,6 +96,7 @@ public class KTableModel {
 		if (pairsVerHor == null) {
 			return null;// No grid found
 		}
+		System.out.println("Number of paired groups of lines:" + pairsVerHor.size());
 
 		System.out.println("Testiram");
 
@@ -109,31 +110,92 @@ public class KTableModel {
 		// return null;
 		// }
 
-		List<Rectangle> horisontalRectangles = createRectangles(verticalGroups, false);
-		List<Rectangle> verticalRectangles = createRectangles(horisontalGroups, true);
+		List<Pair<Rectangle, LineListWrapper>> horisontalRectangles = createRectangles(verticalGroups, false);
+		List<Pair<Rectangle, LineListWrapper>> verticalRectangles = createRectangles(horisontalGroups, true);
 
 		System.out.println("HOR rectangles found:" + horisontalRectangles.size());
-		debugWriteRectangles(horisontalRectangles);// TODO remove
+		// debugWriteRectangles(horisontalRectangles);// TODO remove
 		System.out.println("VERT rectangles found:" + verticalRectangles.size());
-		debugWriteRectangles(verticalRectangles);// TODO remove
+		// debugWriteRectangles(verticalRectangles);// TODO remove
 
-		return null;
+		List<Pair<LineListWrapper, LineListWrapper>> pairs = new ArrayList<Pair<LineListWrapper, LineListWrapper>>();
+
+		for (Pair<Rectangle, LineListWrapper> ph : horisontalRectangles) {
+			for (Pair<Rectangle, LineListWrapper> pv : verticalRectangles) {
+				Pair<LineListWrapper, LineListWrapper> pair = rectangleOverlapLines(ph, pv);
+				if (pair != null) {
+					pairs.add(pair);
+				}
+			}
+		}
+
+		return pairs;
 	}
 
-	private void debugWriteRectangles(List<Rectangle> rectangles) {
-		for (var x : rectangles) {
-			System.out.println(x);
-			sP.getModel().add(new SelectionRectangle(new Point((int) x.getP1().x, (int) x.getP1().y),
-					new Point((int) x.getP2().x, (int) x.getP2().y)));
+	private Pair<LineListWrapper, LineListWrapper> rectangleOverlapLines(Pair<Rectangle, LineListWrapper> ph,
+			Pair<Rectangle, LineListWrapper> pv) {
+		Rectangle overlap = new Rectangle(new PointDouble(pv.t.getP1().x, ph.t.getP1().y),
+				new PointDouble(pv.t.getP2().x, ph.t.getP2().y));
+		// debugTestRectangle(overlap);
+
+		List<Line> verticalLines = new ArrayList<>();
+		for (Line l : ph.k.lines) {
+			if (isInRectangle(overlap, l, false)) {
+				verticalLines.add(l);
+			}
+		}
+
+		if (verticalLines.size() < 2) {// TODO should be 3
+			return null;
+		}
+
+		List<Line> horisontalLines = new ArrayList<>();
+		for (Line l : pv.k.lines) {
+			if (isInRectangle(overlap, l, true)) {
+				horisontalLines.add(l);
+			}
+		}
+
+		if (horisontalLines.size() < 2) {// TODO should be 3
+			return null;
+		}
+
+		return new Pair<KTableModel.LineListWrapper, KTableModel.LineListWrapper>(
+				new LineListWrapper(verticalLines, false), new LineListWrapper(horisontalLines, true));
+	}
+
+	private boolean isInRectangle(Rectangle overlap, Line l, boolean horisontal) {
+		if (horisontal) {
+			return l.getSemiStaticValue() > overlap.getP1().y && l.getSemiStaticValue() < overlap.getP2().y;
+		} else {
+			return l.getSemiStaticValue() > overlap.getP1().x && l.getSemiStaticValue() < overlap.getP2().x;
+		}
+	}
+
+	@SuppressWarnings("unused")
+	private void debugTestRectangle(Rectangle overlap) {
+		System.out.println(overlap);
+		sP.getModel().add(new SelectionRectangle(new Point((int) overlap.getP1().x, (int) overlap.getP1().y),
+				new Point((int) overlap.getP2().x, (int) overlap.getP2().y)));
+		sP.getCanvas().repaint();
+	}
+
+	@SuppressWarnings("unused")
+	private void debugWriteRectangles(List<Pair<Rectangle, LineListWrapper>> horisontalRectangles) {
+		for (var x : horisontalRectangles) {
+			System.out.println(x.t);
+			sP.getModel().add(new SelectionRectangle(new Point((int) x.t.getP1().x, (int) x.t.getP1().y),
+					new Point((int) x.t.getP2().x, (int) x.t.getP2().y)));
 			sP.getCanvas().repaint();
 		}
 	}
 
-	private List<Rectangle> createRectangles(List<LineListWrapper> verticalGroups, boolean minX) {
-		List<Rectangle> rectangles = new ArrayList<>();
+	private List<Pair<Rectangle, LineListWrapper>> createRectangles(List<LineListWrapper> verticalGroups,
+			boolean minX) {
+		List<Pair<Rectangle, LineListWrapper>> rectangles = new ArrayList<>();
 
 		for (LineListWrapper wrapper : verticalGroups) {
-			rectangles.add(createRectangle(wrapper, minX));
+			rectangles.add(new Pair<Rectangle, LineListWrapper>(createRectangle(wrapper, minX), wrapper));
 		}
 
 		return rectangles;

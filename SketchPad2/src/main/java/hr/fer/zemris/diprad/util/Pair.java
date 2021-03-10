@@ -11,4 +11,21 @@ package hr.fer.zemris.diprad.util;
 public class Pair<T, K> {
 	public T t;
 	public K k;
+
+	/**
+	 * Empty constructor
+	 */
+	public Pair() {
+	}
+
+	/**
+	 * Generic constructor;
+	 * 
+	 * @param t
+	 * @param k
+	 */
+	public Pair(T t, K k) {
+		this.t = t;
+		this.k = k;
+	}
 }
