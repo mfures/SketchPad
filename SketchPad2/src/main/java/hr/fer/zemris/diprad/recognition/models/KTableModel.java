@@ -14,6 +14,7 @@ import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable.Position;
+import hr.fer.zemris.diprad.drawing.graphical.objects.SelectionRectangle;
 import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.Tester;
@@ -28,9 +29,14 @@ import hr.fer.zemris.diprad.recognition.testers.LineDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesMinXDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesMinYDistanceTester;
 import hr.fer.zemris.diprad.util.Pair;
+import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
 
 public class KTableModel {
+	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.07;
+	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.07;
+	public static final double LINE_LENGTH_SCALE = 0.1;
+
 	private SketchPad2 sP;
 
 	public KTableModel(SketchPad2 sP) {
@@ -73,19 +79,20 @@ public class KTableModel {
 		System.out.println("NUM HOR:" + horisontalLines.size());
 
 		// horisontalLines.forEach((x) -> System.out.println(x.length()));
-		List<List<Line>> verticalGroups = groupLinesByDistance(verticalLines);
-		List<List<Line>> horisontalGroups = groupLinesByDistance(horisontalLines);
+		List<LineListWrapper> verticalGroups = groupLinesByDistance(verticalLines);
+		List<LineListWrapper> horisontalGroups = groupLinesByDistance(horisontalLines);
 		System.out.println("VERT GROUPS COUNT(dist):" + verticalGroups.size());
 		System.out.println("HOR GROUPS COUNT(dist):" + horisontalGroups.size());
 
 		verticalGroups = groupLinesByStartingCoordinate(verticalGroups, new LinesMinYDistanceTester(),
-				new CoordinateMinYSorter());
+				new CoordinateMinYSorter(), false);
 		horisontalGroups = groupLinesByStartingCoordinate(horisontalGroups, new LinesMinXDistanceTester(),
-				new CoordinateMinXSorter());
+				new CoordinateMinXSorter(), true);
 		System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
 		System.out.println("HOR GROUPS COUNT(dist+x):" + horisontalGroups.size());
 
-		List<Pair<List<Line>, List<Line>>> pairsVerHor = groupLinesInValidPairs(verticalGroups, horisontalGroups);
+		List<Pair<LineListWrapper, LineListWrapper>> pairsVerHor = groupLinesInValidPairs(verticalGroups,
+				horisontalGroups);
 		if (pairsVerHor == null) {
 			return null;// No grid found
 		}
@@ -95,66 +102,90 @@ public class KTableModel {
 		return null;
 	}
 
-	private List<Pair<List<Line>, List<Line>>> groupLinesInValidPairs(List<List<Line>> verticalGroups,
-			List<List<Line>> horisontalGroups) {
-		if (horisontalGroups.isEmpty() || verticalGroups.isEmpty()) {
-			return null;
-		}
+	private List<Pair<LineListWrapper, LineListWrapper>> groupLinesInValidPairs(List<LineListWrapper> verticalGroups,
+			List<LineListWrapper> horisontalGroups) {
+		// TODO Commented for debuging MUST UNCOMMENT LATER
+		// if (horisontalGroups.isEmpty() || verticalGroups.isEmpty()) {
+		// return null;
+		// }
 
-		List<Rectangle> horisontalRectangles = createRectangles(verticalGroups, true);
-		List<Rectangle> verticalRectangles = createRectangles(horisontalGroups, false);
+		List<Rectangle> horisontalRectangles = createRectangles(verticalGroups, false);
+		List<Rectangle> verticalRectangles = createRectangles(horisontalGroups, true);
+
+		System.out.println("HOR rectangles found:" + horisontalRectangles.size());
+		debugWriteRectangles(horisontalRectangles);// TODO remove
+		System.out.println("VERT rectangles found:" + verticalRectangles.size());
+		debugWriteRectangles(verticalRectangles);// TODO remove
+
 		return null;
 	}
 
-	private List<Rectangle> createRectangles(List<List<Line>> groups, boolean verticaGroup) {
+	private void debugWriteRectangles(List<Rectangle> rectangles) {
+		for (var x : rectangles) {
+			System.out.println(x);
+			sP.getModel().add(new SelectionRectangle(new Point((int) x.getP1().x, (int) x.getP1().y),
+					new Point((int) x.getP2().x, (int) x.getP2().y)));
+			sP.getCanvas().repaint();
+		}
+	}
+
+	private List<Rectangle> createRectangles(List<LineListWrapper> verticalGroups, boolean minX) {
 		List<Rectangle> rectangles = new ArrayList<>();
 
-		for (List<Line> l : groups) {
-			rectangles.add(createRectangle(l, verticaGroup));
+		for (LineListWrapper wrapper : verticalGroups) {
+			rectangles.add(createRectangle(wrapper, minX));
 		}
 
 		return rectangles;
 	}
 
-	private Rectangle createRectangle(List<Line> l, boolean verticaGroup) {
-		// TODO Auto-generated method stub
-		return null;
+	private Rectangle createRectangle(LineListWrapper wrapper, boolean minX) {
+		if (minX) {
+			return new Rectangle(
+					new PointDouble(wrapper.avgCoordinateValue - LINES_MIN_X_DISTANCE_SCALE * wrapper.avgLength, 0),
+					new PointDouble(wrapper.avgCoordinateValue + (1 + LINES_MIN_X_DISTANCE_SCALE) * wrapper.avgLength,
+							Double.MAX_VALUE));
+		} else {
+			return new Rectangle(
+					new PointDouble(0, wrapper.avgCoordinateValue - LINES_MIN_Y_DISTANCE_SCALE * wrapper.avgLength),
+					new PointDouble(Double.MAX_VALUE,
+							wrapper.avgCoordinateValue + (1 + LINES_MIN_Y_DISTANCE_SCALE) * wrapper.avgLength));
+		}
 	}
 
-	private List<List<Line>> groupLinesByStartingCoordinate(List<List<Line>> startGroups,
-			LineCoordinateDistanceTester t1, LineSorter sorter) {
-		List<List<Line>> groups = new ArrayList<>();
+	private List<LineListWrapper> groupLinesByStartingCoordinate(List<LineListWrapper> startGroups,
+			LineCoordinateDistanceTester t1, LineSorter sorter, Boolean type) {
+		List<LineListWrapper> groups = new ArrayList<>();
 
-		for (List<Line> lines : startGroups) {
-			sorter.sort(lines);
+		for (LineListWrapper wrapper : startGroups) {
+			sorter.sort(wrapper.lines);
 
-			if (lines.size() < 2) {// Should never happen
-				lines.clear();
+			if (wrapper.lines.size() < 2) {// Should never happen
+				wrapper.lines.clear();
 				continue;
 			}
 
-			double avgLength = (lines.get(0).length() + lines.get(lines.size() - 1).length()) / 2.0;
-			t1.setAvgLineLength(avgLength);
-			for (List<Line> ls : groupLines(lines, t1)) {
-				if (ls.size() > 1) {
-					groups.add(ls);
+			t1.setAvgLineLength(wrapper.avgLength);
+			for (LineListWrapper wp : groupLines(wrapper.lines, t1, type)) {
+				if (wp.lines.size() > 1) {
+					groups.add(wp);
 				}
 			}
 
-			lines.clear();
+			wrapper.lines.clear();
 		}
 
 		startGroups.clear();
 		return groups;
 	}
 
-	private List<List<Line>> groupLinesByDistance(List<Line> lines) {
-		return groupLines(lines, new LineDistanceTester());
+	private List<LineListWrapper> groupLinesByDistance(List<Line> lines) {
+		return groupLines(lines, new LineDistanceTester(), null);
 	}
 
-	private List<List<Line>> groupLines(List<Line> lines, Tester<Line> tester) {
+	private List<LineListWrapper> groupLines(List<Line> lines, Tester<Line> tester, Boolean type) {
 		List<Line> activeLines = new LinkedList<>();
-		List<List<Line>> groups = new ArrayList<>();
+		List<LineListWrapper> groups = new ArrayList<>();
 		Line l1, l2;
 
 		for (int i = 0; i < lines.size(); i++) {
@@ -166,7 +197,7 @@ public class KTableModel {
 
 				if (tester.test(l1, l2)) {
 					if (activeLines.size() > 1) {
-						groups.add(new ArrayList<>(activeLines));
+						groups.add(new LineListWrapper(new ArrayList<>(activeLines), type));
 					}
 					activeLines.remove(0);
 
@@ -185,7 +216,7 @@ public class KTableModel {
 		}
 
 		if (activeLines.size() > 1) {
-			groups.add(new ArrayList<>(activeLines));
+			groups.add(new LineListWrapper(new ArrayList<>(activeLines), type));
 		}
 		return groups;
 	}
@@ -215,6 +246,10 @@ public class KTableModel {
 
 	public void recognize(Point a, Point b) {
 		recognize2(a, b);
+		if (1 == 1) {
+			return;
+		}
+
 		List<Line> horistontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
 		OneModel oneModel = new OneModel();
@@ -480,6 +515,24 @@ public class KTableModel {
 		public PairLine(Line l, GraphicalObject o) {
 			this.l = l;
 			this.o = o;
+		}
+	}
+
+	private static class LineListWrapper {
+		public List<Line> lines;
+		public double avgLength;
+		public double avgCoordinateValue;
+
+		public LineListWrapper(List<Line> lines, Boolean minX) {
+			this.lines = lines;
+			avgLength = lines.stream().mapToDouble(l -> l.length()).average().getAsDouble();
+			if (minX != null) {
+				if (minX == true) {
+					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getMinX()).average().getAsDouble();
+				} else {
+					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getMinY()).average().getAsDouble();
+				}
+			}
 		}
 	}
 }

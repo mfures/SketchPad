@@ -9,6 +9,14 @@ public class SelectionRectangle extends GraphicalObject {
 	private Point start;
 	private Point end;
 
+	public SelectionRectangle() {
+	}
+
+	public SelectionRectangle(Point start, Point end) {
+		this.start = start;
+		this.end = end;
+	}
+
 	@Override
 	public void accept(GraphicalObjectVisitor v) {
 		v.visit(this);

@@ -117,5 +117,4 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 		}
 		g2d.drawImage(img, x, y, null);
 	}
-
 }
