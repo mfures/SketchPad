@@ -34,13 +34,14 @@ import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
 
 public class KTableModel {
-	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.1;
-	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.1;
-	public static final double LINE_LENGTH_SCALE = 0.1;
+	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.15;
+	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.15;
+	public static final double LINE_LENGTH_SCALE = 0.15;
 	public static final double TABLE_WIDTH_TOLERANCE = 0.35;
 	public static final double TABLE_HEIGHT_TOLERANCE = 0.35;
 	private static final double TABLE_HORISONTAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	private static final double TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE = 0.7;
+	public static final double MIN_VECTOR_NORM = 4.2;
 
 	private SketchPad2 sP;
 
@@ -58,6 +59,11 @@ public class KTableModel {
 			return;
 		}
 
+		System.out.println("Našao sam ovoliko tablica:" + tables.size());
+		// TODO remove
+		for (var table : tables) {
+			debugDrawTable(table);
+		}
 	}
 
 	private List<BasicMovement> handleGraphicalObjects(List<GraphicalObject> objects) {
@@ -115,9 +121,7 @@ public class KTableModel {
 	}
 
 	private KTable createTableFromVerHorPair(LineListWrapper verticalLinesWrap, LineListWrapper horisontalLinesWrap) {
-		System.out.println("Bok");
 		if (!areInputDimensionsForKTableValid(verticalLinesWrap, horisontalLinesWrap)) {
-			System.out.println("1");
 			return null;
 		}
 
@@ -139,11 +143,9 @@ public class KTableModel {
 		double tmp;
 
 		if (horisontalLinesWrap.avgLength < TABLE_HORISONTAL_LINE_LENTGTH_TOLERANCE * width) {
-			System.out.println("2");
 			return null;
 		}
 		if (verticalLinesWrap.avgLength < TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE * height) {
-			System.out.println("3");
 			return null;
 		}
 
@@ -151,7 +153,6 @@ public class KTableModel {
 			tmp = verticalLinesWrap.lines.get(i + 1).getSemiStaticValue()
 					- verticalLinesWrap.lines.get(i).getSemiStaticValue();
 			if (tmp > maxWidth || tmp < minWidth) {
-				System.out.println("4");
 				return null;
 			}
 		}
@@ -160,8 +161,39 @@ public class KTableModel {
 			tmp = horisontalLinesWrap.lines.get(i + 1).getSemiStaticValue()
 					- horisontalLinesWrap.lines.get(i).getSemiStaticValue();
 			if (tmp > maxHeight || tmp < minHeight) {
-				System.out.println("5");
 				return null;
+			}
+		}
+
+		for (Line l : verticalLinesWrap.lines) {//No need to check horisontal lines
+			if (!l.getBm().isDealtWith()) {
+				if (l.getBm().isFractured()) {
+					List<Line> lines = l.getBm().getFracturedLines();
+
+					for (Line fl : lines) {
+						boolean found = false;
+						if (fl.getType() == LineType.VERTICAL) {
+							for (Line vl : verticalLinesWrap.lines) {
+								if (vl.equals(fl)) {
+									found = true;
+									break;
+								}
+							}
+						} else {
+							for (Line hl : horisontalLinesWrap.lines) {
+								if (hl.equals(fl)) {
+									found = true;
+									break;
+								}
+							}
+						}
+
+						if (found == false) {
+							return null;
+						}
+					}
+					l.getBm().setDealtWith(true);
+				}
 			}
 		}
 
@@ -170,15 +202,13 @@ public class KTableModel {
 						horisontalLinesWrap.lines.get(0).getSemiStaticValue().intValue()),
 				verticalLinesWrap.lines.size(), horisontalLinesWrap.lines.size(), (int) width, (int) height);
 
-		debugDrawTable(table);
-
 		return table;
 	}
 
+	@SuppressWarnings("unused")
 	private void debugDrawTable(KTable table) {
 		sP.getModel().add(table);
 		sP.getCanvas().repaint();
-
 	}
 
 	private void sortInputLinesBySemiStaticValue(LineListWrapper verticalLinesWrap,
@@ -393,6 +423,38 @@ public class KTableModel {
 
 	private void initLines(List<Line> horisontalLines, List<Line> verticalLines, List<BasicMovement> bms) {
 		for (BasicMovement bm : bms) {
+			List<Point> breakPoints = LineModel.calculateAcumulatedBreakPoints(bm.getPoints(),
+					LineModel.calculateBreakPoints(bm.getPoints()));
+
+			if (!breakPoints.isEmpty()) {
+				if (breakPoints.size() > 3) {
+					continue;
+				}
+
+				Pair<List<Line>, List<Line>> verHorLines = calculateVerticalAndHorisontalLinesFromMovementAndBreakPoints(
+						bm, breakPoints);
+				if (verHorLines == null) {
+					continue;
+				}
+
+				List<Line> fLines = new ArrayList<>();
+
+				for (Line l : verHorLines.t) {
+					verticalLines.add(l);
+					fLines.add(l);
+				}
+
+				for (Line l : verHorLines.k) {
+					horisontalLines.add(l);
+					fLines.add(l);
+				}
+
+				bm.setFractured(true);
+				bm.setFracturedLines(fLines);
+
+				continue;
+			}
+
 			Line l = LineModel.recognize(bm);
 			if (l != null) {
 				if (l.getType() == LineType.HORISONTAL) {
@@ -403,6 +465,50 @@ public class KTableModel {
 			}
 		}
 
+	}
+
+	private Pair<List<Line>, List<Line>> calculateVerticalAndHorisontalLinesFromMovementAndBreakPoints(BasicMovement bm,
+			List<Point> breakPoints) {
+		List<Line> lines = LineModel.linesInPoints(bm.getPoints(), breakPoints, bm);
+		if (lines.size() != breakPoints.size() + 1) {
+			return null;
+		}
+
+		List<Line> verticalLines = new ArrayList<>();
+		List<Line> horistonalLines = new ArrayList<>();
+		LineType last;
+
+		if (lines.get(0).getType() == LineType.HORISONTAL) {
+			last = LineType.HORISONTAL;
+			horistonalLines.add(lines.get(0));
+		} else if (lines.get(0).getType() == LineType.VERTICAL) {
+			last = LineType.VERTICAL;
+			verticalLines.add(lines.get(0));
+		} else {
+			return null;
+		}
+
+		for (int i = 1; i < lines.size(); i++) {
+			if (last == LineType.HORISONTAL) {
+				if (lines.get(i).getType() != LineType.VERTICAL) {
+					return null;
+				}
+
+				verticalLines.add(lines.get(i));
+				last = LineType.VERTICAL;
+			} else if (last == LineType.VERTICAL) {
+				if (lines.get(i).getType() != LineType.HORISONTAL) {
+					return null;
+				}
+
+				horistonalLines.add(lines.get(i));
+				last = LineType.HORISONTAL;
+			} else {
+				return null;
+			}
+		}
+
+		return new Pair<List<Line>, List<Line>>(verticalLines, horistonalLines);
 	}
 
 	public void recognize(Point a, Point b) {

@@ -6,6 +6,7 @@ import java.util.List;
 
 import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.recognition.objects.Line;
+import hr.fer.zemris.diprad.util.MyVector;
 
 public class LineModel {
 	public static List<Line> linesInPoints(List<Point> points, List<Point> breakPoints, BasicMovement bm) {
@@ -104,5 +105,75 @@ public class LineModel {
 		}
 
 		return new Line(p1, p2, slope, intercept, bm);
+	}
+
+	public static List<Point> calculateBreakPoints(List<Point> points) {
+		if (points.size() < 3) {
+			return null;
+		}
+
+		List<MyVector> vectors = MyVector.listOfPointsToListOfVectors(points);
+		MyVector v1 = new MyVector();
+		MyVector v2 = new MyVector();
+
+		double cos;
+		// NumberFormat formatter = new DecimalFormat("#0.0000");
+		List<Point> breakPoints = new ArrayList<>();
+
+		for (int i = 0; i < vectors.size() - 1; i++) {
+			v1 = vectors.get(i);
+			v2 = vectors.get(i + 1);
+			cos = MyVector.scalarProduct(v1, v2) / (v1.norm() * v2.norm());
+
+			if (cos < 0.8) {
+				breakPoints.add(new Point(v1.i2, v1.i2));
+				// System.out.println("i:" + i + " cos:" + formatter.format(cos) + " v1:" + v1 +
+				// " v2:" + v2);
+			}
+		}
+
+		return breakPoints;
+	}
+
+	public static List<Point> calculateAcumulatedBreakPoints(List<Point> points, List<Point> breakPoints) {
+		List<Point> trueBreakPoints = new ArrayList<Point>();
+
+		acumulateBreakPointsWhichAreClose(breakPoints, trueBreakPoints, points.size());
+
+		if (trueBreakPoints.isEmpty()) {
+			return trueBreakPoints;
+		}
+
+		removeFirstBreakPointIfItsOnFirstPoint(trueBreakPoints);
+		removeLastBreakPointIfItsOnLastPoint(points, trueBreakPoints);
+		return trueBreakPoints;
+	}
+
+	private static void acumulateBreakPointsWhichAreClose(List<Point> breakPoints, List<Point> trueBreakPoints,
+			int totalNumOfPoints) {
+		if (!breakPoints.isEmpty()) {
+			trueBreakPoints.add(breakPoints.get(0));
+
+			for (int i = 1; i < breakPoints.size(); i++) {
+				Point p = breakPoints.get(i);
+				if (trueBreakPoints.get(trueBreakPoints.size() - 1).y + totalNumOfPoints * 0.1 >= p.x) {
+					trueBreakPoints.get(trueBreakPoints.size() - 1).y = p.x;
+				} else {
+					trueBreakPoints.add(breakPoints.get(i));
+				}
+			}
+		}
+	}
+
+	private static void removeLastBreakPointIfItsOnLastPoint(List<Point> points, List<Point> trueBreakPoints) {
+		if (trueBreakPoints.get(trueBreakPoints.size() - 1).y == points.size() - 1) {
+			trueBreakPoints.remove(trueBreakPoints.size() - 1);
+		}
+	}
+
+	private static void removeFirstBreakPointIfItsOnFirstPoint(List<Point> trueBreakPoints) {
+		if (trueBreakPoints.get(0).x == 0) {
+			trueBreakPoints.remove(0);
+		}
 	}
 }
