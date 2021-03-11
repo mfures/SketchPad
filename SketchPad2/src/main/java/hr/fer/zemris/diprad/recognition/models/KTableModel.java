@@ -22,13 +22,13 @@ import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.One;
 import hr.fer.zemris.diprad.recognition.objects.Zero;
-import hr.fer.zemris.diprad.recognition.sorters.CoordinateMinXSorter;
-import hr.fer.zemris.diprad.recognition.sorters.CoordinateMinYSorter;
+import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
+import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageYSorter;
 import hr.fer.zemris.diprad.recognition.sorters.SemiStaticValueSorter;
 import hr.fer.zemris.diprad.recognition.testers.LineCoordinateDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LineDistanceTester;
-import hr.fer.zemris.diprad.recognition.testers.LinesMinXDistanceTester;
-import hr.fer.zemris.diprad.recognition.testers.LinesMinYDistanceTester;
+import hr.fer.zemris.diprad.recognition.testers.LinesAverageXDistanceTester;
+import hr.fer.zemris.diprad.recognition.testers.LinesAverageYDistanceTester;
 import hr.fer.zemris.diprad.util.Pair;
 import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
@@ -95,10 +95,10 @@ public class KTableModel {
 		System.out.println("VERT GROUPS COUNT(dist):" + verticalGroups.size());
 		System.out.println("HOR GROUPS COUNT(dist):" + horisontalGroups.size());
 
-		verticalGroups = groupLinesByStartingCoordinate(verticalGroups, new LinesMinYDistanceTester(),
-				new CoordinateMinYSorter(), false);
-		horisontalGroups = groupLinesByStartingCoordinate(horisontalGroups, new LinesMinXDistanceTester(),
-				new CoordinateMinXSorter(), true);
+		verticalGroups = groupLinesByStartingCoordinate(verticalGroups, new LinesAverageYDistanceTester(),
+				new CoordinateAverageYSorter(), false);
+		horisontalGroups = groupLinesByStartingCoordinate(horisontalGroups, new LinesAverageXDistanceTester(),
+				new CoordinateAverageXSorter(), true);
 		System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
 		System.out.println("HOR GROUPS COUNT(dist+x):" + horisontalGroups.size());
 
@@ -165,7 +165,7 @@ public class KTableModel {
 			}
 		}
 
-		for (Line l : verticalLinesWrap.lines) {//No need to check horisontal lines
+		for (Line l : verticalLinesWrap.lines) {// No need to check horisontal lines
 			if (!l.getBm().isDealtWith()) {
 				if (l.getBm().isFractured()) {
 					List<Line> lines = l.getBm().getFracturedLines();
@@ -333,14 +333,17 @@ public class KTableModel {
 	private Rectangle createRectangle(LineListWrapper wrapper, boolean minX) {
 		if (minX) {
 			return new Rectangle(
-					new PointDouble(wrapper.avgCoordinateValue - LINES_MIN_X_DISTANCE_SCALE * wrapper.avgLength, 0),
-					new PointDouble(wrapper.avgCoordinateValue + (1 + LINES_MIN_X_DISTANCE_SCALE) * wrapper.avgLength,
+					new PointDouble(wrapper.avgCoordinateValue - wrapper.avgLength / 2
+							- LINES_MIN_X_DISTANCE_SCALE * wrapper.avgLength, 0),
+					new PointDouble(wrapper.avgCoordinateValue + (0.5 + LINES_MIN_X_DISTANCE_SCALE) * wrapper.avgLength,
 							Integer.MAX_VALUE));
 		} else {
 			return new Rectangle(
-					new PointDouble(0, wrapper.avgCoordinateValue - LINES_MIN_Y_DISTANCE_SCALE * wrapper.avgLength),
+					new PointDouble(0,
+							wrapper.avgCoordinateValue - wrapper.avgLength / 2
+									- LINES_MIN_Y_DISTANCE_SCALE * wrapper.avgLength),
 					new PointDouble(Integer.MAX_VALUE,
-							wrapper.avgCoordinateValue + (1 + LINES_MIN_Y_DISTANCE_SCALE) * wrapper.avgLength));
+							wrapper.avgCoordinateValue + (0.5 + LINES_MIN_Y_DISTANCE_SCALE) * wrapper.avgLength));
 		}
 	}
 
@@ -790,14 +793,14 @@ public class KTableModel {
 		public double avgLength;
 		public double avgCoordinateValue;
 
-		public LineListWrapper(List<Line> lines, Boolean minX) {
+		public LineListWrapper(List<Line> lines, Boolean averageX) {
 			this.lines = lines;
 			avgLength = lines.stream().mapToDouble(l -> l.length()).average().getAsDouble();
-			if (minX != null) {
-				if (minX == true) {
-					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getMinX()).average().getAsDouble();
+			if (averageX != null) {
+				if (averageX == true) {
+					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getAverageX()).average().getAsDouble();
 				} else {
-					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getMinY()).average().getAsDouble();
+					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getAverageY()).average().getAsDouble();
 				}
 			}
 		}

@@ -8,17 +8,18 @@ import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 
 /**
- * Sorter that sorts lines by ther smallest Y coordinate
+ * Sorter that sorts lines by their smallest X coordinate
+ * 
  * @author Matej
  *
  */
-public class CoordinateMinYSorter implements LineSorter {
+public class CoordinateAverageXSorter implements LineSorter {
 	@Override
 	public void sort(List<Line> lines) {
 		Collections.sort(lines, new Comparator<Line>() {
 			@Override
 			public int compare(Line o1, Line o2) {
-				return Integer.compare(o1.getMinY(), o2.getMinY());
+				return Double.compare(o1.getAverageX(), o2.getAverageX());
 			}
 		});
 

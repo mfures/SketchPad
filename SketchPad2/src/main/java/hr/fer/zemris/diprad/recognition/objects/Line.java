@@ -108,12 +108,12 @@ public class Line implements Comparable<Line> {
 		return this.semiStaticValue.compareTo(o.getSemiStaticValue());
 	}
 
-	public int getMinX() {
-		return Math.min(p1.x, p2.x);
+	public double getAverageX() {
+		return (p1.x + p2.x) / 2.0;
 	}
 
-	public int getMinY() {
-		return Math.min(p1.y, p2.y);
+	public double getAverageY() {
+		return (p1.y + p2.y) / 2.0;
 	}
 
 	@Override
