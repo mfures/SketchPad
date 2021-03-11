@@ -6,13 +6,41 @@ import java.util.List;
 
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectVisitor;
+import hr.fer.zemris.diprad.util.Rectangle;
 
 public class BasicMovement extends GraphicalObject {
 	private List<Point> points;
 	private String label = "";
+	private Rectangle boundingBox;
 
 	public BasicMovement(List<Point> points) {
 		this.points = points;
+	}
+
+	public void initBoundingBox() {
+		int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = 0, maxY = 0;
+
+		System.out.println(points.size());
+		for (Point p : points) {
+			System.out.println(p);
+			System.out.println(minX + " " + minY + " " + maxX + " " + maxY);
+			if (p.x < minX) {
+				minX = p.x;
+			}
+			if (p.y < minY) {
+				minY = p.y;
+			}
+			if (p.x > maxX) {
+				maxX = p.x;
+			}
+			if (p.y > maxY) {
+				maxY = p.y;
+			}
+		}
+
+		this.boundingBox = new Rectangle(new Point(minX, minY), new Point(maxX, maxY));
+		// SketchPad2.debugDraw(new SelectionRectangle(new Point(minX, minY), new
+		// Point(maxX, maxY)));//TODO remove
 	}
 
 	@Override
@@ -30,6 +58,10 @@ public class BasicMovement extends GraphicalObject {
 
 	public void setLabel(String label) {
 		this.label = label;
+	}
+
+	public Rectangle getBoundingBox() {
+		return boundingBox;
 	}
 
 	@Override

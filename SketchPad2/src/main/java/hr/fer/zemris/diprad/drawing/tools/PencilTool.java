@@ -15,6 +15,7 @@ public class PencilTool implements Tool {
 	private List<Point> points;
 	private JDrawingCanvas canvas;
 	private DrawingModel model;
+	private BasicMovement bm;
 
 	public PencilTool(JDrawingCanvas canvas, DrawingModel model) {
 		this.canvas = canvas;
@@ -25,11 +26,15 @@ public class PencilTool implements Tool {
 	public void mousePressed(MouseEvent e) {
 		points = new ArrayList<>();
 		points.add(e.getPoint());
-		model.add(new BasicMovement(points));
+		bm = new BasicMovement(points);
+		model.add(bm);
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		if (bm != null) {
+			bm.initBoundingBox();
+		}
 	}
 
 	@Override

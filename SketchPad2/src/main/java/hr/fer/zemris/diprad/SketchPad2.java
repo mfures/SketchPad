@@ -22,6 +22,7 @@ import hr.fer.zemris.diprad.actions.SaveAction;
 import hr.fer.zemris.diprad.actions.SaveAsAction;
 import hr.fer.zemris.diprad.drawing.JListGraphical;
 import hr.fer.zemris.diprad.drawing.Tool;
+import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.drawing.model.DrawingModelImpl;
 import hr.fer.zemris.diprad.drawing.model.DrawingObjectsListModel;
@@ -31,6 +32,7 @@ import hr.fer.zemris.diprad.drawing.tools.SelectorTool;
 import hr.fer.zemris.diprad.drawing.tools.ToolManager;
 
 public class SketchPad2 extends JFrame {
+	public static SketchPad2 sP;// TODO ONLY FOR DEBUG, REMOVE
 	private static final long serialVersionUID = -4039070322155680266L;
 	private DrawingModel model;
 	private JDrawingCanvas canvas;
@@ -47,6 +49,7 @@ public class SketchPad2 extends JFrame {
 	private NewDocumentAction newDoc;
 
 	public SketchPad2() {
+		sP = this;// TODO ONLY FOR DEBUG, REMOVE
 		setSize(1000, 600);
 		setTitle("SketchPad");
 		setLocationRelativeTo(null);
@@ -146,6 +149,12 @@ public class SketchPad2 extends JFrame {
 
 	public SaveAsAction getSaveAs() {
 		return saveAs;
+	}
+
+	// TODO Only for debug, remove
+	public static void debugDraw(GraphicalObject go) {
+		sP.getModel().add(go);
+		sP.getCanvas().repaint();
 	}
 
 	public static void main(String[] args) {

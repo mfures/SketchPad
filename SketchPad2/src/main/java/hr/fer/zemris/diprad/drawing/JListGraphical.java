@@ -103,8 +103,10 @@ public class JListGraphical extends JList<GraphicalObject> {
 					GraphicalObject go = sP.getModel().getObject(index);
 
 					if (go instanceof BasicMovement) {
-						String result = (String) JOptionPane.showInputDialog(sP, "Set label",
-								"Swing Tester", JOptionPane.PLAIN_MESSAGE, null, null, "");
+						System.out.println(((BasicMovement) go).getBoundingBox());
+
+						String result = (String) JOptionPane.showInputDialog(sP, "Set label", "Swing Tester",
+								JOptionPane.PLAIN_MESSAGE, null, null, "");
 
 						if (result != null) {
 							((BasicMovement) go).setLabel(result);
