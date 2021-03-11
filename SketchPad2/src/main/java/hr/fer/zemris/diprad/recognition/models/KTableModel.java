@@ -305,11 +305,11 @@ public class KTableModel {
 			return new Rectangle(
 					new PointDouble(wrapper.avgCoordinateValue - LINES_MIN_X_DISTANCE_SCALE * wrapper.avgLength, 0),
 					new PointDouble(wrapper.avgCoordinateValue + (1 + LINES_MIN_X_DISTANCE_SCALE) * wrapper.avgLength,
-							Double.MAX_VALUE));
+							Integer.MAX_VALUE));
 		} else {
 			return new Rectangle(
 					new PointDouble(0, wrapper.avgCoordinateValue - LINES_MIN_Y_DISTANCE_SCALE * wrapper.avgLength),
-					new PointDouble(Double.MAX_VALUE,
+					new PointDouble(Integer.MAX_VALUE,
 							wrapper.avgCoordinateValue + (1 + LINES_MIN_Y_DISTANCE_SCALE) * wrapper.avgLength));
 		}
 	}

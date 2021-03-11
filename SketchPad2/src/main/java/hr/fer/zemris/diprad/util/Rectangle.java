@@ -10,13 +10,22 @@ import java.awt.Point;
  */
 public class Rectangle {
 	/**
-	 * Point which is closer to (0,0)
+	 * PointDouble which is closer to (0,0)
 	 */
 	private PointDouble p1;
 	/**
-	 * Point further away from (0,0) in positive (+,+) direction
+	 * PointDouble further away from (0,0) in positive (+,+) direction
 	 */
 	private PointDouble p2;
+
+	/**
+	 * Point which is closer to (0,0)
+	 */
+	private Point ip1;
+	/**
+	 * Point further away from (0,0) in positive (+,+) direction
+	 */
+	private Point ip2;
 
 	/**
 	 * Constructor that will cast Point to PointDouble
@@ -24,9 +33,11 @@ public class Rectangle {
 	 * @param p1 Point which is closer to (0,0)
 	 * @param p2 Point further away from (0,0) in positive (+,+) direction
 	 */
-	public Rectangle(Point p1, Point p2) {
-		this.p1 = new PointDouble(p1.x, p1.y);
-		this.p2 = new PointDouble(p2.x, p2.y);
+	public Rectangle(Point ip1, Point ip2) {
+		this.ip1 = ip1;
+		this.ip2 = ip2;
+		this.p1 = new PointDouble(ip1.x, ip1.y);
+		this.p2 = new PointDouble(ip2.x, ip2.y);
 	}
 
 	/**
@@ -38,6 +49,8 @@ public class Rectangle {
 	public Rectangle(PointDouble p1, PointDouble p2) {
 		this.p1 = p1;
 		this.p2 = p2;
+		this.ip1 = new Point((int) p1.x, (int) p1.y);
+		this.ip2 = new Point((int) p2.x, (int) p2.y);
 	}
 
 	public PointDouble getP1() {
@@ -54,6 +67,14 @@ public class Rectangle {
 
 	public void setP2(PointDouble p2) {
 		this.p2 = p2;
+	}
+
+	public Point getIp1() {
+		return ip1;
+	}
+
+	public Point getIp2() {
+		return ip2;
 	}
 
 	/**
