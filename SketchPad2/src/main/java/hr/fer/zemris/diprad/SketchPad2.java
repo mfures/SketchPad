@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import hr.fer.zemris.diprad.actions.ExitAction;
+import hr.fer.zemris.diprad.actions.NewDocumentAction;
 import hr.fer.zemris.diprad.actions.OpenAction;
 import hr.fer.zemris.diprad.actions.SaveAction;
 import hr.fer.zemris.diprad.actions.SaveAsAction;
@@ -37,12 +38,13 @@ public class SketchPad2 extends JFrame {
 	private Tool pencilTool;
 	private Tool selectorTool;
 	private ToolManager toolManager;
-	private ExitAction exit;
 	private boolean altPressed;
 	private Path path;
 	private SaveAsAction saveAs;
 	private SaveAction save;
 	private OpenAction open;
+	private ExitAction exit;
+	private NewDocumentAction newDoc;
 
 	public SketchPad2() {
 		setSize(1000, 600);
@@ -78,6 +80,8 @@ public class SketchPad2 extends JFrame {
 		initActions();
 
 		JMenu file = new JMenu("File");
+		file.add(newDoc);
+		file.addSeparator();
 		file.add(open);
 		file.add(save);
 		file.add(saveAs);
@@ -121,6 +125,7 @@ public class SketchPad2 extends JFrame {
 		save = new SaveAction(this);
 		open = new OpenAction(this);
 		exit = new ExitAction(this);
+		newDoc = new NewDocumentAction(this);
 	}
 
 	public Path getPath() {

@@ -58,7 +58,10 @@ public class DrawingModelImpl implements DrawingModel {
 
 	@Override
 	public void clear() {
+		int index = objects.size() - 1;
 		objects.clear();
+		modified = true;
+		listeners.forEach(l -> l.objectsRemoved(this, 0, index));
 	}
 
 	@Override
