@@ -54,10 +54,10 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 	}
 
 	@Override
-	public void visit(SelectionRectangle selectionRectangle) {
-		g2d.setColor(Colors.DEFAULT);
-		a = selectionRectangle.getStart();
-		b = selectionRectangle.getEnd();
+	public void visit(SelectionRectangle sR) {
+		g2d.setColor(sR.getColor());
+		a = sR.getStart();
+		b = sR.getEnd();
 
 		c.x = Math.min(a.x, b.x);
 		c.y = Math.min(a.y, b.y);

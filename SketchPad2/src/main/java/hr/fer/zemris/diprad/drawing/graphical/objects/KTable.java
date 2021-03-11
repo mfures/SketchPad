@@ -5,6 +5,8 @@ import java.util.List;
 
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectVisitor;
+import hr.fer.zemris.diprad.util.PointDouble;
+import hr.fer.zemris.diprad.util.Rectangle;
 
 public class KTable extends GraphicalObject {
 	private Point p;
@@ -274,5 +276,17 @@ public class KTable extends GraphicalObject {
 
 	public void setBms(List<BasicMovement> bms) {
 		this.bms = bms;
+	}
+
+	public Rectangle getBoundingRectangle() {
+		return new Rectangle(new Point(p), new Point(p.x + width, p.y + height));
+	}
+
+	public Rectangle getExpandedBoundingRectangle() {
+		double widthScaled = width * 0.25;
+		double heightScaled = height * 0.25;
+
+		return new Rectangle(new PointDouble(p.x - widthScaled, p.y - heightScaled),
+				new PointDouble(p.x + width + widthScaled, p.y + height + heightScaled));
 	}
 }

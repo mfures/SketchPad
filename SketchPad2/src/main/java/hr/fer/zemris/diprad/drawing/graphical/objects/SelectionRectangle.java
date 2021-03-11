@@ -4,6 +4,7 @@ import java.awt.Point;
 
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectVisitor;
+import hr.fer.zemris.diprad.util.Rectangle;
 
 public class SelectionRectangle extends GraphicalObject {
 	private Point start;
@@ -15,6 +16,11 @@ public class SelectionRectangle extends GraphicalObject {
 	public SelectionRectangle(Point start, Point end) {
 		this.start = start;
 		this.end = end;
+	}
+
+	public SelectionRectangle(Rectangle r) {
+		this.start = r.getIp1();
+		this.end = r.getIp2();
 	}
 
 	@Override
