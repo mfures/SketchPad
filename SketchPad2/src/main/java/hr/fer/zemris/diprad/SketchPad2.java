@@ -4,21 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.file.Path;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-import hr.fer.zemris.diprad.actions.AppendAction;
+import hr.fer.zemris.diprad.actions.ExitAction;
 import hr.fer.zemris.diprad.actions.OpenAction;
 import hr.fer.zemris.diprad.actions.SaveAction;
 import hr.fer.zemris.diprad.actions.SaveAsAction;
@@ -40,7 +37,7 @@ public class SketchPad2 extends JFrame {
 	private Tool pencilTool;
 	private Tool selectorTool;
 	private ToolManager toolManager;
-	private Action exit;
+	private ExitAction exit;
 	private boolean altPressed;
 	private Path path;
 	private SaveAsAction saveAs;
@@ -123,23 +120,7 @@ public class SketchPad2 extends JFrame {
 		saveAs = new SaveAsAction(this);
 		save = new SaveAction(this);
 		open = new OpenAction(this);
-
-		exit = new AbstractAction() {
-			private static final long serialVersionUID = -83481833466420513L;
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (model.isModified()) {
-					// Pitaj za zatvaranje
-				}
-
-				new AppendAction(SketchPad2.this).actionPerformed(e);
-				SketchPad2.this.dispose();
-			}
-		};
-
-		exit.putValue(Action.NAME, "Exit");
-		exit.putValue(Action.SHORT_DESCRIPTION, "Exit application");
+		exit = new ExitAction(this);
 	}
 
 	public Path getPath() {
