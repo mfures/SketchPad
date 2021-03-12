@@ -58,6 +58,16 @@ public class KTableModel {
 			return;
 		}
 
+		for (int i = 0; i < tables.size() - 1; i++) {
+			for (int j = i + 1; j < tables.size(); j++) {
+				if (Rectangle.areOverlaping(tables.get(i).getExpandedBoundingRectangle(),
+						tables.get(j).getExpandedBoundingRectangle())) {
+					System.out.println("Tabels 2 close");
+					return;
+				}
+			}
+		}
+
 		System.out.println("Našao sam ovoliko tablica:" + tables.size());
 		// TODO remove
 		for (var table : tables) {

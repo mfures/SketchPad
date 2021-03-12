@@ -77,6 +77,22 @@ public class Rectangle {
 		return ip2;
 	}
 
+	public static boolean areOverlaping(Rectangle rec1, Rectangle rec2) {
+		if (rec1.p1.x >= rec2.p2.x || rec2.p1.x >= rec1.p2.x) {
+			return false;
+		}
+
+		if (rec1.p1.y >= rec2.p2.y || rec2.p1.y >= rec1.p2.y) {
+			return false;
+		}
+
+//		System.out.println(rec1.p1);//TODO Remove
+//		System.out.println(rec1.p2);
+//		System.out.println(rec2.p1);
+//		System.out.println(rec2.p2);
+		return true;
+	}
+
 	/**
 	 * Writes in format (x1,y1),(x2,y2)
 	 */
