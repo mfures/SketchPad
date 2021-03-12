@@ -37,8 +37,7 @@ public class KTableModel {
 	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.15;
 	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.15;
 	public static final double LINE_LENGTH_SCALE = 0.15;
-	public static final double TABLE_WIDTH_TOLERANCE = 0.35;
-	public static final double TABLE_HEIGHT_TOLERANCE = 0.35;
+	public static final double TABLE_HEIGHT_AND_WIDTH_TOLERANCE = 0.35;
 	private static final double TABLE_HORISONTAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	private static final double TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	public static final double MIN_VECTOR_NORM = 4.2;
@@ -61,13 +60,13 @@ public class KTableModel {
 
 		System.out.println("Našao sam ovoliko tablica:" + tables.size());
 		// TODO remove
-		// for (var table : tables) {
-		// debugDrawTable(table);
-		// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
-		// SketchPad2.debugDraw(new
-		// SelectionRectangle(table.getExpandedBoundingRectangle()));
+		for (var table : tables) {
+			debugDrawTable(table);
+			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
+			// SketchPad2.debugDraw(new
+			// SelectionRectangle(table.getExpandedBoundingRectangle()));
 
-		// }
+		}
 	}
 
 	private List<BasicMovement> handleGraphicalObjects(List<GraphicalObject> objects) {
@@ -106,7 +105,12 @@ public class KTableModel {
 		System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
 		System.out.println("HOR GROUPS COUNT(dist+x):" + horisontalGroups.size());
 
-		List<Pair<LineListWrapper, LineListWrapper>> pairsVerHor = groupLinesInValidPairs(verticalGroups,
+		verticalGroups = groupLinesBySemiStaticOffset(verticalGroups);
+		horisontalGroups = groupLinesBySemiStaticOffset(horisontalGroups);
+		System.out.println("VERT GROUPS COUNT(dist+x+semi):" + verticalGroups.size());
+		System.out.println("HOR GROUPS COUNT(dist+x+semi):" + horisontalGroups.size());
+
+		List<Pair<LineListWrapper, LineListWrapper>> pairsVerHor = groupLinesValidPairs(verticalGroups,
 				horisontalGroups);
 		if (pairsVerHor == null) {
 			return null;// No grid found
@@ -124,6 +128,64 @@ public class KTableModel {
 		return tables;
 	}
 
+	private List<LineListWrapper> groupLinesBySemiStaticOffset(List<LineListWrapper> inGroups) {
+		LineSorter sorter = new SemiStaticValueSorter();
+		List<LineListWrapper> outGroups = new ArrayList<>();
+
+		for (LineListWrapper wrapper : inGroups) {
+			if (wrapper.lines.size() < 2) {// TODO Should be 3
+				continue;
+			}
+
+			sorter.sort(wrapper.lines);
+
+			double coefMin = (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE) / (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE);
+			double coefMax = (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE) / (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE);
+			List<Line> previousLines = null;
+
+			for (int i = 0; i < wrapper.lines.size() - 1; i++) {
+				List<Line> lines = new ArrayList<>();
+				lines.add(wrapper.lines.get(i));
+				lines.add(wrapper.lines.get(i + 1));
+
+				double dist = wrapper.lines.get(i + 1).getSemiStaticValue() - wrapper.lines.get(i).getSemiStaticValue();
+				double avgMin = dist * coefMin;
+				double avgMax = dist * coefMax;
+
+				for (int j = i + 1; j < wrapper.lines.size() - 1; j++) {
+					dist = wrapper.lines.get(j + 1).getSemiStaticValue() - wrapper.lines.get(j).getSemiStaticValue();
+					if (!(dist > avgMin && dist < avgMax)) {
+						break;
+
+					}
+
+					lines.add(wrapper.lines.get(j + 1));
+					avgMin = Math.max(avgMin, dist * coefMin);
+					avgMax = Math.min(avgMax, dist * coefMax);
+				}
+
+				if (previousLines == null) {
+					if (lines.size() > 1) {// TODO SHOULD BE 2, LINES SIZE MINIMUM IS 2 AND WE NEED A MINIMUM OF
+											// 3!
+						previousLines = lines;
+						outGroups.add(new LineListWrapper(wrapper.lines, wrapper.averageX));
+					}
+				} else {
+					if (lines.size() >= previousLines.size()) {
+						previousLines = lines;
+						outGroups.add(new LineListWrapper(wrapper.lines, wrapper.averageX));
+					} else {// line size is at least 3 here, will be 4 with correct condition
+						previousLines = null;// SUBSET FOUND
+						i += (lines.size() - 2);
+					}
+				}
+			}
+
+		}
+
+		return outGroups;
+	}
+
 	private KTable createTableFromVerHorPair(LineListWrapper verticalLinesWrap, LineListWrapper horisontalLinesWrap) {
 		if (!areInputDimensionsForKTableValid(verticalLinesWrap, horisontalLinesWrap)) {
 			return null;
@@ -137,12 +199,12 @@ public class KTableModel {
 				- verticalLinesWrap.lines.get(0).getSemiStaticValue();
 
 		double avgHeight = height / (horisontalLinesWrap.lines.size() - 1);
-		double maxHeight = (1 + TABLE_HEIGHT_TOLERANCE) * avgHeight;
-		double minHeight = (1 - TABLE_HEIGHT_TOLERANCE) * avgHeight;
+		double maxHeight = (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgHeight;
+		double minHeight = (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgHeight;
 
 		double avgWidth = width / (verticalLinesWrap.lines.size() - 1);
-		double maxWidth = (1 + TABLE_WIDTH_TOLERANCE) * avgWidth;
-		double minWidth = (1 - TABLE_WIDTH_TOLERANCE) * avgWidth;
+		double maxWidth = (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgWidth;
+		double minWidth = (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgWidth;
 
 		double tmp;
 
@@ -236,9 +298,9 @@ public class KTableModel {
 		return true;
 	}
 
-	private List<Pair<LineListWrapper, LineListWrapper>> groupLinesInValidPairs(List<LineListWrapper> verticalGroups,
+	private List<Pair<LineListWrapper, LineListWrapper>> groupLinesValidPairs(List<LineListWrapper> verticalGroups,
 			List<LineListWrapper> horisontalGroups) {
-		// TODO Commented for debuging MUST UNCOMMENT LATER
+		// TODO Commented for debuging MUST UNCOMMENT LATER AND SET SIZE >2
 		// if (horisontalGroups.isEmpty() || verticalGroups.isEmpty()) {
 		// return null;
 		// }
@@ -247,9 +309,9 @@ public class KTableModel {
 		List<Pair<Rectangle, LineListWrapper>> verticalRectangles = createRectangles(horisontalGroups, true);
 
 		System.out.println("HOR rectangles found:" + horisontalRectangles.size());
-		debugWriteRectangles(horisontalRectangles);// TODO remove
+		// debugWriteRectangles(horisontalRectangles);// TODO remove
 		System.out.println("VERT rectangles found:" + verticalRectangles.size());
-		debugWriteRectangles(verticalRectangles);// TODO remove
+		// debugWriteRectangles(verticalRectangles);// TODO remove
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairs = new ArrayList<Pair<LineListWrapper, LineListWrapper>>();
 
@@ -262,7 +324,62 @@ public class KTableModel {
 			}
 		}
 
+		for (int i = 0; i < pairs.size() - 1; i++) {
+			for (int j = i + 1; j < pairs.size(); j++) {
+				Boolean subset = isSubset(pairs.get(i), pairs.get(j));
+				if (subset != null) {
+					if (subset == true) {
+						pairs.remove(i);
+						i--;
+					} else {
+						pairs.remove(j);
+					}
+				}
+			}
+		}
+
 		return pairs;
+	}
+
+	private Boolean isSubset(Pair<LineListWrapper, LineListWrapper> p1, Pair<LineListWrapper, LineListWrapper> p2) {
+
+		if (p1.t.lines.size() < p2.t.lines.size()) {
+			if (p1.k.lines.size() <= p2.k.lines.size()) {
+				if (listSubsetTest(p1.t.lines, p2.t.lines) && listSubsetTest(p1.k.lines, p2.k.lines)) {
+					return true;
+				}
+			}
+		} else {
+			if (p1.t.lines.size() > p2.t.lines.size()) {
+				if (p1.k.lines.size() >= p2.k.lines.size()) {
+					if (listSubsetTest(p2.t.lines, p1.t.lines) && listSubsetTest(p2.k.lines, p1.k.lines)) {
+						return false;
+					}
+				}
+			} else {
+				if (p1.k.lines.size() <= p2.k.lines.size()) {
+					if (listSubsetTest(p1.t.lines, p2.t.lines) && listSubsetTest(p1.k.lines, p2.k.lines)) {
+						return true;
+					}
+				} else {
+					if (listSubsetTest(p2.t.lines, p1.t.lines) && listSubsetTest(p2.k.lines, p1.k.lines)) {
+						return false;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private boolean listSubsetTest(List<Line> smaller, List<Line> bigger) {
+		for (Line l : smaller) {
+			if (!bigger.contains(l)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private Pair<LineListWrapper, LineListWrapper> rectangleOverlapLines(Pair<Rectangle, LineListWrapper> ph,
@@ -358,7 +475,7 @@ public class KTableModel {
 		for (LineListWrapper wrapper : startGroups) {
 			sorter.sort(wrapper.lines);
 
-			if (wrapper.lines.size() < 2) {// Should never happen
+			if (wrapper.lines.size() < 2) {// TODO Should never happen, AND SHOULD BE 3
 				wrapper.lines.clear();
 				continue;
 			}
@@ -796,9 +913,12 @@ public class KTableModel {
 		public List<Line> lines;
 		public double avgLength;
 		public double avgCoordinateValue;
+		public Boolean averageX;
 
 		public LineListWrapper(List<Line> lines, Boolean averageX) {
 			this.lines = lines;
+			this.averageX = averageX;
+
 			avgLength = lines.stream().mapToDouble(l -> l.length()).average().getAsDouble();
 			if (averageX != null) {
 				if (averageX == true) {
