@@ -29,7 +29,6 @@ import hr.fer.zemris.diprad.recognition.testers.LineCoordinateDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LineDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageXDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageYDistanceTester;
-import hr.fer.zemris.diprad.util.ListPair;
 import hr.fer.zemris.diprad.util.Pair;
 import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
@@ -253,46 +252,17 @@ public class KTableModel {
 		debugWriteRectangles(verticalRectangles);// TODO remove
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairs = new ArrayList<Pair<LineListWrapper, LineListWrapper>>();
-		List<ListPair> lPairs = new ArrayList<>();
 
 		for (Pair<Rectangle, LineListWrapper> ph : horisontalRectangles) {
 			for (Pair<Rectangle, LineListWrapper> pv : verticalRectangles) {
 				Pair<LineListWrapper, LineListWrapper> pair = rectangleOverlapLines(ph, pv);
 				if (pair != null) {
-					ListPair p = new ListPair(pair.t.lines, pair.k.lines);
-					boolean flag = true;
-					for (ListPair pp : lPairs) {
-						if (myEquals(pp, p)) {
-							flag = false;
-							break;
-						}
-					}
-
-					if (flag) {
-						pairs.add(pair);
-						lPairs.add(p);
-					}
+					pairs.add(pair);
 				}
 			}
 		}
 
 		return pairs;
-	}
-
-	private boolean myEquals(ListPair pp, ListPair p) {
-		if (pp.l1.size() != p.l1.size()) {
-			System.out.println("First list different size:" + pp.l1.size() + " " + p.l1.size());
-			return false;
-		}
-
-		if (pp.l2.size() != p.l2.size()) {
-			System.out.println("Second list different size:" + pp.l2.size() + " " + p.l2.size());
-			return false;
-		}
-
-		System.out.println("Iste veličine");
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	private Pair<LineListWrapper, LineListWrapper> rectangleOverlapLines(Pair<Rectangle, LineListWrapper> ph,
@@ -365,26 +335,18 @@ public class KTableModel {
 	}
 
 	private Rectangle createRectangle(LineListWrapper wrapper, boolean minX) {
-		LineSorter sorter = new SemiStaticValueSorter();
-		sorter.sort(wrapper.lines);
-		double heightOrWidth = wrapper.lines.get(wrapper.lines.size() - 1).getSemiStaticValue()
-				- wrapper.lines.get(0).getSemiStaticValue();
-
 		if (minX) {
 			return new Rectangle(
-					new PointDouble(
-							wrapper.avgCoordinateValue - wrapper.avgLength / 2
-									- LINES_MIN_X_DISTANCE_SCALE * wrapper.avgLength,
-							wrapper.lines.get(0).getSemiStaticValue() - 0.2 * heightOrWidth),
+					new PointDouble(wrapper.avgCoordinateValue - wrapper.avgLength / 2
+							- LINES_MIN_X_DISTANCE_SCALE * wrapper.avgLength, 0),
 					new PointDouble(wrapper.avgCoordinateValue + (0.5 + LINES_MIN_X_DISTANCE_SCALE) * wrapper.avgLength,
-							wrapper.lines.get(wrapper.lines.size() - 1).getSemiStaticValue() + 0.2 * heightOrWidth));
+							Integer.MAX_VALUE));
 		} else {
 			return new Rectangle(
-					new PointDouble(wrapper.lines.get(0).getSemiStaticValue() - 0.2 * heightOrWidth,
+					new PointDouble(0,
 							wrapper.avgCoordinateValue - wrapper.avgLength / 2
 									- LINES_MIN_Y_DISTANCE_SCALE * wrapper.avgLength),
-					new PointDouble(
-							wrapper.lines.get(wrapper.lines.size() - 1).getSemiStaticValue() + 0.2 * heightOrWidth,
+					new PointDouble(Integer.MAX_VALUE,
 							wrapper.avgCoordinateValue + (0.5 + LINES_MIN_Y_DISTANCE_SCALE) * wrapper.avgLength));
 		}
 	}
@@ -846,31 +808,5 @@ public class KTableModel {
 				}
 			}
 		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((lines == null) ? 0 : lines.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			LineListWrapper other = (LineListWrapper) obj;
-			if (lines == null) {
-				if (other.lines != null)
-					return false;
-			} else if (!lines.equals(other.lines))
-				return false;
-			return true;
-		}
-
 	}
 }
