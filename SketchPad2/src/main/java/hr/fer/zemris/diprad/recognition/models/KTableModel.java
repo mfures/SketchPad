@@ -37,7 +37,7 @@ public class KTableModel {
 	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.15;
 	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.15;
 	public static final double LINE_LENGTH_SCALE = 0.15;
-	public static final double TABLE_HEIGHT_AND_WIDTH_TOLERANCE = 0.35;
+	public static final double TABLE_HEIGHT_AND_WIDTH_TOLERANCE = 0.25;
 	private static final double TABLE_HORISONTAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	private static final double TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	public static final double MIN_VECTOR_NORM = 4.2;
@@ -331,12 +331,30 @@ public class KTableModel {
 					if (subset == true) {
 						pairs.remove(i);
 						i--;
+						break;
 					} else {
 						pairs.remove(j);
+						j--;
 					}
 				}
 			}
 		}
+
+//		for (var x : pairs) {//TODO REMOVE
+//			for (Line l : x.t.lines) {
+//				System.out
+//						.print("(" + l.getP1().x + "," + l.getP1().y + ") (" + l.getP2().x + "," + l.getP2().y + "), ");
+//			}
+//			System.out.println();
+//
+//			for (Line l : x.k.lines) {
+//
+//				System.out
+//						.print("(" + l.getP1().x + "," + l.getP1().y + ") (" + l.getP2().x + "," + l.getP2().y + "), ");
+//			}
+//			System.out.println();
+//			System.out.println();
+//		}
 
 		return pairs;
 	}
@@ -443,7 +461,6 @@ public class KTableModel {
 	private List<Pair<Rectangle, LineListWrapper>> createRectangles(List<LineListWrapper> verticalGroups,
 			boolean minX) {
 		List<Pair<Rectangle, LineListWrapper>> rectangles = new ArrayList<>();
-
 		for (LineListWrapper wrapper : verticalGroups) {
 			rectangles.add(new Pair<Rectangle, LineListWrapper>(createRectangle(wrapper, minX), wrapper));
 		}
