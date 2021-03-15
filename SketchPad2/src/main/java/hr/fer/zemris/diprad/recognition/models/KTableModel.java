@@ -4,16 +4,13 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import hr.fer.zemris.diprad.SketchPad2;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable;
-import hr.fer.zemris.diprad.drawing.graphical.objects.KTable.Position;
 import hr.fer.zemris.diprad.drawing.graphical.objects.SelectionRectangle;
 import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.recognition.LineSorter;
@@ -21,8 +18,6 @@ import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
-import hr.fer.zemris.diprad.recognition.objects.One;
-import hr.fer.zemris.diprad.recognition.objects.Zero;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageYSorter;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageXSupplier;
@@ -39,10 +34,13 @@ public class KTableModel {
 	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.15;
 	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.15;
 	public static final double LINE_LENGTH_SCALE = 0.15;
-	public static final double TABLE_HEIGHT_AND_WIDTH_TOLERANCE = 0.25;
 	private static final double TABLE_HORIZONTAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	private static final double TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	public static final double MIN_VECTOR_NORM = 4.2;
+
+	public static final double TOLERANCE = 0.1;
+	public static final double COEF_MIN = (1 - TOLERANCE) / (1 + TOLERANCE);
+	public static final double COEF_MAX = (1 + TOLERANCE) / (1 - TOLERANCE);
 
 	private SketchPad2 sP;
 
@@ -159,9 +157,6 @@ public class KTableModel {
 
 			sorter.sort(wrapper.lines);
 
-			double coefMin = (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE) / (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE);
-			double coefMax = (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE) / (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE);
-
 			for (int i = 0; i < wrapper.lines.size() - 1; i++) {
 				List<Line> lines = new ArrayList<>();
 				lines.add(wrapper.lines.get(i));
@@ -174,10 +169,10 @@ public class KTableModel {
 				for (int j = i + 1; j < wrapper.lines.size() - 1; j++) {
 					dCurrent = supplier.getValue(wrapper.lines.get(j + 1)) - supplier.getValue(wrapper.lines.get(j));
 
-					if (dCurrent < dMax * coefMin) {
+					if (dCurrent < dMax * COEF_MIN) {
 						i = indexDMax;
 						break;
-					} else if (dCurrent > dMin * coefMax) {
+					} else if (dCurrent > dMin * COEF_MAX) {
 						i = indexDMin;
 						break;
 					}
@@ -194,7 +189,13 @@ public class KTableModel {
 				}
 
 				if (lines.size() > 1) {// TODO SHOULD BE 2
-					outGroups.add(new LineListWrapper(wrapper.lines, wrapper.averageX));
+					System.out.println("i: " + i + " size: " + lines.size());
+					outGroups.add(new LineListWrapper(wrapper.lines, wrapper.averageX, false));
+				}
+
+				if (i + lines.size() == wrapper.lines.size()) {
+					System.out.println("Dobar");
+					break;
 				}
 			}
 		}
@@ -206,45 +207,13 @@ public class KTableModel {
 		if (!areInputDimensionsForKTableValid(verticalLinesWrap, horizontalLinesWrap)) {
 			return null;
 		}
-
-		sortLinesByAverageValue(verticalLinesWrap, horizontalLinesWrap);
-
 		double height = horizontalLinesWrap.lines.get(horizontalLinesWrap.lines.size() - 1).getAverageY()
 				- horizontalLinesWrap.lines.get(0).getAverageY();
 		double width = verticalLinesWrap.lines.get(verticalLinesWrap.lines.size() - 1).getAverageX()
 				- verticalLinesWrap.lines.get(0).getAverageX();
 
-		double avgHeight = height / (horizontalLinesWrap.lines.size() - 1);
-		double maxHeight = (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgHeight;
-		double minHeight = (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgHeight;
 
-		double avgWidth = width / (verticalLinesWrap.lines.size() - 1);
-		double maxWidth = (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgWidth;
-		double minWidth = (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgWidth;
-
-		double tmp;
-
-		if (horizontalLinesWrap.avgLength < TABLE_HORIZONTAL_LINE_LENTGTH_TOLERANCE * width) {
-			return null;
-		}
-		if (verticalLinesWrap.avgLength < TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE * height) {
-			return null;
-		}
-
-		for (int i = 0; i < verticalLinesWrap.lines.size() - 1; i++) {
-			tmp = verticalLinesWrap.lines.get(i + 1).getAverageX() - verticalLinesWrap.lines.get(i).getAverageX();
-			if (tmp > maxWidth || tmp < minWidth) {
-				return null;
-			}
-		}
-
-		for (int i = 0; i < horizontalLinesWrap.lines.size() - 1; i++) {
-			tmp = horizontalLinesWrap.lines.get(i + 1).getAverageY() - horizontalLinesWrap.lines.get(i).getAverageY();
-			if (tmp > maxHeight || tmp < minHeight) {
-				return null;
-			}
-		}
-
+		System.out.println("Tu sam 3");
 		for (Line l : verticalLinesWrap.lines) {// No need to check horizontal lines
 			if (!l.getBm().isDealtWith()) {
 				if (l.getBm().isFractured()) {
@@ -291,6 +260,7 @@ public class KTableModel {
 		sP.getCanvas().repaint();
 	}
 
+	@SuppressWarnings("unused")
 	private void sortLinesByAverageValue(LineListWrapper verticalLinesWrap, LineListWrapper horizontalLinesWrap) {
 		LineSorter sorterX = new CoordinateAverageXSorter();
 		LineSorter sorterY = new CoordinateAverageYSorter();
@@ -323,9 +293,9 @@ public class KTableModel {
 		List<Pair<Rectangle, LineListWrapper>> verticalRectangles = createRectangles(horizontalGroups, true);
 
 		System.out.println("HOR rectangles found:" + horizontalRectangles.size());
-		// debugWriteRectangles(horizontalRectangles);// TODO remove
+		debugWriteRectangles(horizontalRectangles);// TODO remove
 		System.out.println("VERT rectangles found:" + verticalRectangles.size());
-		// debugWriteRectangles(verticalRectangles);// TODO remove
+		debugWriteRectangles(verticalRectangles);// TODO remove
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairs = new ArrayList<Pair<LineListWrapper, LineListWrapper>>();
 
@@ -353,22 +323,6 @@ public class KTableModel {
 				}
 			}
 		}
-
-//		for (var x : pairs) {//TODO REMOVE
-//			for (Line l : x.t.lines) {
-//				System.out
-//						.print("(" + l.getP1().x + "," + l.getP1().y + ") (" + l.getP2().x + "," + l.getP2().y + "), ");
-//			}
-//			System.out.println();
-//
-//			for (Line l : x.k.lines) {
-//
-//				System.out
-//						.print("(" + l.getP1().x + "," + l.getP1().y + ") (" + l.getP2().x + "," + l.getP2().y + "), ");
-//			}
-//			System.out.println();
-//			System.out.println();
-//		}
 
 		return pairs;
 	}
@@ -442,8 +396,32 @@ public class KTableModel {
 			return null;
 		}
 
-		return new Pair<KTableModel.LineListWrapper, KTableModel.LineListWrapper>(
-				new LineListWrapper(verticalLines, false), new LineListWrapper(horizontalLines, true));
+		// Does distance fit into window between dMin and dMax
+		System.out.println("1");
+		LineListWrapper vertical = new LineListWrapper(verticalLines, false, true);
+		LineListWrapper horizontal = new LineListWrapper(horizontalLines, true, true);
+		if (!checkIfValidLength(vertical.minAvgDistance, vertical.maxAvgDistance, horizontal.avgLength,
+				verticalLines.size() - 1)) {
+			return null;
+		}
+		System.out.println("2");
+		if (!checkIfValidLength(horizontal.minAvgDistance, horizontal.maxAvgDistance, vertical.avgLength,
+				horizontalLines.size() - 1)) {
+			return null;
+		}
+		System.out.println("3");
+		return new Pair<KTableModel.LineListWrapper, KTableModel.LineListWrapper>(vertical, horizontal);
+	}
+
+	private boolean checkIfValidLength(Double minAvgDistance, Double maxAvgDistance, double d, int n) {
+		d /= n;
+		System.out.println("D_" + d + " N_" + n + " mxA_" + maxAvgDistance + " mnA_" + minAvgDistance);
+		if (d > maxAvgDistance)
+			return false;
+		if (d < minAvgDistance)
+			return false;
+
+		return true;
 	}
 
 	private boolean isInRectangle(Rectangle overlap, Line l, boolean horizontal) {
@@ -554,7 +532,7 @@ public class KTableModel {
 
 				if (tester.test(l1, l2)) {
 					if (activeLines.size() > 1) {
-						groups.add(new LineListWrapper(new ArrayList<>(activeLines), type));
+						groups.add(new LineListWrapper(new ArrayList<>(activeLines), type, false));
 					}
 					activeLines.remove(0);
 
@@ -573,7 +551,7 @@ public class KTableModel {
 		}
 
 		if (activeLines.size() > 1) {
-			groups.add(new LineListWrapper(new ArrayList<>(activeLines), type));
+			groups.add(new LineListWrapper(new ArrayList<>(activeLines), type, false));
 		}
 		return groups;
 	}
@@ -691,33 +669,15 @@ public class KTableModel {
 		return (int) (Math.ceil((Math.log(n) / Math.log(2)))) == (int) (Math.floor(((Math.log(n) / Math.log(2)))));
 	}
 
-	private static class Pairt {
-		public int v;
-		public GraphicalObject o;
-
-		public Pairt(int v, GraphicalObject o) {
-			this.v = v;
-			this.o = o;
-		}
-	}
-
-	private static class PairLine {
-		public Line l;
-		public GraphicalObject o;
-
-		public PairLine(Line l, GraphicalObject o) {
-			this.l = l;
-			this.o = o;
-		}
-	}
-
 	private static class LineListWrapper {
 		public List<Line> lines;
 		public double avgLength;
 		public double avgCoordinateValue;
 		public Boolean averageX;
+		public Double minAvgDistance;
+		public Double maxAvgDistance;
 
-		public LineListWrapper(List<Line> lines, Boolean averageX) {
+		public LineListWrapper(List<Line> lines, Boolean averageX, Boolean distance) {
 			this.lines = lines;
 			this.averageX = averageX;
 
@@ -727,6 +687,32 @@ public class KTableModel {
 					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getAverageX()).average().getAsDouble();
 				} else {
 					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getAverageY()).average().getAsDouble();
+				}
+
+				if (distance == true) {
+					LineValueSupplier supplier;
+					if (averageX == true) {
+						supplier = new LineAverageYSupplier();
+					} else {
+						supplier = new LineAverageXSupplier();
+					}
+
+					// No need to check conditions, they are already ok, we just need to go trough
+					// once
+					double dCurrent = supplier.getValue(lines.get(1)) - supplier.getValue(lines.get(0));
+					double dMin = dCurrent, dMax = dCurrent;
+
+					for (int j = 1; j < lines.size() - 1; j++) {
+						dCurrent = supplier.getValue(lines.get(j + 1)) - supplier.getValue(lines.get(j));
+						if (dCurrent > dMax) {
+							dMax = dCurrent;
+						} else if (dCurrent < dMin) {
+							dMin = dCurrent;
+						}
+					}
+
+					minAvgDistance = dMax * COEF_MIN;
+					maxAvgDistance = dMin * COEF_MAX;
 				}
 			}
 		}

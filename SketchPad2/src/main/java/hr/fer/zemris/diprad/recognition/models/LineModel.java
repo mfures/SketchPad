@@ -109,7 +109,7 @@ public class LineModel {
 
 	public static List<Point> calculateBreakPoints(List<Point> points) {
 		if (points.size() < 3) {
-			return null;
+			return new ArrayList<Point>();
 		}
 
 		List<MyVector> vectors = MyVector.listOfPointsToListOfVectors(points);
