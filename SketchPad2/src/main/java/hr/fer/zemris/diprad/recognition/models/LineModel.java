@@ -4,12 +4,12 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.recognition.objects.Line;
+import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.MyVector;
 
 public class LineModel {
-	public static List<Line> linesInPoints(List<Point> points, List<Point> breakPoints, BasicMovement bm) {
+	public static List<Line> linesInPoints(List<Point> points, List<Point> breakPoints, BasicMovementWrapper bmw) {
 		Point p1;
 		Point p2;
 		double slope;
@@ -41,7 +41,7 @@ public class LineModel {
 			if (error > 15) {
 				continue;
 			} else {
-				lines.add(new Line(p1, p2, slope, intercept, bm));
+				lines.add(new Line(p1, p2, slope, intercept, bmw));
 
 			}
 
@@ -74,8 +74,8 @@ public class LineModel {
 		return error;
 	}
 
-	public static Line recognize(BasicMovement bm) {
-		List<Point> points = bm.getPoints();
+	public static Line recognize(BasicMovementWrapper bmw) {
+		List<Point> points = bmw.getBm().getPoints();
 		Point p1 = points.get(0);
 		Point p2 = points.get(points.size() - 1);
 		double slope = (p2.y - p1.y) / (p2.x * 1.0 - p1.x);
@@ -104,7 +104,7 @@ public class LineModel {
 			return null;
 		}
 
-		return new Line(p1, p2, slope, intercept, bm);
+		return new Line(p1, p2, slope, intercept, bmw);
 	}
 
 	public static List<Point> calculateBreakPoints(List<Point> points) {

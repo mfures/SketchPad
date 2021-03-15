@@ -2,8 +2,8 @@ package hr.fer.zemris.diprad.recognition.objects;
 
 import java.awt.Point;
 
-import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
+import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class Line {
 	public static final double MAX_TAN = 0.2;
@@ -19,14 +19,14 @@ public class Line {
 	private double intercept;
 	private double tan;
 
-	private BasicMovement bm;
+	private BasicMovementWrapper bmw;
 
-	public Line(Point p1, Point p2, double slope, double intercept, BasicMovement bm) {
+	public Line(Point p1, Point p2, double slope, double intercept, BasicMovementWrapper bmw) {
 		this.p1 = p1;
 		this.p2 = p2;
 		this.slope = slope;
 		this.intercept = intercept;
-		this.bm = bm;
+		this.bmw = bmw;
 
 		this.averageY = 0.5 * (p1.y + p2.y);
 		this.averageX = 0.5 * (p1.x + p2.x);
@@ -77,8 +77,8 @@ public class Line {
 		return slope;
 	}
 
-	public BasicMovement getBm() {
-		return bm;
+	public BasicMovementWrapper getBmw() {
+		return bmw;
 	}
 
 	public double getIntercept() {

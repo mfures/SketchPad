@@ -6,16 +6,12 @@ import java.util.List;
 
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectVisitor;
-import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.util.Rectangle;
 
 public class BasicMovement extends GraphicalObject {
 	private List<Point> points;
 	private String label = "";
 	private Rectangle boundingBox;
-	private boolean fractured = false;
-	private boolean dealtWith = false;
-	private List<Line> fracturedLines;
 
 	public BasicMovement(List<Point> points) {
 		this.points = points;
@@ -24,11 +20,7 @@ public class BasicMovement extends GraphicalObject {
 	public void initBoundingBox() {
 		int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = 0, maxY = 0;
 
-		// System.out.println(points.size());
 		for (Point p : points) {
-			// TODO remove
-			// System.out.println(p);
-			// System.out.println(minX + " " + minY + " " + maxX + " " + maxY);
 			if (p.x < minX) {
 				minX = p.x;
 			}
@@ -44,8 +36,6 @@ public class BasicMovement extends GraphicalObject {
 		}
 
 		this.boundingBox = new Rectangle(new Point(minX, minY), new Point(maxX, maxY));
-		// SketchPad2.debugDraw(new SelectionRectangle(new Point(minX, minY), new
-		// Point(maxX, maxY)));//TODO remove
 	}
 
 	@Override
@@ -133,29 +123,5 @@ public class BasicMovement extends GraphicalObject {
 		} catch (Exception e) {
 			throw new RuntimeException("Couldn't parse line to basic movement. " + e.getMessage());
 		}
-	}
-
-	public boolean isFractured() {
-		return fractured;
-	}
-
-	public void setFractured(boolean fractured) {
-		this.fractured = fractured;
-	}
-
-	public List<Line> getFracturedLines() {
-		return fracturedLines;
-	}
-
-	public void setFracturedLines(List<Line> fracturedLines) {
-		this.fracturedLines = fracturedLines;
-	}
-
-	public boolean isDealtWith() {
-		return dealtWith;
-	}
-
-	public void setDealtWith(boolean dealtWith) {
-		this.dealtWith = dealtWith;
 	}
 }

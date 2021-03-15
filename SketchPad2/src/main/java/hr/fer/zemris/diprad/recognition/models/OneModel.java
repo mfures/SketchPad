@@ -5,16 +5,16 @@ import java.awt.Point;
 //import java.text.NumberFormat;
 import java.util.List;
 
-import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.recognition.Pattern;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.One;
+import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class OneModel implements Pattern<One> {
 	@Override
-	public One recognize(BasicMovement bm) {
+	public One recognize(BasicMovementWrapper bmw) {
 
-		List<Point> points = bm.getPoints();
+		List<Point> points = bmw.getBm().getPoints();
 
 		List<Point> breakPoints = LineModel.calculateBreakPoints(points);
 
@@ -28,7 +28,7 @@ public class OneModel implements Pattern<One> {
 			return null;
 		}
 
-		List<Line> lines = LineModel.linesInPoints(points, acumulatedBreakPoints, bm);
+		List<Line> lines = LineModel.linesInPoints(points, acumulatedBreakPoints, bmw);
 
 		if (lines.size() != 2) {
 			return null;
@@ -61,12 +61,12 @@ public class OneModel implements Pattern<One> {
 			averagePoint.x = 0;
 			averagePoint.y = 0;
 
-			for (Point p1 : bm.getPoints()) {
+			for (Point p1 : bmw.getBm().getPoints()) {
 				averagePoint.x += p1.x;
 				averagePoint.y += p1.y;
 			}
-			averagePoint.x = (int) Math.round(((double) averagePoint.x) / bm.getPoints().size());
-			averagePoint.y = (int) Math.round(((double) averagePoint.y) / bm.getPoints().size());
+			averagePoint.x = (int) Math.round(((double) averagePoint.x) / bmw.getBm().getPoints().size());
+			averagePoint.y = (int) Math.round(((double) averagePoint.y) / bmw.getBm().getPoints().size());
 
 			return new One(averagePoint, l2.length() / 2);
 		}

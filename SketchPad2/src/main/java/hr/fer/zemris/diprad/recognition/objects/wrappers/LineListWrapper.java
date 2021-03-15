@@ -1,6 +1,8 @@
-package hr.fer.zemris.diprad.recognition.objects;
+package hr.fer.zemris.diprad.recognition.objects.wrappers;
 
 import java.util.List;
+
+import hr.fer.zemris.diprad.recognition.objects.Line;
 
 public class LineListWrapper {
 	public List<Line> lines;

@@ -3,30 +3,30 @@ package hr.fer.zemris.diprad.recognition.models;
 import java.awt.Point;
 import java.util.List;
 
-import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.recognition.Pattern;
 import hr.fer.zemris.diprad.recognition.objects.Zero;
+import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class ZeroModel implements Pattern<Zero> {
 	private Point averagePoint = new Point();
 	private double min, max, avg, dist;
 
 	@Override
-	public Zero recognize(BasicMovement bm) {
+	public Zero recognize(BasicMovementWrapper bmw) {
 		averagePoint.x = 0;
 		averagePoint.y = 0;
 
-		for (Point p1 : bm.getPoints()) {
+		for (Point p1 : bmw.getBm().getPoints()) {
 			averagePoint.x += p1.x;
 			averagePoint.y += p1.y;
 		}
-		averagePoint.x = (int) Math.round(((double) averagePoint.x) / bm.getPoints().size());
-		averagePoint.y = (int) Math.round(((double) averagePoint.y) / bm.getPoints().size());
+		averagePoint.x = (int) Math.round(((double) averagePoint.x) / bmw.getBm().getPoints().size());
+		averagePoint.y = (int) Math.round(((double) averagePoint.y) / bmw.getBm().getPoints().size());
 
 		max = 0;
 		min = Integer.MAX_VALUE;
 
-		for (Point p1 : bm.getPoints()) {
+		for (Point p1 : bmw.getBm().getPoints()) {
 			dist = Math.sqrt(Math.pow(p1.x - averagePoint.x, 2) + Math.pow(p1.y - averagePoint.y, 2));
 			if (min > dist) {
 				min = dist;
@@ -37,7 +37,7 @@ public class ZeroModel implements Pattern<Zero> {
 			avg += dist;
 		}
 
-		avg /= bm.getPoints().size();
+		avg /= bmw.getBm().getPoints().size();
 
 		if (!(min / max > 0.3)) {
 			// System.out.println("Bad max/min ratio:" + min / max);
@@ -45,10 +45,10 @@ public class ZeroModel implements Pattern<Zero> {
 		}
 
 		double s1, s2;
-		List<Point> points = bm.getPoints();
+		List<Point> points = bmw.getBm().getPoints();
 		double angle;
 		int checkSum = 0;
-		for (int i = 0; i < bm.getPoints().size() - 1; i++) {
+		for (int i = 0; i < bmw.getBm().getPoints().size() - 1; i++) {
 			s1 = calculateSlope(points.get(i), averagePoint);
 			s2 = calculateSlope(averagePoint, points.get(i + 1));
 			if (Double.isInfinite(s1)) {
@@ -69,7 +69,7 @@ public class ZeroModel implements Pattern<Zero> {
 			return new Zero(averagePoint, avg);
 		}
 
-		//System.out.println((checkSum / (points.size() - 1.0)));
+		// System.out.println((checkSum / (points.size() - 1.0)));
 		return null;
 	}
 

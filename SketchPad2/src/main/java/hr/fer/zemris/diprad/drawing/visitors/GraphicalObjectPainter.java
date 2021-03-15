@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import hr.fer.zemris.diprad.drawing.Colors;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectVisitor;
 import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable;

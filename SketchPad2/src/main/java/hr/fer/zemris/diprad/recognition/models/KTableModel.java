@@ -18,7 +18,8 @@ import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
-import hr.fer.zemris.diprad.recognition.objects.LineListWrapper;
+import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
+import hr.fer.zemris.diprad.recognition.objects.wrappers.LineListWrapper;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageYSorter;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageXSupplier;
@@ -50,9 +51,9 @@ public class KTableModel {
 
 	public void recognize(Point a, Point b) {
 		List<GraphicalObject> objects = getObjectsInRectangle(a, b, sP.getModel());
-		List<BasicMovement> bms = handleGraphicalObjects(objects);
+		List<BasicMovementWrapper> bmws = handleGraphicalObjects(objects);
 
-		List<KTable> tables = recognizeTables(bms);
+		List<KTable> tables = recognizeTables(bmws);
 
 		if (tables.isEmpty()) {
 			return;
@@ -88,12 +89,12 @@ public class KTableModel {
 		return tables;
 	}
 
-	private List<BasicMovement> handleGraphicalObjects(List<GraphicalObject> objects) {
-		List<BasicMovement> bms = new ArrayList<>();
+	private List<BasicMovementWrapper> handleGraphicalObjects(List<GraphicalObject> objects) {
+		List<BasicMovementWrapper> bms = new ArrayList<>();
 
 		for (GraphicalObject go : objects) {
 			if (go instanceof BasicMovement) {
-				bms.add((BasicMovement) go);
+				bms.add(new BasicMovementWrapper((BasicMovement) go));
 			}
 		}
 
@@ -101,25 +102,25 @@ public class KTableModel {
 		return bms;
 	}
 
-	private List<KTable> recognizeTables(List<BasicMovement> bms) {
+	private List<KTable> recognizeTables(List<BasicMovementWrapper> bmws) {
 		List<Line> horizontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
 
-		initLines(horizontalLines, verticalLines, bms);
-		// System.out.println("NUM VERT:" + verticalLines.size());
-		// System.out.println("NUM HOR:" + horizontalLines.size());
+		initLines(horizontalLines, verticalLines, bmws);
+		System.out.println("NUM VERT:" + verticalLines.size());
+		System.out.println("NUM HOR:" + horizontalLines.size());
 
 		List<LineListWrapper> verticalGroups = groupLinesByLength(verticalLines);
 		List<LineListWrapper> horizontalGroups = groupLinesByLength(horizontalLines);
-		// System.out.println("VERT GROUPS COUNT(dist):" + verticalGroups.size());
-		// System.out.println("HOR GROUPS COUNT(dist):" + horizontalGroups.size());
+		System.out.println("VERT GROUPS COUNT(dist):" + verticalGroups.size());
+		System.out.println("HOR GROUPS COUNT(dist):" + horizontalGroups.size());
 
 		verticalGroups = groupLinesByYCoordinate(verticalGroups, new LinesAverageYDistanceTester(),
 				new CoordinateAverageYSorter(), false);
 		horizontalGroups = groupLinesByXCoordinate(horizontalGroups, new LinesAverageXDistanceTester(),
 				new CoordinateAverageXSorter(), true);
-		// System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
-		// System.out.println("HOR GROUPS COUNT(dist+x):" + horizontalGroups.size());
+		System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
+		System.out.println("HOR GROUPS COUNT(dist+x):" + horizontalGroups.size());
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairsVerHor = groupLinesValidPairs(verticalGroups,
 				horizontalGroups);
@@ -131,7 +132,7 @@ public class KTableModel {
 
 		List<KTable> tables = new ArrayList<>();
 		for (Pair<LineListWrapper, LineListWrapper> pairVerHor : pairsVerHor) {
-			KTable table = createTableFromVerHorPair(pairVerHor.t, pairVerHor.k);
+			KTable table = checkForFragmentsAndCreateTable(pairVerHor.t, pairVerHor.k);
 			if (table != null) {
 				tables.add(table);
 			}
@@ -175,47 +176,32 @@ public class KTableModel {
 		return false;
 	}
 
-	private KTable createTableFromVerHorPair(LineListWrapper verticalLinesWrap, LineListWrapper horizontalLinesWrap) {
-		if (!(areInputDimensionsForKTableValid(verticalLinesWrap.lines)
-				&& areInputDimensionsForKTableValid(horizontalLinesWrap.lines))) {
-			return null;
+	private KTable checkForFragmentsAndCreateTable(LineListWrapper verticalLinesWrap,
+			LineListWrapper horizontalLinesWrap) {
+		for (Line l : verticalLinesWrap.lines) {
+			l.getBmw().incTotalHandeledFragments();
 		}
+		for (Line l : horizontalLinesWrap.lines) {
+			l.getBmw().incTotalHandeledFragments();
+		}
+
+		for (Line l : verticalLinesWrap.lines) {
+			if (l.getBmw().getTotalFragments() != l.getBmw().getTotalHandeledFragments()) {
+				resetAll(verticalLinesWrap, horizontalLinesWrap);
+				return null;
+			}
+		}
+		for (Line l : horizontalLinesWrap.lines) {
+			if (l.getBmw().getTotalFragments() != l.getBmw().getTotalHandeledFragments()) {
+				resetAll(verticalLinesWrap, horizontalLinesWrap);
+				return null;
+			}
+		}
+
 		double height = horizontalLinesWrap.lines.get(horizontalLinesWrap.lines.size() - 1).getAverageY()
 				- horizontalLinesWrap.lines.get(0).getAverageY();
 		double width = verticalLinesWrap.lines.get(verticalLinesWrap.lines.size() - 1).getAverageX()
 				- verticalLinesWrap.lines.get(0).getAverageX();
-
-		for (Line l : verticalLinesWrap.lines) {// No need to check horizontal lines
-			if (!l.getBm().isDealtWith()) {
-				if (l.getBm().isFractured()) {
-					List<Line> lines = l.getBm().getFracturedLines();
-
-					for (Line fl : lines) {
-						boolean found = false;
-						if (fl.getType() == LineType.VERTICAL) {
-							for (Line vl : verticalLinesWrap.lines) {
-								if (vl.equals(fl)) {
-									found = true;
-									break;
-								}
-							}
-						} else {
-							for (Line hl : horizontalLinesWrap.lines) {
-								if (hl.equals(fl)) {
-									found = true;
-									break;
-								}
-							}
-						}
-
-						if (found == false) {
-							return null;
-						}
-					}
-					l.getBm().setDealtWith(true);
-				}
-			}
-		}
 
 		KTable table = new KTable(
 				new Point((int) verticalLinesWrap.lines.get(0).getAverageX(),
@@ -223,6 +209,15 @@ public class KTableModel {
 				verticalLinesWrap.lines.size(), horizontalLinesWrap.lines.size(), (int) width, (int) height);
 
 		return table;
+	}
+
+	private void resetAll(LineListWrapper verticalLinesWrap, LineListWrapper horizontalLinesWrap) {
+		for (Line l : verticalLinesWrap.lines) {
+			l.getBmw().resetTotalHandeledFragments();
+		}
+		for (Line l : horizontalLinesWrap.lines) {
+			l.getBmw().resetTotalHandeledFragments();
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -511,10 +506,10 @@ public class KTableModel {
 		});
 	}
 
-	private void initLines(List<Line> horizontalLines, List<Line> verticalLines, List<BasicMovement> bms) {
-		for (BasicMovement bm : bms) {
-			List<Point> breakPoints = LineModel.calculateAcumulatedBreakPoints(bm.getPoints(),
-					LineModel.calculateBreakPoints(bm.getPoints()));
+	private void initLines(List<Line> horizontalLines, List<Line> verticalLines, List<BasicMovementWrapper> bmws) {
+		for (BasicMovementWrapper bmw : bmws) {
+			List<Point> breakPoints = LineModel.calculateAcumulatedBreakPoints(bmw.getBm().getPoints(),
+					LineModel.calculateBreakPoints(bmw.getBm().getPoints()));
 
 			if (!breakPoints.isEmpty()) {
 				if (breakPoints.size() > 3) {
@@ -522,7 +517,7 @@ public class KTableModel {
 				}
 
 				Pair<List<Line>, List<Line>> verHorLines = calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(
-						bm, breakPoints);
+						bmw, breakPoints);
 				if (verHorLines == null) {
 					continue;
 				}
@@ -539,13 +534,12 @@ public class KTableModel {
 					fLines.add(l);
 				}
 
-				bm.setFractured(true);
-				bm.setFracturedLines(fLines);
+				bmw.setTotalFragments(verHorLines.t.size() + verHorLines.k.size());
 
 				continue;
 			}
 
-			Line l = LineModel.recognize(bm);
+			Line l = LineModel.recognize(bmw);
 			if (l != null) {
 				if (l.getType() == LineType.HORIZONTAL) {
 					horizontalLines.add(l);
@@ -557,9 +551,9 @@ public class KTableModel {
 
 	}
 
-	private Pair<List<Line>, List<Line>> calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(BasicMovement bm,
-			List<Point> breakPoints) {
-		List<Line> lines = LineModel.linesInPoints(bm.getPoints(), breakPoints, bm);
+	private Pair<List<Line>, List<Line>> calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(
+			BasicMovementWrapper bmw, List<Point> breakPoints) {
+		List<Line> lines = LineModel.linesInPoints(bmw.getBm().getPoints(), breakPoints, bmw);
 		if (lines.size() != breakPoints.size() + 1) {
 			return null;
 		}
