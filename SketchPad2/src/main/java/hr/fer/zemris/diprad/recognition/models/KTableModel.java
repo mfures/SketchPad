@@ -17,6 +17,7 @@ import hr.fer.zemris.diprad.drawing.graphical.objects.KTable.Position;
 import hr.fer.zemris.diprad.drawing.graphical.objects.SelectionRectangle;
 import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.recognition.LineSorter;
+import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
@@ -24,7 +25,8 @@ import hr.fer.zemris.diprad.recognition.objects.One;
 import hr.fer.zemris.diprad.recognition.objects.Zero;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageYSorter;
-import hr.fer.zemris.diprad.recognition.sorters.SemiStaticValueSorter;
+import hr.fer.zemris.diprad.recognition.supliers.LineAverageXSupplier;
+import hr.fer.zemris.diprad.recognition.supliers.LineAverageYSupplier;
 import hr.fer.zemris.diprad.recognition.testers.LineCoordinateDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LineDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageXDistanceTester;
@@ -38,7 +40,7 @@ public class KTableModel {
 	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.15;
 	public static final double LINE_LENGTH_SCALE = 0.15;
 	public static final double TABLE_HEIGHT_AND_WIDTH_TOLERANCE = 0.25;
-	private static final double TABLE_HORISONTAL_LINE_LENTGTH_TOLERANCE = 0.7;
+	private static final double TABLE_HORIZONTAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	private static final double TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE = 0.7;
 	public static final double MIN_VECTOR_NORM = 4.2;
 
@@ -48,7 +50,7 @@ public class KTableModel {
 		this.sP = sP;
 	}
 
-	public void recognize2(Point a, Point b) {
+	public void recognize(Point a, Point b) {
 		List<GraphicalObject> objects = getObjectsInRectangle(a, b, sP.getModel());
 		List<BasicMovement> bms = handleGraphicalObjects(objects);
 
@@ -58,14 +60,9 @@ public class KTableModel {
 			return;
 		}
 
-		for (int i = 0; i < tables.size() - 1; i++) {
-			for (int j = i + 1; j < tables.size(); j++) {
-				if (Rectangle.areOverlaping(tables.get(i).getExpandedBoundingRectangle(),
-						tables.get(j).getExpandedBoundingRectangle())) {
-					System.out.println("Tabels 2 close");
-					return;
-				}
-			}
+		tables = checkForTableOverlaps(tables);
+		if (tables == null) {
+			return;
 		}
 
 		System.out.println("Našao sam ovoliko tablica:" + tables.size());
@@ -77,6 +74,20 @@ public class KTableModel {
 			// SelectionRectangle(table.getExpandedBoundingRectangle()));
 
 		}
+	}
+
+	private List<KTable> checkForTableOverlaps(List<KTable> tables) {
+		for (int i = 0; i < tables.size() - 1; i++) {
+			for (int j = i + 1; j < tables.size(); j++) {
+				if (Rectangle.areOverlaping(tables.get(i).getExpandedBoundingRectangle(),
+						tables.get(j).getExpandedBoundingRectangle())) {
+					System.out.println("Tabels 2 close");
+					return null;
+				}
+			}
+		}
+
+		return tables;
 	}
 
 	private List<BasicMovement> handleGraphicalObjects(List<GraphicalObject> objects) {
@@ -93,35 +104,34 @@ public class KTableModel {
 	}
 
 	private List<KTable> recognizeTables(List<BasicMovement> bms) {
-		List<Line> horisontalLines = new ArrayList<>();
+		List<Line> horizontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
 
-		initLines(horisontalLines, verticalLines, bms);
-		sortByDistance(verticalLines);
-		sortByDistance(horisontalLines);
+		initLines(horizontalLines, verticalLines, bms);
 		System.out.println("NUM VERT:" + verticalLines.size());
-		System.out.println("NUM HOR:" + horisontalLines.size());
+		System.out.println("NUM HOR:" + horizontalLines.size());
 
-		// horisontalLines.forEach((x) -> System.out.println(x.length()));
-		List<LineListWrapper> verticalGroups = groupLinesByDistance(verticalLines);
-		List<LineListWrapper> horisontalGroups = groupLinesByDistance(horisontalLines);
+		List<LineListWrapper> verticalGroups = groupLinesByLength(verticalLines);
+		List<LineListWrapper> horizontalGroups = groupLinesByLength(horizontalLines);
 		System.out.println("VERT GROUPS COUNT(dist):" + verticalGroups.size());
-		System.out.println("HOR GROUPS COUNT(dist):" + horisontalGroups.size());
+		System.out.println("HOR GROUPS COUNT(dist):" + horizontalGroups.size());
 
-		verticalGroups = groupLinesByStartingCoordinate(verticalGroups, new LinesAverageYDistanceTester(),
+		verticalGroups = groupLinesByYCoordinate(verticalGroups, new LinesAverageYDistanceTester(),
 				new CoordinateAverageYSorter(), false);
-		horisontalGroups = groupLinesByStartingCoordinate(horisontalGroups, new LinesAverageXDistanceTester(),
+		horizontalGroups = groupLinesByXCoordinate(horizontalGroups, new LinesAverageXDistanceTester(),
 				new CoordinateAverageXSorter(), true);
 		System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
-		System.out.println("HOR GROUPS COUNT(dist+x):" + horisontalGroups.size());
+		System.out.println("HOR GROUPS COUNT(dist+x):" + horizontalGroups.size());
 
-		verticalGroups = groupLinesBySemiStaticOffset(verticalGroups);
-		horisontalGroups = groupLinesBySemiStaticOffset(horisontalGroups);
+		verticalGroups = groupLinesByDistance(verticalGroups, new CoordinateAverageXSorter(),
+				new LineAverageXSupplier());
+		horizontalGroups = groupLinesByDistance(horizontalGroups, new CoordinateAverageYSorter(),
+				new LineAverageYSupplier());
 		System.out.println("VERT GROUPS COUNT(dist+x+semi):" + verticalGroups.size());
-		System.out.println("HOR GROUPS COUNT(dist+x+semi):" + horisontalGroups.size());
+		System.out.println("HOR GROUPS COUNT(dist+x+semi):" + horizontalGroups.size());
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairsVerHor = groupLinesValidPairs(verticalGroups,
-				horisontalGroups);
+				horizontalGroups);
 		if (pairsVerHor == null) {
 			return null;// No grid found
 		}
@@ -138,8 +148,8 @@ public class KTableModel {
 		return tables;
 	}
 
-	private List<LineListWrapper> groupLinesBySemiStaticOffset(List<LineListWrapper> inGroups) {
-		LineSorter sorter = new SemiStaticValueSorter();
+	private List<LineListWrapper> groupLinesByDistance(List<LineListWrapper> inGroups, LineSorter sorter,
+			LineValueSupplier supplier) {
 		List<LineListWrapper> outGroups = new ArrayList<>();
 
 		for (LineListWrapper wrapper : inGroups) {
@@ -151,64 +161,60 @@ public class KTableModel {
 
 			double coefMin = (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE) / (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE);
 			double coefMax = (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE) / (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE);
-			List<Line> previousLines = null;
 
 			for (int i = 0; i < wrapper.lines.size() - 1; i++) {
 				List<Line> lines = new ArrayList<>();
 				lines.add(wrapper.lines.get(i));
 				lines.add(wrapper.lines.get(i + 1));
 
-				double dist = wrapper.lines.get(i + 1).getSemiStaticValue() - wrapper.lines.get(i).getSemiStaticValue();
-				double avgMin = dist * coefMin;
-				double avgMax = dist * coefMax;
+				double dCurrent = supplier.getValue(wrapper.lines.get(i + 1)) - supplier.getValue(wrapper.lines.get(i));
+				double dMin = dCurrent, dMax = dCurrent;
+				int indexDMin = i, indexDMax = i;
 
 				for (int j = i + 1; j < wrapper.lines.size() - 1; j++) {
-					dist = wrapper.lines.get(j + 1).getSemiStaticValue() - wrapper.lines.get(j).getSemiStaticValue();
-					if (!(dist > avgMin && dist < avgMax)) {
-						break;
+					dCurrent = supplier.getValue(wrapper.lines.get(j + 1)) - supplier.getValue(wrapper.lines.get(j));
 
+					if (dCurrent < dMax * coefMin) {
+						i = indexDMax;
+						break;
+					} else if (dCurrent > dMin * coefMax) {
+						i = indexDMin;
+						break;
+					}
+
+					if (dCurrent > dMax) {
+						dMax = dCurrent;
+						indexDMax = j;
+					} else if (dCurrent < dMin) {
+						dMin = dCurrent;
+						indexDMin = j;
 					}
 
 					lines.add(wrapper.lines.get(j + 1));
-					avgMin = Math.max(avgMin, dist * coefMin);
-					avgMax = Math.min(avgMax, dist * coefMax);
 				}
 
-				if (previousLines == null) {
-					if (lines.size() > 1) {// TODO SHOULD BE 2, LINES SIZE MINIMUM IS 2 AND WE NEED A MINIMUM OF
-											// 3!
-						previousLines = lines;
-						outGroups.add(new LineListWrapper(wrapper.lines, wrapper.averageX));
-					}
-				} else {
-					if (lines.size() >= previousLines.size()) {
-						previousLines = lines;
-						outGroups.add(new LineListWrapper(wrapper.lines, wrapper.averageX));
-					} else {// line size is at least 3 here, will be 4 with correct condition
-						previousLines = null;// SUBSET FOUND
-						i += (lines.size() - 2);
-					}
+				if (lines.size() > 1) {// TODO SHOULD BE 2
+					outGroups.add(new LineListWrapper(wrapper.lines, wrapper.averageX));
 				}
 			}
-
 		}
 
 		return outGroups;
 	}
 
-	private KTable createTableFromVerHorPair(LineListWrapper verticalLinesWrap, LineListWrapper horisontalLinesWrap) {
-		if (!areInputDimensionsForKTableValid(verticalLinesWrap, horisontalLinesWrap)) {
+	private KTable createTableFromVerHorPair(LineListWrapper verticalLinesWrap, LineListWrapper horizontalLinesWrap) {
+		if (!areInputDimensionsForKTableValid(verticalLinesWrap, horizontalLinesWrap)) {
 			return null;
 		}
 
-		sortInputLinesBySemiStaticValue(verticalLinesWrap, horisontalLinesWrap);
+		sortLinesByAverageValue(verticalLinesWrap, horizontalLinesWrap);
 
-		double height = horisontalLinesWrap.lines.get(horisontalLinesWrap.lines.size() - 1).getSemiStaticValue()
-				- horisontalLinesWrap.lines.get(0).getSemiStaticValue();
-		double width = verticalLinesWrap.lines.get(verticalLinesWrap.lines.size() - 1).getSemiStaticValue()
-				- verticalLinesWrap.lines.get(0).getSemiStaticValue();
+		double height = horizontalLinesWrap.lines.get(horizontalLinesWrap.lines.size() - 1).getAverageY()
+				- horizontalLinesWrap.lines.get(0).getAverageY();
+		double width = verticalLinesWrap.lines.get(verticalLinesWrap.lines.size() - 1).getAverageX()
+				- verticalLinesWrap.lines.get(0).getAverageX();
 
-		double avgHeight = height / (horisontalLinesWrap.lines.size() - 1);
+		double avgHeight = height / (horizontalLinesWrap.lines.size() - 1);
 		double maxHeight = (1 + TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgHeight;
 		double minHeight = (1 - TABLE_HEIGHT_AND_WIDTH_TOLERANCE) * avgHeight;
 
@@ -218,7 +224,7 @@ public class KTableModel {
 
 		double tmp;
 
-		if (horisontalLinesWrap.avgLength < TABLE_HORISONTAL_LINE_LENTGTH_TOLERANCE * width) {
+		if (horizontalLinesWrap.avgLength < TABLE_HORIZONTAL_LINE_LENTGTH_TOLERANCE * width) {
 			return null;
 		}
 		if (verticalLinesWrap.avgLength < TABLE_VERTICAL_LINE_LENTGTH_TOLERANCE * height) {
@@ -226,22 +232,20 @@ public class KTableModel {
 		}
 
 		for (int i = 0; i < verticalLinesWrap.lines.size() - 1; i++) {
-			tmp = verticalLinesWrap.lines.get(i + 1).getSemiStaticValue()
-					- verticalLinesWrap.lines.get(i).getSemiStaticValue();
+			tmp = verticalLinesWrap.lines.get(i + 1).getAverageX() - verticalLinesWrap.lines.get(i).getAverageX();
 			if (tmp > maxWidth || tmp < minWidth) {
 				return null;
 			}
 		}
 
-		for (int i = 0; i < horisontalLinesWrap.lines.size() - 1; i++) {
-			tmp = horisontalLinesWrap.lines.get(i + 1).getSemiStaticValue()
-					- horisontalLinesWrap.lines.get(i).getSemiStaticValue();
+		for (int i = 0; i < horizontalLinesWrap.lines.size() - 1; i++) {
+			tmp = horizontalLinesWrap.lines.get(i + 1).getAverageY() - horizontalLinesWrap.lines.get(i).getAverageY();
 			if (tmp > maxHeight || tmp < minHeight) {
 				return null;
 			}
 		}
 
-		for (Line l : verticalLinesWrap.lines) {// No need to check horisontal lines
+		for (Line l : verticalLinesWrap.lines) {// No need to check horizontal lines
 			if (!l.getBm().isDealtWith()) {
 				if (l.getBm().isFractured()) {
 					List<Line> lines = l.getBm().getFracturedLines();
@@ -256,7 +260,7 @@ public class KTableModel {
 								}
 							}
 						} else {
-							for (Line hl : horisontalLinesWrap.lines) {
+							for (Line hl : horizontalLinesWrap.lines) {
 								if (hl.equals(fl)) {
 									found = true;
 									break;
@@ -274,9 +278,9 @@ public class KTableModel {
 		}
 
 		KTable table = new KTable(
-				new Point(verticalLinesWrap.lines.get(0).getSemiStaticValue().intValue(),
-						horisontalLinesWrap.lines.get(0).getSemiStaticValue().intValue()),
-				verticalLinesWrap.lines.size(), horisontalLinesWrap.lines.size(), (int) width, (int) height);
+				new Point((int) verticalLinesWrap.lines.get(0).getAverageX(),
+						(int) horizontalLinesWrap.lines.get(0).getAverageY()),
+				verticalLinesWrap.lines.size(), horizontalLinesWrap.lines.size(), (int) width, (int) height);
 
 		return table;
 	}
@@ -287,21 +291,21 @@ public class KTableModel {
 		sP.getCanvas().repaint();
 	}
 
-	private void sortInputLinesBySemiStaticValue(LineListWrapper verticalLinesWrap,
-			LineListWrapper horisontalLinesWrap) {
-		LineSorter sorter = new SemiStaticValueSorter();
-		sorter.sort(horisontalLinesWrap.lines);
-		sorter.sort(verticalLinesWrap.lines);
+	private void sortLinesByAverageValue(LineListWrapper verticalLinesWrap, LineListWrapper horizontalLinesWrap) {
+		LineSorter sorterX = new CoordinateAverageXSorter();
+		LineSorter sorterY = new CoordinateAverageYSorter();
+		sorterY.sort(horizontalLinesWrap.lines);
+		sorterX.sort(verticalLinesWrap.lines);
 	}
 
 	private boolean areInputDimensionsForKTableValid(LineListWrapper verticalLinesWrap,
-			LineListWrapper horisontalLinesWrap) {
-		if (!(verticalLinesWrap.lines.size() > 1 && horisontalLinesWrap.lines.size() > 1)) {// TODO should be 2
+			LineListWrapper horizontalLinesWrap) {
+		if (!(verticalLinesWrap.lines.size() > 1 && horizontalLinesWrap.lines.size() > 1)) {// TODO should be 2
 
 			return false;
 		}
 
-		if (!(isPowerOfTwo(verticalLinesWrap.lines.size() - 1) && isPowerOfTwo(horisontalLinesWrap.lines.size() - 1))) {
+		if (!(isPowerOfTwo(verticalLinesWrap.lines.size() - 1) && isPowerOfTwo(horizontalLinesWrap.lines.size() - 1))) {
 			return false;
 		}
 
@@ -309,23 +313,23 @@ public class KTableModel {
 	}
 
 	private List<Pair<LineListWrapper, LineListWrapper>> groupLinesValidPairs(List<LineListWrapper> verticalGroups,
-			List<LineListWrapper> horisontalGroups) {
+			List<LineListWrapper> horizontalGroups) {
 		// TODO Commented for debuging MUST UNCOMMENT LATER AND SET SIZE >2
-		// if (horisontalGroups.isEmpty() || verticalGroups.isEmpty()) {
+		// if (horizontalGroups.isEmpty() || verticalGroups.isEmpty()) {
 		// return null;
 		// }
 
-		List<Pair<Rectangle, LineListWrapper>> horisontalRectangles = createRectangles(verticalGroups, false);
-		List<Pair<Rectangle, LineListWrapper>> verticalRectangles = createRectangles(horisontalGroups, true);
+		List<Pair<Rectangle, LineListWrapper>> horizontalRectangles = createRectangles(verticalGroups, false);
+		List<Pair<Rectangle, LineListWrapper>> verticalRectangles = createRectangles(horizontalGroups, true);
 
-		System.out.println("HOR rectangles found:" + horisontalRectangles.size());
-		// debugWriteRectangles(horisontalRectangles);// TODO remove
+		System.out.println("HOR rectangles found:" + horizontalRectangles.size());
+		// debugWriteRectangles(horizontalRectangles);// TODO remove
 		System.out.println("VERT rectangles found:" + verticalRectangles.size());
 		// debugWriteRectangles(verticalRectangles);// TODO remove
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairs = new ArrayList<Pair<LineListWrapper, LineListWrapper>>();
 
-		for (Pair<Rectangle, LineListWrapper> ph : horisontalRectangles) {
+		for (Pair<Rectangle, LineListWrapper> ph : horizontalRectangles) {
 			for (Pair<Rectangle, LineListWrapper> pv : verticalRectangles) {
 				Pair<LineListWrapper, LineListWrapper> pair = rectangleOverlapLines(ph, pv);
 				if (pair != null) {
@@ -427,26 +431,26 @@ public class KTableModel {
 			return null;
 		}
 
-		List<Line> horisontalLines = new ArrayList<>();
+		List<Line> horizontalLines = new ArrayList<>();
 		for (Line l : pv.k.lines) {
 			if (isInRectangle(overlap, l, true)) {
-				horisontalLines.add(l);
+				horizontalLines.add(l);
 			}
 		}
 
-		if (horisontalLines.size() < 2) {// TODO should be 3
+		if (horizontalLines.size() < 2) {// TODO should be 3
 			return null;
 		}
 
 		return new Pair<KTableModel.LineListWrapper, KTableModel.LineListWrapper>(
-				new LineListWrapper(verticalLines, false), new LineListWrapper(horisontalLines, true));
+				new LineListWrapper(verticalLines, false), new LineListWrapper(horizontalLines, true));
 	}
 
-	private boolean isInRectangle(Rectangle overlap, Line l, boolean horisontal) {
-		if (horisontal) {
-			return l.getSemiStaticValue() > overlap.getP1().y && l.getSemiStaticValue() < overlap.getP2().y;
+	private boolean isInRectangle(Rectangle overlap, Line l, boolean horizontal) {
+		if (horizontal) {
+			return l.getAverageY() > overlap.getP1().y && l.getAverageY() < overlap.getP2().y;
 		} else {
-			return l.getSemiStaticValue() > overlap.getP1().x && l.getSemiStaticValue() < overlap.getP2().x;
+			return l.getAverageX() > overlap.getP1().x && l.getAverageX() < overlap.getP2().x;
 		}
 	}
 
@@ -459,8 +463,8 @@ public class KTableModel {
 	}
 
 	@SuppressWarnings("unused")
-	private void debugWriteRectangles(List<Pair<Rectangle, LineListWrapper>> horisontalRectangles) {
-		for (var x : horisontalRectangles) {
+	private void debugWriteRectangles(List<Pair<Rectangle, LineListWrapper>> horizontalRectangles) {
+		for (var x : horizontalRectangles) {
 			System.out.println(x.t);
 			sP.getModel().add(new SelectionRectangle(new Point((int) x.t.getP1().x, (int) x.t.getP1().y),
 					new Point((int) x.t.getP2().x, (int) x.t.getP2().y)));
@@ -495,7 +499,17 @@ public class KTableModel {
 		}
 	}
 
-	private List<LineListWrapper> groupLinesByStartingCoordinate(List<LineListWrapper> startGroups,
+	private List<LineListWrapper> groupLinesByXCoordinate(List<LineListWrapper> startGroups,
+			LineCoordinateDistanceTester t1, LineSorter sorter, Boolean type) {
+		return groupLinesByCoordinate(startGroups, t1, sorter, type);
+	}
+
+	private List<LineListWrapper> groupLinesByYCoordinate(List<LineListWrapper> startGroups,
+			LineCoordinateDistanceTester t1, LineSorter sorter, Boolean type) {
+		return groupLinesByCoordinate(startGroups, t1, sorter, type);
+	}
+
+	private List<LineListWrapper> groupLinesByCoordinate(List<LineListWrapper> startGroups,
 			LineCoordinateDistanceTester t1, LineSorter sorter, Boolean type) {
 		List<LineListWrapper> groups = new ArrayList<>();
 
@@ -521,7 +535,8 @@ public class KTableModel {
 		return groups;
 	}
 
-	private List<LineListWrapper> groupLinesByDistance(List<Line> lines) {
+	private List<LineListWrapper> groupLinesByLength(List<Line> lines) {
+		sortByDistance(lines);
 		return groupLines(lines, new LineDistanceTester(), null);
 	}
 
@@ -572,7 +587,7 @@ public class KTableModel {
 		});
 	}
 
-	private void initLines(List<Line> horisontalLines, List<Line> verticalLines, List<BasicMovement> bms) {
+	private void initLines(List<Line> horizontalLines, List<Line> verticalLines, List<BasicMovement> bms) {
 		for (BasicMovement bm : bms) {
 			List<Point> breakPoints = LineModel.calculateAcumulatedBreakPoints(bm.getPoints(),
 					LineModel.calculateBreakPoints(bm.getPoints()));
@@ -582,7 +597,7 @@ public class KTableModel {
 					continue;
 				}
 
-				Pair<List<Line>, List<Line>> verHorLines = calculateVerticalAndHorisontalLinesFromMovementAndBreakPoints(
+				Pair<List<Line>, List<Line>> verHorLines = calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(
 						bm, breakPoints);
 				if (verHorLines == null) {
 					continue;
@@ -596,7 +611,7 @@ public class KTableModel {
 				}
 
 				for (Line l : verHorLines.k) {
-					horisontalLines.add(l);
+					horizontalLines.add(l);
 					fLines.add(l);
 				}
 
@@ -608,8 +623,8 @@ public class KTableModel {
 
 			Line l = LineModel.recognize(bm);
 			if (l != null) {
-				if (l.getType() == LineType.HORISONTAL) {
-					horisontalLines.add(l);
+				if (l.getType() == LineType.HORIZONTAL) {
+					horizontalLines.add(l);
 				} else if (l.getType() == LineType.VERTICAL) {
 					verticalLines.add(l);
 				}
@@ -618,7 +633,7 @@ public class KTableModel {
 
 	}
 
-	private Pair<List<Line>, List<Line>> calculateVerticalAndHorisontalLinesFromMovementAndBreakPoints(BasicMovement bm,
+	private Pair<List<Line>, List<Line>> calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(BasicMovement bm,
 			List<Point> breakPoints) {
 		List<Line> lines = LineModel.linesInPoints(bm.getPoints(), breakPoints, bm);
 		if (lines.size() != breakPoints.size() + 1) {
@@ -626,12 +641,12 @@ public class KTableModel {
 		}
 
 		List<Line> verticalLines = new ArrayList<>();
-		List<Line> horistonalLines = new ArrayList<>();
+		List<Line> horizontalLines = new ArrayList<>();
 		LineType last;
 
-		if (lines.get(0).getType() == LineType.HORISONTAL) {
-			last = LineType.HORISONTAL;
-			horistonalLines.add(lines.get(0));
+		if (lines.get(0).getType() == LineType.HORIZONTAL) {
+			last = LineType.HORIZONTAL;
+			horizontalLines.add(lines.get(0));
 		} else if (lines.get(0).getType() == LineType.VERTICAL) {
 			last = LineType.VERTICAL;
 			verticalLines.add(lines.get(0));
@@ -640,7 +655,7 @@ public class KTableModel {
 		}
 
 		for (int i = 1; i < lines.size(); i++) {
-			if (last == LineType.HORISONTAL) {
+			if (last == LineType.HORIZONTAL) {
 				if (lines.get(i).getType() != LineType.VERTICAL) {
 					return null;
 				}
@@ -648,258 +663,18 @@ public class KTableModel {
 				verticalLines.add(lines.get(i));
 				last = LineType.VERTICAL;
 			} else if (last == LineType.VERTICAL) {
-				if (lines.get(i).getType() != LineType.HORISONTAL) {
+				if (lines.get(i).getType() != LineType.HORIZONTAL) {
 					return null;
 				}
 
-				horistonalLines.add(lines.get(i));
-				last = LineType.HORISONTAL;
+				horizontalLines.add(lines.get(i));
+				last = LineType.HORIZONTAL;
 			} else {
 				return null;
 			}
 		}
 
-		return new Pair<List<Line>, List<Line>>(verticalLines, horistonalLines);
-	}
-
-	public void recognize(Point a, Point b) {
-		recognize2(a, b);
-		if (1 == 1) {
-			return;
-		}
-
-		List<Line> horistontalLines = new ArrayList<>();
-		List<Line> verticalLines = new ArrayList<>();
-		OneModel oneModel = new OneModel();
-		ZeroModel zeroModel = new ZeroModel();
-		DrawingModel model = sP.getModel();
-
-		List<GraphicalObject> objects = getObjectsInRectangle(a, b, model);
-		List<GraphicalObject> extraObjects = new ArrayList<GraphicalObject>();
-		List<Line> extraLines = new ArrayList<Line>();
-		List<GraphicalObject> tmpList = new ArrayList<GraphicalObject>();
-		List<GraphicalObject> circles = new ArrayList<GraphicalObject>();
-		List<GraphicalObject> ones = new ArrayList<GraphicalObject>();
-
-		for (GraphicalObject o : objects) {
-			One o1 = oneModel.recognize((BasicMovement) o);
-			if (o1 != null) {
-				ones.add(o);
-			}
-		}
-
-		for (GraphicalObject o : ones) {
-			objects.remove(o);
-		}
-
-		for (GraphicalObject o : objects) {
-			Zero z1 = zeroModel.recognize((BasicMovement) o);
-			if (z1 != null) {
-				circles.add(o);
-			}
-		}
-
-		for (GraphicalObject o : circles) {
-			objects.remove(o);
-		}
-
-		Line l = null;
-		for (GraphicalObject o : objects) {
-			l = LineModel.recognize((BasicMovement) o);
-			if (l == null) {
-				extraObjects.add(o);
-			} else if (l.getTan() > 0.2) {
-				extraLines.add(l);
-				tmpList.add(o);
-			} else if (l.getType() == LineType.HORISONTAL) {
-				horistontalLines.add(l);
-			} else {
-				verticalLines.add(l);
-			}
-		}
-
-		for (GraphicalObject o : extraObjects) {
-			objects.remove(o);
-		}
-		for (GraphicalObject o : tmpList) {
-			objects.remove(o);
-		}
-
-		Collections.sort(horistontalLines);
-		Collections.sort(verticalLines);
-
-		if (verticalLines.size() > 1 && horistontalLines.size() > 1) {
-			double height = horistontalLines.get(horistontalLines.size() - 1).getSemiStaticValue()
-					- horistontalLines.get(0).getSemiStaticValue();
-			double width = verticalLines.get(verticalLines.size() - 1).getSemiStaticValue()
-					- verticalLines.get(0).getSemiStaticValue();
-
-			double avgHeight = height / (horistontalLines.size() - 1);
-
-			double maxHeight = 1.25 * avgHeight;
-			double minHeight = 0.75 * avgHeight;
-
-			double avgWidth = width / (verticalLines.size() - 1);
-			double maxWidth = 1.25 * avgWidth;
-			double minWidth = 0.75 * avgWidth;
-
-			boolean checkFlag = true;
-			double tmp;
-
-			for (Line l2 : horistontalLines) {
-				if (Math.abs(l2.getP1().x - l2.getP2().x) < 0.7 * width) {
-					checkFlag = false;
-					break;
-				}
-			}
-
-			for (Line l2 : verticalLines) {
-				if (Math.abs(l2.getP1().y - l2.getP2().y) < 0.7 * height) {
-					checkFlag = false;
-					break;
-				}
-			}
-
-			for (int i = 0; i < verticalLines.size() - 1; i++) {
-				tmp = verticalLines.get(i + 1).getSemiStaticValue() - verticalLines.get(i).getSemiStaticValue();
-				if (tmp > maxWidth || tmp < minWidth) {
-					checkFlag = false;
-					break;
-				}
-			}
-
-			for (int i = 0; i < horistontalLines.size() - 1; i++) {
-				tmp = horistontalLines.get(i + 1).getSemiStaticValue() - horistontalLines.get(i).getSemiStaticValue();
-				if (tmp > maxHeight || tmp < minHeight) {
-					checkFlag = false;
-					break;
-				}
-			}
-
-			if (checkFlag) {
-				for (int i = 0; i < verticalLines.size() - 1; i++) {
-					tmp = verticalLines.get(i + 1).getSemiStaticValue() - verticalLines.get(i).getSemiStaticValue();
-					if (tmp > maxWidth || tmp < minWidth) {
-						checkFlag = false;
-						break;
-					}
-				}
-
-				if (checkFlag) {
-					for (GraphicalObject o : objects) {
-						model.remove(o);
-					}
-
-					if (isPowerOfTwo(verticalLines.size() - 1) && isPowerOfTwo(horistontalLines.size() - 1)) {
-						KTable table = new KTable(
-								new Point(verticalLines.get(0).getSemiStaticValue().intValue(),
-										horistontalLines.get(0).getSemiStaticValue().intValue()),
-								verticalLines.size(), horistontalLines.size(), (int) width, (int) height);
-
-						model.add(table);
-
-						Zero z1 = null;
-						Map<Position, List<Pairt>> map = new HashMap<>();
-						for (GraphicalObject o : circles) {
-							z1 = zeroModel.recognize((BasicMovement) o);
-							if (z1 != null) {
-								if (table.youInterested(z1.getCenter())) {
-									if (z1.getRadius() < avgHeight && z1.getRadius() < avgWidth) {
-										Position p = table.getPosition(z1.getCenter());
-										if (map.containsKey(p)) {
-											map.get(p).add(new Pairt(0, o));
-										} else {
-											List<Pairt> listP = new ArrayList<Pairt>();
-											listP.add(new Pairt(0, o));
-											map.put(p, listP);
-										}
-									}
-								}
-							}
-						}
-
-						One one1 = null;
-						for (GraphicalObject o : ones) {
-							one1 = oneModel.recognize((BasicMovement) o);
-							if (one1 != null) {
-								if (table.youInterested(one1.getCenter())) {
-									if (one1.getRadius() < avgHeight && one1.getRadius() < avgWidth) {
-										Position p = table.getPosition(one1.getCenter());
-										if (map.containsKey(p)) {
-											map.get(p).add(new Pairt(1, o));
-										} else {
-											List<Pairt> listP = new ArrayList<Pairt>();
-											listP.add(new Pairt(1, o));
-											map.put(p, listP);
-										}
-									}
-								}
-							}
-						}
-
-						Map<Position, List<PairLine>> mapLine = new HashMap<>();
-						for (GraphicalObject o : tmpList) {
-							l = LineModel.recognize((BasicMovement) o);
-							Point averagePoint = new Point();
-							averagePoint.x = (l.getP1().x + l.getP2().x) / 2;
-							averagePoint.y = (l.getP1().y + l.getP2().y) / 2;
-
-							if (table.youInterested(averagePoint)) {
-								if (l.length() / 2 < avgHeight && l.length() / 2 < avgWidth) {
-									Position p = table.getPosition(averagePoint);
-									if (mapLine.containsKey(p)) {
-										mapLine.get(p).add(new PairLine(l, o));
-									} else {
-										List<PairLine> listP = new ArrayList<>();
-										listP.add(new PairLine(l, o));
-										mapLine.put(p, listP);
-									}
-								}
-							}
-						}
-
-						for (Position x : mapLine.keySet()) {
-							List<PairLine> l1 = mapLine.get(x);
-							if (l1.size() == 2) {
-								Line ln1 = l1.get(0).l;
-								Line ln2 = l1.get(1).l;
-								if ((ln1.getSlope() / ln2.getSlope()) < 0) {
-									double y1 = ln1.forX(ln2.getP1().x);
-									double y2 = ln1.forX(ln2.getP2().x);
-									double y3 = ln2.forX(ln1.getP1().x);
-									double y4 = ln2.forX(ln1.getP2().x);
-
-									if ((y1 < ln2.getP1().y && y2 > ln2.getP2().y)
-											|| (y1 > ln2.getP1().y && y2 < ln2.getP2().y)) {
-										if ((y3 < ln1.getP1().y && y4 > ln1.getP2().y)
-												|| (y3 > ln1.getP1().y && y4 < ln1.getP2().y)) {
-											if (!map.containsKey(x)) {
-												List<Pairt> listP = new ArrayList<Pairt>();
-												listP.add(new Pairt(2, l1.get(0).o));
-												map.put(x, listP);
-												model.remove(l1.get(1).o);
-											}
-										}
-									}
-								}
-							}
-						}
-
-						for (Position x : map.keySet()) {
-							List<Pairt> l1 = map.get(x);
-							if (l1.size() == 1) {
-								model.remove(l1.get(0).o);
-								table.setValueAt(x, l1.get(0).v);
-							}
-						}
-
-					}
-				}
-			}
-
-		}
-
-		sP.getCanvas().repaint();
+		return new Pair<List<Line>, List<Line>>(verticalLines, horizontalLines);
 	}
 
 	private List<GraphicalObject> getObjectsInRectangle(Point a, Point b, DrawingModel model) {

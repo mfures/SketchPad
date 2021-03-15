@@ -65,7 +65,7 @@ public class OpenAction extends AbstractAction {
 
 			sP.setPath(selected);
 		} catch (Exception e2) {
-			JOptionPane.showConfirmDialog(sP, "Invalid extension. " + e2.getMessage());
+			throw new RuntimeException(e2);
 		}
 
 	}

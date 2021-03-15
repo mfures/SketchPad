@@ -5,14 +5,15 @@ import java.awt.Point;
 import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 
-public class Line implements Comparable<Line> {
+public class Line {
 	public static final double MAX_TAN = 0.2;
 
 	private Point p1;
 	private Point p2;
+	private double averageX;
+	private double averageY;
 
 	private LineType type;
-	private Double semiStaticValue;
 	private Double length;
 	private double slope;
 	private double intercept;
@@ -27,21 +28,18 @@ public class Line implements Comparable<Line> {
 		this.intercept = intercept;
 		this.bm = bm;
 
+		this.averageY = 0.5 * (p1.y + p2.y);
+		this.averageX = 0.5 * (p1.x + p2.x);
+
 		this.tan = calculateTan();
 		this.type = calculateType();
 		this.length = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-
-		if (type == LineType.HORISONTAL) {
-			semiStaticValue = 0.5 * (p1.y + p2.y);
-		} else {
-			semiStaticValue = 0.5 * (p1.x + p2.x);
-		}
 	}
 
 	private LineType calculateType() {
 		if (tan < MAX_TAN) {
 			if (Math.abs(slope) <= 1.0) {
-				return LineType.HORISONTAL;
+				return LineType.HORIZONTAL;
 			}
 
 			return LineType.VERTICAL;
@@ -75,10 +73,6 @@ public class Line implements Comparable<Line> {
 		return type;
 	}
 
-	public Double getSemiStaticValue() {
-		return semiStaticValue;
-	}
-
 	public double getSlope() {
 		return slope;
 	}
@@ -103,17 +97,12 @@ public class Line implements Comparable<Line> {
 		return length;
 	}
 
-	@Override
-	public int compareTo(Line o) {
-		return this.semiStaticValue.compareTo(o.getSemiStaticValue());
-	}
-
 	public double getAverageX() {
-		return (p1.x + p2.x) / 2.0;
+		return averageX;
 	}
 
 	public double getAverageY() {
-		return (p1.y + p2.y) / 2.0;
+		return averageY;
 	}
 
 	@Override

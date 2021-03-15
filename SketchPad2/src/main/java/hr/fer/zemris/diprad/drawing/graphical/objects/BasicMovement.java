@@ -72,11 +72,11 @@ public class BasicMovement extends GraphicalObject {
 	@Override
 	public boolean isInRect(int minX, int maxX, int minY, int maxY) {
 		for (Point p : points) {
-			if (p.x > minX && p.x < maxX && p.y > minY && p.y < maxY)
-				return true;
+			if (!(p.x > minX && p.x < maxX && p.y > minY && p.y < maxY))
+				return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	@Override

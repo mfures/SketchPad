@@ -121,9 +121,12 @@ public class JListGraphical extends JList<GraphicalObject> {
 
 		if (index < 0) {
 			if (selected >= 0) {
-				model.getObject(selected).setColor(Colors.DEFAULT);
+				if (selected < model.getSize()) {
+					model.getObject(selected).setColor(Colors.DEFAULT);
+					sP.getCanvas().repaint();
+				}
+
 				selected = -1;
-				sP.getCanvas().repaint();
 			}
 		} else if (index != selected) {
 			if (selected >= 0) {
