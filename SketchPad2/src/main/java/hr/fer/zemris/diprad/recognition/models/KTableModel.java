@@ -25,7 +25,7 @@ import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageYSorter;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageXSupplier;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageYSupplier;
 import hr.fer.zemris.diprad.recognition.testers.LineCoordinateDistanceTester;
-import hr.fer.zemris.diprad.recognition.testers.LineDistanceTester;
+import hr.fer.zemris.diprad.recognition.testers.LineLengthTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageXDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageYDistanceTester;
 import hr.fer.zemris.diprad.util.Pair;
@@ -33,15 +33,17 @@ import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
 
 public class KTableModel {
-	public static final double LINES_MIN_X_DISTANCE_SCALE = 0.15;
-	public static final double LINES_MIN_Y_DISTANCE_SCALE = 0.15;
-	public static final double LINE_LENGTH_SCALE = 0.15;
-
 	public static final double MIN_VECTOR_NORM = 4.2;
+	public static final double COORDINATE_TOLERANCE = 0.15;
+	public static final double LENGTH_TOLLERANCE = 0.05;
+	public static final double DISTANCE_TOLERANCE = 0.25;
 
-	public static final double TOLERANCE = 0.25;
-	public static final double COEF_MIN = (1 - TOLERANCE) / (1 + TOLERANCE);
-	public static final double COEF_MAX = (1 + TOLERANCE) / (1 - TOLERANCE);
+	public static final double COORDINATE_MIN = (1 - COORDINATE_TOLERANCE) / (1 + COORDINATE_TOLERANCE);
+	public static final double COORDINATE_MAX = (1 + COORDINATE_TOLERANCE) / (1 - COORDINATE_TOLERANCE);
+	public static final double LENGTH_MIN = (1 - LENGTH_TOLLERANCE) / (1 + LENGTH_TOLLERANCE);
+	public static final double LENGTH_MAX = (1 + LENGTH_TOLLERANCE) / (1 - LENGTH_TOLLERANCE);
+	public static final double DISTANCE_MIN = (1 - DISTANCE_TOLERANCE) / (1 + DISTANCE_TOLERANCE);
+	public static final double DISTANCE_MAX = (1 + DISTANCE_TOLERANCE) / (1 - DISTANCE_TOLERANCE);
 
 	private SketchPad2 sP;
 
@@ -50,11 +52,8 @@ public class KTableModel {
 	}
 
 	public void recognize(Point a, Point b) {
-		List<GraphicalObject> objects = getObjectsInRectangle(a, b, sP.getModel());
-		List<BasicMovementWrapper> bmws = handleGraphicalObjects(objects);
-
+		List<BasicMovementWrapper> bmws = handleGraphicalObjects(getObjectsInRectangle(a, b, sP.getModel()));
 		List<KTable> tables = recognizeTables(bmws);
-
 		if (tables.isEmpty()) {
 			return;
 		}
@@ -105,7 +104,6 @@ public class KTableModel {
 	private List<KTable> recognizeTables(List<BasicMovementWrapper> bmws) {
 		List<Line> horizontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
-
 		initLines(horizontalLines, verticalLines, bmws);
 		System.out.println("NUM VERT:" + verticalLines.size());
 		System.out.println("NUM HOR:" + horizontalLines.size());
@@ -155,9 +153,9 @@ public class KTableModel {
 		for (int j = 1; j < lines.size() - 1; j++) {
 			dCurrent = supplier.getValue(lines.get(j + 1)) - supplier.getValue(lines.get(j));
 
-			if (dCurrent < dMax * COEF_MIN) {
+			if (dCurrent < dMax * DISTANCE_MIN) {
 				return false;
-			} else if (dCurrent > dMin * COEF_MAX) {
+			} else if (dCurrent > dMin * DISTANCE_MAX) {
 				return false;
 			}
 
@@ -169,7 +167,7 @@ public class KTableModel {
 		}
 
 		double averageLength = length / (lines.size() - 1);
-		if (averageLength > dMax * COEF_MIN && averageLength < dMin * COEF_MAX) {
+		if (averageLength > dMax * DISTANCE_MIN && averageLength < dMin * DISTANCE_MAX) {
 			return true;
 		}
 
@@ -251,10 +249,10 @@ public class KTableModel {
 		List<Pair<Rectangle, LineListWrapper>> horizontalRectangles = createRectangles(verticalGroups, false);
 		List<Pair<Rectangle, LineListWrapper>> verticalRectangles = createRectangles(horizontalGroups, true);
 
-		// System.out.println("HOR rectangles found:" + horizontalRectangles.size());
-		// debugWriteRectangles(horizontalRectangles);//
-		// System.out.println("VERT rectangles found:" + verticalRectangles.size());
-		// debugWriteRectangles(verticalRectangles);//
+		System.out.println("HOR rectangles found:" + horizontalRectangles.size());
+		debugWriteRectangles(horizontalRectangles);//
+		System.out.println("VERT rectangles found:" + verticalRectangles.size());
+		debugWriteRectangles(verticalRectangles);//
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairs = new ArrayList<Pair<LineListWrapper, LineListWrapper>>();
 
@@ -410,16 +408,16 @@ public class KTableModel {
 		if (minX) {
 			return new Rectangle(
 					new PointDouble(wrapper.avgCoordinateValue - wrapper.avgLength / 2
-							- LINES_MIN_X_DISTANCE_SCALE * wrapper.avgLength, 0),
-					new PointDouble(wrapper.avgCoordinateValue + (0.5 + LINES_MIN_X_DISTANCE_SCALE) * wrapper.avgLength,
+							- COORDINATE_TOLERANCE * wrapper.avgLength, 0),
+					new PointDouble(wrapper.avgCoordinateValue + (0.5 + COORDINATE_TOLERANCE) * wrapper.avgLength,
 							Integer.MAX_VALUE));
 		} else {
 			return new Rectangle(
 					new PointDouble(0,
 							wrapper.avgCoordinateValue - wrapper.avgLength / 2
-									- LINES_MIN_Y_DISTANCE_SCALE * wrapper.avgLength),
+									- COORDINATE_TOLERANCE * wrapper.avgLength),
 					new PointDouble(Integer.MAX_VALUE,
-							wrapper.avgCoordinateValue + (0.5 + LINES_MIN_Y_DISTANCE_SCALE) * wrapper.avgLength));
+							wrapper.avgCoordinateValue + (0.5 + COORDINATE_TOLERANCE) * wrapper.avgLength));
 		}
 	}
 
@@ -455,8 +453,8 @@ public class KTableModel {
 	}
 
 	private List<LineListWrapper> groupLinesByLength(List<Line> lines) {
-		sortByDistance(lines);
-		return groupLines(lines, new LineDistanceTester(), null);
+		sortByLength(lines);
+		return groupLines(lines, new LineLengthTester(), null);
 	}
 
 	private List<LineListWrapper> groupLines(List<Line> lines, Tester<Line> tester, Boolean type) {
@@ -497,7 +495,7 @@ public class KTableModel {
 		return groups;
 	}
 
-	private void sortByDistance(List<Line> lines) {
+	private void sortByLength(List<Line> lines) {
 		Collections.sort(lines, new Comparator<Line>() {
 			@Override
 			public int compare(Line o1, Line o2) {

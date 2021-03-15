@@ -7,7 +7,7 @@ import hr.fer.zemris.diprad.recognition.objects.Line;
 public class LinesAverageYDistanceTester extends LineCoordinateDistanceTester implements Tester<Line> {
 	@Override
 	public boolean test(Line l1, Line l2) {
-		return l1.getAverageY() + avgLineLength * (-KTableModel.LINES_MIN_Y_DISTANCE_SCALE) > (l2.getAverageY()
-				+ avgLineLength * (KTableModel.LINES_MIN_Y_DISTANCE_SCALE));
+		return l1.getAverageY() + avgLineLength * (-KTableModel.COORDINATE_MIN) > (l2.getAverageY()
+				+ avgLineLength * (KTableModel.COORDINATE_MAX));
 	}
 }
