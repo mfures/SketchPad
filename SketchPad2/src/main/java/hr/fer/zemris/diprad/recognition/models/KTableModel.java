@@ -18,6 +18,7 @@ import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
+import hr.fer.zemris.diprad.recognition.objects.LineListWrapper;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageYSorter;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageXSupplier;
@@ -371,7 +372,7 @@ public class KTableModel {
 			return null;
 		}
 
-		return new Pair<KTableModel.LineListWrapper, KTableModel.LineListWrapper>(vertical, horizontal);
+		return new Pair<LineListWrapper, LineListWrapper>(vertical, horizontal);
 	}
 
 	private boolean isInRectangle(Rectangle overlap, Line l, boolean horizontal) {
@@ -612,23 +613,5 @@ public class KTableModel {
 
 	static boolean isPowerOfTwo(int n) {
 		return (int) (Math.ceil((Math.log(n) / Math.log(2)))) == (int) (Math.floor(((Math.log(n) / Math.log(2)))));
-	}
-
-	private static class LineListWrapper {
-		public List<Line> lines;
-		public double avgLength;
-		public double avgCoordinateValue;
-
-		public LineListWrapper(List<Line> lines, Boolean averageX) {
-			this.lines = lines;
-			avgLength = lines.stream().mapToDouble(l -> l.length()).average().getAsDouble();
-			if (averageX != null) {
-				if (averageX == true) {
-					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getAverageX()).average().getAsDouble();
-				} else {
-					avgCoordinateValue = lines.stream().mapToDouble(l -> l.getAverageY()).average().getAsDouble();
-				}
-			}
-		}
 	}
 }
