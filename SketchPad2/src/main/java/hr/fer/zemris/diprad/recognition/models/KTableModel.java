@@ -24,7 +24,6 @@ import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageYSorter;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageXSupplier;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageYSupplier;
-import hr.fer.zemris.diprad.recognition.testers.LineCoordinateDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LineLengthTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageXDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageYDistanceTester;
@@ -421,24 +420,23 @@ public class KTableModel {
 		}
 	}
 
-	private List<LineListWrapper> groupLinesByXCoordinate(List<LineListWrapper> startGroups,
-			LineCoordinateDistanceTester t1, LineSorter sorter, Boolean type) {
+	private List<LineListWrapper> groupLinesByXCoordinate(List<LineListWrapper> startGroups, Tester<Line> t1,
+			LineSorter sorter, Boolean type) {
 		return groupLinesByCoordinate(startGroups, t1, sorter, type);
 	}
 
-	private List<LineListWrapper> groupLinesByYCoordinate(List<LineListWrapper> startGroups,
-			LineCoordinateDistanceTester t1, LineSorter sorter, Boolean type) {
+	private List<LineListWrapper> groupLinesByYCoordinate(List<LineListWrapper> startGroups, Tester<Line> t1,
+			LineSorter sorter, Boolean type) {
 		return groupLinesByCoordinate(startGroups, t1, sorter, type);
 	}
 
-	private List<LineListWrapper> groupLinesByCoordinate(List<LineListWrapper> startGroups,
-			LineCoordinateDistanceTester t1, LineSorter sorter, Boolean type) {
+	private List<LineListWrapper> groupLinesByCoordinate(List<LineListWrapper> startGroups, Tester<Line> t1,
+			LineSorter sorter, Boolean type) {
 		List<LineListWrapper> groups = new ArrayList<>();
 
 		for (LineListWrapper wrapper : startGroups) {
 			sorter.sort(wrapper.lines);
 
-			t1.setAvgLineLength(wrapper.avgLength);
 			for (LineListWrapper wp : groupLines(wrapper.lines, t1, type)) {
 				if (wp.lines.size() > 2) {
 					groups.add(wp);
