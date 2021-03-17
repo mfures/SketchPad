@@ -8,6 +8,6 @@ public class LinesAverageXDistanceTester extends LineDistanceTester {
 	@Override
 	public boolean test(Line l1, Line l2) {
 		return l1.getAverageX() - minLength * (1 - KTableModel.COORDINATE_MIN) > (l2.getAverageX()
-				+ maxLength * (KTableModel.COORDINATE_MAX) - 1);
+				+ maxLength * (KTableModel.COORDINATE_MAX - 1));
 	}
 }

@@ -68,6 +68,7 @@ public class KTableModel {
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
 			// SketchPad2.debugDraw(new
 			// SelectionRectangle(table.getExpandedBoundingRectangle()));
+
 			clearBMsModel(table);
 		}
 	}
@@ -109,10 +110,13 @@ public class KTableModel {
 
 		verticalGroups = groupLinesByYCoordinate(verticalGroups, new LinesAverageYDistanceTester(),
 				new CoordinateAverageYSorter(), false);
+		System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
+		// verticalGroups.forEach((l) -> System.out.println(l.lines.size()));
+
 		horizontalGroups = groupLinesByXCoordinate(horizontalGroups, new LinesAverageXDistanceTester(),
 				new CoordinateAverageXSorter(), true);
-		System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
 		System.out.println("HOR GROUPS COUNT(dist+x):" + horizontalGroups.size());
+		// horizontalGroups.forEach((l) -> System.out.println(l.lines.size()));
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairsVerHor = groupLinesValidPairs(verticalGroups,
 				horizontalGroups);
@@ -416,19 +420,17 @@ public class KTableModel {
 	private Rectangle createRectangle(LineListWrapper wrapper, boolean minX) {
 		if (minX) {
 			return new Rectangle(
-					new PointDouble(wrapper.avgCoordinateValue - ((wrapper.minLength + wrapper.maxLength) / 2) / 2
-							- COORDINATE_TOLERANCE * ((wrapper.minLength + wrapper.maxLength) / 2), 0),
-					new PointDouble(
-							wrapper.avgCoordinateValue
-									+ (0.5 + COORDINATE_TOLERANCE) * ((wrapper.minLength + wrapper.maxLength) / 2),
+					new PointDouble(wrapper.avgCoordinateValue - (wrapper.maxLength) / 2
+							- (COORDINATE_MAX - 1) * (wrapper.maxLength), 0),
+					new PointDouble(wrapper.avgCoordinateValue + (COORDINATE_MAX - 0.5) * (wrapper.maxLength),
 							Integer.MAX_VALUE));
 		} else {
 			return new Rectangle(
 					new PointDouble(0,
-							wrapper.avgCoordinateValue - ((wrapper.minLength + wrapper.maxLength) / 2) / 2
-									- COORDINATE_TOLERANCE * ((wrapper.minLength + wrapper.maxLength) / 2)),
-					new PointDouble(Integer.MAX_VALUE, wrapper.avgCoordinateValue
-							+ (0.5 + COORDINATE_TOLERANCE) * ((wrapper.minLength + wrapper.maxLength) / 2)));
+							wrapper.avgCoordinateValue - (wrapper.maxLength) / 2
+									- (COORDINATE_MAX - 1) * (wrapper.maxLength)),
+					new PointDouble(Integer.MAX_VALUE,
+							wrapper.avgCoordinateValue + (COORDINATE_MAX - 0.5) * (wrapper.maxLength)));
 		}
 	}
 
