@@ -36,9 +36,10 @@ public class DrawingModelImpl implements DrawingModel {
 	@Override
 	public void remove(GraphicalObject object) {
 		int index = objects.indexOf(object);
-		objects.remove(object);
-		modified = true;
-		listeners.forEach(l -> l.objectsRemoved(this, index, index));
+		if (objects.remove(object)) {
+			modified = true;
+			listeners.forEach(l -> l.objectsRemoved(this, index, index));
+		}
 	}
 
 	@Override

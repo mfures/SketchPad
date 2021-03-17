@@ -68,6 +68,14 @@ public class KTableModel {
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
 			// SketchPad2.debugDraw(new
 			// SelectionRectangle(table.getExpandedBoundingRectangle()));
+			clearBMsModel(table);
+		}
+	}
+
+	private void clearBMsModel(KTable table) {
+		DrawingModel model = sP.getModel();
+		for (BasicMovementWrapper bmw : table.getBmws()) {
+			model.remove(bmw.getBm());
 		}
 	}
 
@@ -186,6 +194,10 @@ public class KTableModel {
 			}
 		}
 
+		List<BasicMovementWrapper> bmws = new ArrayList<>();
+		addAllBmwsToList(verticalLinesWrap, bmws);
+		addAllBmwsToList(horizontalLinesWrap, bmws);
+
 		double height = horizontalLinesWrap.lines.get(horizontalLinesWrap.lines.size() - 1).getAverageY()
 				- horizontalLinesWrap.lines.get(0).getAverageY();
 		double width = verticalLinesWrap.lines.get(verticalLinesWrap.lines.size() - 1).getAverageX()
@@ -196,7 +208,14 @@ public class KTableModel {
 						(int) horizontalLinesWrap.lines.get(0).getAverageY()),
 				verticalLinesWrap.lines.size(), horizontalLinesWrap.lines.size(), (int) width, (int) height);
 
+		table.setBms(bmws);
 		return table;
+	}
+
+	private void addAllBmwsToList(LineListWrapper verticalLinesWrap, List<BasicMovementWrapper> bmws) {
+		for (Line l : verticalLinesWrap.lines) {
+			bmws.add(l.getBmw());
+		}
 	}
 
 	private void resetAll(LineListWrapper verticalLinesWrap, LineListWrapper horizontalLinesWrap) {
