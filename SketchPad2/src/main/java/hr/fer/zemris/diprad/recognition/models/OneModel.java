@@ -16,13 +16,14 @@ public class OneModel implements Pattern<One> {
 
 		List<Point> points = bmw.getBm().getPoints();
 
-		List<Point> breakPoints = LineModel.calculateBreakPoints(points);
+		List<Integer> breakPoints = LineModel.calculateBreakPoints(points);
 
 		if (breakPoints.size() < 1) {
 			return null;
 		}
 
-		List<Point> acumulatedBreakPoints = LineModel.calculateAcumulatedBreakPoints(points, breakPoints);
+		List<Integer> acumulatedBreakPoints = LineModel.acumulateBreakPointsWhichAreClose(
+				LineModel.calculateBreakPoints(bmw.getBm().getPoints()), bmw.getBm().getPoints().size());
 
 		if (acumulatedBreakPoints.size() != 1) {
 			return null;

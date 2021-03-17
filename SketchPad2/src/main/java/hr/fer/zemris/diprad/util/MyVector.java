@@ -6,7 +6,16 @@ import java.util.List;
 
 import hr.fer.zemris.diprad.recognition.models.KTableModel;
 
+/**
+ * Defines vector as used in calculations
+ * 
+ * @author Matej
+ *
+ */
 public class MyVector {
+	/**
+	 * This point defines values of the vector v.x=p2.x-p1.x and v.y=p2.y-p1.y
+	 */
 	public Point v;
 	/**
 	 * First point that makes the vector
@@ -19,12 +28,12 @@ public class MyVector {
 	public Point p2;
 
 	/**
-	 * First vectors identifier, usually index in the list
+	 * First identifier, index of first point in the list of points
 	 */
 	public int i1;
 
 	/**
-	 * First vectors identifier, usually index in the list
+	 * Second identifier, index of second point in the list of points
 	 */
 	public int i2;
 
@@ -32,10 +41,20 @@ public class MyVector {
 		v = new Point();
 	}
 
+	/**
+	 * Returns vectors norm
+	 * 
+	 * @return Euclidean norm ->Math.sqrt(v.x * v.x + v.y * v.y)
+	 */
 	public double norm() {
 		return Math.sqrt(v.x * v.x + v.y * v.y);
 	}
 
+	/**
+	 * Adds vector to current vector
+	 * 
+	 * @param v1
+	 */
 	public void add(MyVector v1) {
 		v.x += v1.v.x;
 		v.y += v1.v.y;
@@ -70,9 +89,14 @@ public class MyVector {
 		return v1.v.x * v2.v.x + v1.v.y * v2.v.y;
 	}
 
+	/**
+	 * Creates list of vectors from list of points
+	 * 
+	 * @param points
+	 * @return
+	 */
 	public static List<MyVector> listOfPointsToListOfVectors(List<Point> points) {
 		List<MyVector> vectors = new ArrayList<MyVector>();
-
 		for (int i = 0; i < points.size() - 1; i++) {
 			vectors.add(MyVector.initNewVector(points.get(i), points.get(i + 1), i, i + 1));
 		}

@@ -9,7 +9,9 @@ import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.MyVector;
 
 public class LineModel {
-	public static List<Line> linesInPoints(List<Point> points, List<Point> breakPoints, BasicMovementWrapper bmw) {
+	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.1;
+
+	public static List<Line> linesInPoints(List<Point> points, List<Integer> breakPoints, BasicMovementWrapper bmw) {
 		Point p1;
 		Point p2;
 		double slope;
@@ -23,15 +25,16 @@ public class LineModel {
 		for (int k = 0; k <= breakPoints.size(); k++) {
 			p1 = points.get(start);
 			if (k < breakPoints.size()) {
-				p2 = points.get(breakPoints.get(k).x);
+				p2 = points.get(breakPoints.get(k));
 			} else {
 				p2 = points.get(points.size() - 1);
 			}
+
 			slope = (p2.y - p1.y) / (p2.x * 1.0 - p1.x);
 			intercept = p1.y - slope * p1.x;
 
 			if (k < breakPoints.size()) {
-				error = calculateError(points, error, start, breakPoints.get(k).x, slope, intercept);
+				error = calculateError(points, error, start, breakPoints.get(k), slope, intercept);
 			} else {
 				error = calculateError(points, error, start, points.size() - 1, slope, intercept);
 			}
@@ -45,8 +48,9 @@ public class LineModel {
 
 			}
 
-			if (k < breakPoints.size())
-				start = breakPoints.get(k).y;
+			if (k < breakPoints.size()) {
+				start = breakPoints.get(k);
+			}
 		}
 
 		return lines;
@@ -107,9 +111,15 @@ public class LineModel {
 		return new Line(p1, p2, slope, intercept, bmw);
 	}
 
-	public static List<Point> calculateBreakPoints(List<Point> points) {
+	/**
+	 * This function calculates break points.
+	 * 
+	 * @param points
+	 * @return
+	 */
+	public static List<Integer> calculateBreakPoints(List<Point> points) {
 		if (points.size() < 3) {
-			return new ArrayList<Point>();
+			return new ArrayList<>();
 		}
 
 		List<MyVector> vectors = MyVector.listOfPointsToListOfVectors(points);
@@ -118,7 +128,7 @@ public class LineModel {
 
 		double cos;
 		// NumberFormat formatter = new DecimalFormat("#0.0000");
-		List<Point> breakPoints = new ArrayList<>();
+		List<Integer> breakPoints = new ArrayList<>();
 
 		for (int i = 0; i < vectors.size() - 1; i++) {
 			v1 = vectors.get(i);
@@ -126,7 +136,9 @@ public class LineModel {
 			cos = MyVector.scalarProduct(v1, v2) / (v1.norm() * v2.norm());
 
 			if (cos < 0.8) {
-				breakPoints.add(new Point(v1.i2, v1.i2));
+				breakPoints.add(v1.i2);
+				// Break point is in format (
+
 				// System.out.println("i:" + i + " cos:" + formatter.format(cos) + " v1:" + v1 +
 				// " v2:" + v2);
 			}
@@ -135,45 +147,42 @@ public class LineModel {
 		return breakPoints;
 	}
 
-	public static List<Point> calculateAcumulatedBreakPoints(List<Point> points, List<Point> breakPoints) {
-		List<Point> trueBreakPoints = new ArrayList<Point>();
-
-		acumulateBreakPointsWhichAreClose(breakPoints, trueBreakPoints, points.size());
-
-		if (trueBreakPoints.isEmpty()) {
+	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Integer> breakPoints, int totalNumOfPoints) {
+		List<Integer> trueBreakPoints = new ArrayList<>();
+		if (breakPoints.isEmpty()) {
 			return trueBreakPoints;
 		}
 
-		removeFirstBreakPointIfItsOnFirstPoint(trueBreakPoints);
-		removeLastBreakPointIfItsOnLastPoint(points, trueBreakPoints);
-		return trueBreakPoints;
-	}
+		int index = 0;
+		while (breakPoints.get(index) <= COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNumOfPoints) {
+			index++;
 
-	private static void acumulateBreakPointsWhichAreClose(List<Point> breakPoints, List<Point> trueBreakPoints,
-			int totalNumOfPoints) {
-		if (!breakPoints.isEmpty()) {
-			trueBreakPoints.add(breakPoints.get(0));
-
-			for (int i = 1; i < breakPoints.size(); i++) {
-				Point p = breakPoints.get(i);
-				if (trueBreakPoints.get(trueBreakPoints.size() - 1).y + totalNumOfPoints * 0.1 >= p.x) {
-					trueBreakPoints.get(trueBreakPoints.size() - 1).y = p.x;
-				} else {
-					trueBreakPoints.add(breakPoints.get(i));
-				}
+			if (index == breakPoints.size()) {
+				return trueBreakPoints;
 			}
 		}
-	}
 
-	private static void removeLastBreakPointIfItsOnLastPoint(List<Point> points, List<Point> trueBreakPoints) {
-		if (trueBreakPoints.get(trueBreakPoints.size() - 1).y == points.size() - 1) {
-			trueBreakPoints.remove(trueBreakPoints.size() - 1);
+		if (index == breakPoints.size() - 1) {
+			if (totalNumOfPoints - breakPoints.get(index) <= COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE
+					* totalNumOfPoints) {
+				return trueBreakPoints;
+			}
 		}
-	}
 
-	private static void removeFirstBreakPointIfItsOnFirstPoint(List<Point> trueBreakPoints) {
-		if (trueBreakPoints.get(0).x == 0) {
-			trueBreakPoints.remove(0);
+		trueBreakPoints.add(breakPoints.get(index));
+		int counter = 0;// index of last int in trueBreakPoints
+
+		for (int i = index + 1; i < breakPoints.size(); i++) {
+			int p = breakPoints.get(i);
+			if (p - trueBreakPoints.get(counter) > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNumOfPoints
+					&& totalNumOfPoints - p > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNumOfPoints) {
+				trueBreakPoints.add(p);
+				counter++;
+			} else {
+				trueBreakPoints.set(counter, p);
+			}
 		}
+
+		return trueBreakPoints;
 	}
 }
