@@ -24,6 +24,7 @@ import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageYSorter;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageXSupplier;
 import hr.fer.zemris.diprad.recognition.supliers.LineAverageYSupplier;
+import hr.fer.zemris.diprad.recognition.testers.LineDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LineLengthTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageXDistanceTester;
 import hr.fer.zemris.diprad.recognition.testers.LinesAverageYDistanceTester;
@@ -33,7 +34,7 @@ import hr.fer.zemris.diprad.util.Rectangle;
 
 public class KTableModel {
 	public static final double MIN_VECTOR_NORM = 4.2;
-	public static final double COORDINATE_TOLERANCE = 0.15;
+	public static final double COORDINATE_TOLERANCE = 0.05;
 	public static final double LENGTH_TOLLERANCE = 0.05;
 	public static final double DISTANCE_TOLERANCE = 0.25;
 
@@ -69,7 +70,6 @@ public class KTableModel {
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
 			// SketchPad2.debugDraw(new
 			// SelectionRectangle(table.getExpandedBoundingRectangle()));
-
 		}
 	}
 
@@ -110,7 +110,9 @@ public class KTableModel {
 		List<LineListWrapper> verticalGroups = groupLinesByLength(verticalLines);
 		List<LineListWrapper> horizontalGroups = groupLinesByLength(horizontalLines);
 		System.out.println("VERT GROUPS COUNT(dist):" + verticalGroups.size());
+		// verticalGroups.forEach((l) -> System.out.println(l.lines.size()));
 		System.out.println("HOR GROUPS COUNT(dist):" + horizontalGroups.size());
+		// horizontalGroups.forEach((l) -> System.out.println(l.lines.size()));
 
 		verticalGroups = groupLinesByYCoordinate(verticalGroups, new LinesAverageYDistanceTester(),
 				new CoordinateAverageYSorter(), false);
@@ -139,7 +141,7 @@ public class KTableModel {
 	}
 
 	private boolean groupLinesByDistance(List<Line> lines, LineSorter sorter, LineValueSupplier supplier,
-			double length) {
+			double minLength, double maxLength) {
 		if (!areInputDimensionsForKTableValid(lines)) {
 			return false;
 		}
@@ -165,8 +167,10 @@ public class KTableModel {
 			}
 		}
 
-		double averageLength = length / (lines.size() - 1);
-		if (averageLength > dMax * DISTANCE_MIN && averageLength < dMin * DISTANCE_MAX) {
+		double minAverageLength = minLength / (lines.size() - 1);
+		double maxAverageLength = maxLength / (lines.size() - 1);
+
+		if (minAverageLength > dMax * DISTANCE_MIN && maxAverageLength < dMin * DISTANCE_MAX) {
 			return true;
 		}
 
@@ -249,9 +253,9 @@ public class KTableModel {
 		List<Pair<Rectangle, LineListWrapper>> verticalRectangles = createRectangles(horizontalGroups, true);
 
 		System.out.println("HOR rectangles found:" + horizontalRectangles.size());
-		debugWriteRectangles(horizontalRectangles);//
+		// debugWriteRectangles(horizontalRectangles);//
 		System.out.println("VERT rectangles found:" + verticalRectangles.size());
-		debugWriteRectangles(verticalRectangles);//
+		// debugWriteRectangles(verticalRectangles);//
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairs = new ArrayList<Pair<LineListWrapper, LineListWrapper>>();
 
@@ -354,13 +358,13 @@ public class KTableModel {
 
 		LineListWrapper horizontal = new LineListWrapper(horizontalLines, true);
 		if (!groupLinesByDistance(verticalLines, new CoordinateAverageXSorter(), new LineAverageXSupplier(),
-				horizontal.avgLength)) {
+				horizontal.minLength, horizontal.maxLength)) {
 			return null;
 		}
 
 		LineListWrapper vertical = new LineListWrapper(verticalLines, false);
 		if (!groupLinesByDistance(horizontalLines, new CoordinateAverageYSorter(), new LineAverageYSupplier(),
-				vertical.avgLength)) {
+				vertical.minLength, vertical.minLength)) {
 			return null;
 		}
 
@@ -406,37 +410,40 @@ public class KTableModel {
 	private Rectangle createRectangle(LineListWrapper wrapper, boolean minX) {
 		if (minX) {
 			return new Rectangle(
-					new PointDouble(wrapper.avgCoordinateValue - wrapper.avgLength / 2
-							- COORDINATE_TOLERANCE * wrapper.avgLength, 0),
-					new PointDouble(wrapper.avgCoordinateValue + (0.5 + COORDINATE_TOLERANCE) * wrapper.avgLength,
+					new PointDouble(wrapper.avgCoordinateValue - ((wrapper.minLength + wrapper.maxLength) / 2) / 2
+							- COORDINATE_TOLERANCE * ((wrapper.minLength + wrapper.maxLength) / 2), 0),
+					new PointDouble(
+							wrapper.avgCoordinateValue
+									+ (0.5 + COORDINATE_TOLERANCE) * ((wrapper.minLength + wrapper.maxLength) / 2),
 							Integer.MAX_VALUE));
 		} else {
 			return new Rectangle(
 					new PointDouble(0,
-							wrapper.avgCoordinateValue - wrapper.avgLength / 2
-									- COORDINATE_TOLERANCE * wrapper.avgLength),
-					new PointDouble(Integer.MAX_VALUE,
-							wrapper.avgCoordinateValue + (0.5 + COORDINATE_TOLERANCE) * wrapper.avgLength));
+							wrapper.avgCoordinateValue - ((wrapper.minLength + wrapper.maxLength) / 2) / 2
+									- COORDINATE_TOLERANCE * ((wrapper.minLength + wrapper.maxLength) / 2)),
+					new PointDouble(Integer.MAX_VALUE, wrapper.avgCoordinateValue
+							+ (0.5 + COORDINATE_TOLERANCE) * ((wrapper.minLength + wrapper.maxLength) / 2)));
 		}
 	}
 
-	private List<LineListWrapper> groupLinesByXCoordinate(List<LineListWrapper> startGroups, Tester<Line> t1,
+	private List<LineListWrapper> groupLinesByXCoordinate(List<LineListWrapper> startGroups, LineDistanceTester t1,
 			LineSorter sorter, Boolean type) {
 		return groupLinesByCoordinate(startGroups, t1, sorter, type);
 	}
 
-	private List<LineListWrapper> groupLinesByYCoordinate(List<LineListWrapper> startGroups, Tester<Line> t1,
+	private List<LineListWrapper> groupLinesByYCoordinate(List<LineListWrapper> startGroups, LineDistanceTester t1,
 			LineSorter sorter, Boolean type) {
 		return groupLinesByCoordinate(startGroups, t1, sorter, type);
 	}
 
-	private List<LineListWrapper> groupLinesByCoordinate(List<LineListWrapper> startGroups, Tester<Line> t1,
+	private List<LineListWrapper> groupLinesByCoordinate(List<LineListWrapper> startGroups, LineDistanceTester t1,
 			LineSorter sorter, Boolean type) {
 		List<LineListWrapper> groups = new ArrayList<>();
 
 		for (LineListWrapper wrapper : startGroups) {
 			sorter.sort(wrapper.lines);
 
+			t1.setLengths(wrapper.minLength, wrapper.maxLength);
 			for (LineListWrapper wp : groupLines(wrapper.lines, t1, type)) {
 				if (wp.lines.size() > 2) {
 					groups.add(wp);
