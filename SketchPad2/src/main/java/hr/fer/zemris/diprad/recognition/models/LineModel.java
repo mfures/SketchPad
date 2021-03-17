@@ -9,7 +9,7 @@ import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.MyVector;
 
 public class LineModel {
-	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.1;
+	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.15;
 
 	public static List<Line> linesInPoints(List<Point> points, List<Integer> breakPoints, BasicMovementWrapper bmw) {
 		Point p1;
@@ -41,7 +41,8 @@ public class LineModel {
 
 			error /= points.size();
 
-			if (error > 15) {
+			if (error > 20) {
+				// System.out.println(error);
 				continue;
 			} else {
 				lines.add(new Line(p1, p2, slope, intercept, bmw));
@@ -170,6 +171,9 @@ public class LineModel {
 		}
 
 		trueBreakPoints.add(breakPoints.get(index));
+		// System.out.println(
+		// trueBreakPoints.get(0) + " min:" +
+		// COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNumOfPoints);
 		int counter = 0;// index of last int in trueBreakPoints
 
 		for (int i = index + 1; i < breakPoints.size(); i++) {

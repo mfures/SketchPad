@@ -16,6 +16,7 @@ import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
+import hr.fer.zemris.diprad.recognition.objects.One;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.LineListWrapper;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
@@ -51,6 +52,10 @@ public class KTableModel {
 
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
+
+		// TODO not here
+		checkCharacterModels(bmws);
+
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
 			return;
@@ -70,6 +75,21 @@ public class KTableModel {
 			// SelectionRectangle(table.getExpandedBoundingRectangle()));
 
 			clearBMsModel(table);
+		}
+	}
+
+	private void checkCharacterModels(List<BasicMovementWrapper> bmws) {
+		for (int i = 0; i < bmws.size(); i++) {
+			if (bmws.get(i).isUnused()) {
+				One one = OneModel.recognize(bmws.get(i));
+				if (one != null) {
+					System.out.print("one ");
+				} else {
+					System.out.print("Not one ");
+				}
+
+				System.out.println();
+			}
 		}
 	}
 
@@ -98,24 +118,24 @@ public class KTableModel {
 		List<Line> horizontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
 		initLines(horizontalLines, verticalLines, bmws);
-		System.out.println("NUM VERT:" + verticalLines.size());
-		System.out.println("NUM HOR:" + horizontalLines.size());
+		// System.out.println("NUM VERT:" + verticalLines.size());
+		// System.out.println("NUM HOR:" + horizontalLines.size());
 
 		List<LineListWrapper> verticalGroups = groupLinesByLength(verticalLines);
 		List<LineListWrapper> horizontalGroups = groupLinesByLength(horizontalLines);
-		System.out.println("VERT GROUPS COUNT(dist):" + verticalGroups.size());
+		// System.out.println("VERT GROUPS COUNT(dist):" + verticalGroups.size());
 		// verticalGroups.forEach((l) -> System.out.println(l.lines.size()));
-		System.out.println("HOR GROUPS COUNT(dist):" + horizontalGroups.size());
+		// System.out.println("HOR GROUPS COUNT(dist):" + horizontalGroups.size());
 		// horizontalGroups.forEach((l) -> System.out.println(l.lines.size()));
 
 		verticalGroups = groupLinesByYCoordinate(verticalGroups, new LinesAverageYDistanceTester(),
 				new CoordinateAverageYSorter(), false);
-		System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
+		// System.out.println("VERT GROUPS COUNT(dist+x):" + verticalGroups.size());
 		// verticalGroups.forEach((l) -> System.out.println(l.lines.size()));
 
 		horizontalGroups = groupLinesByXCoordinate(horizontalGroups, new LinesAverageXDistanceTester(),
 				new CoordinateAverageXSorter(), true);
-		System.out.println("HOR GROUPS COUNT(dist+x):" + horizontalGroups.size());
+		// System.out.println("HOR GROUPS COUNT(dist+x):" + horizontalGroups.size());
 		// horizontalGroups.forEach((l) -> System.out.println(l.lines.size()));
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairsVerHor = groupLinesValidPairs(verticalGroups,
@@ -124,7 +144,7 @@ public class KTableModel {
 		if (pairsVerHor == null) {
 			return null;// No grid found
 		}
-		System.out.println("Number of paired groups of lines:" + pairsVerHor.size());
+		// System.out.println("Number of paired groups of lines:" + pairsVerHor.size());
 
 		List<KTable> tables = new ArrayList<>();
 		for (Pair<LineListWrapper, LineListWrapper> pairVerHor : pairsVerHor) {
@@ -262,9 +282,9 @@ public class KTableModel {
 		List<Pair<Rectangle, LineListWrapper>> horizontalRectangles = createRectangles(verticalGroups, false);
 		List<Pair<Rectangle, LineListWrapper>> verticalRectangles = createRectangles(horizontalGroups, true);
 
-		System.out.println("HOR rectangles found:" + horizontalRectangles.size());
+		// System.out.println("HOR rectangles found:" + horizontalRectangles.size());
 		// debugWriteRectangles(horizontalRectangles);//
-		System.out.println("VERT rectangles found:" + verticalRectangles.size());
+		// System.out.println("VERT rectangles found:" + verticalRectangles.size());
 		// debugWriteRectangles(verticalRectangles);//
 
 		List<Pair<LineListWrapper, LineListWrapper>> pairs = new ArrayList<Pair<LineListWrapper, LineListWrapper>>();

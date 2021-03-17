@@ -40,4 +40,8 @@ public class BasicMovementWrapper {
 	public void resetTotalHandeledFragments() {
 		this.totalHandeledFragments = 0;
 	}
+
+	public boolean isUnused() {
+		return totalFragments != totalHandeledFragments;
+	}
 }
