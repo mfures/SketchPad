@@ -6,6 +6,7 @@ import java.util.List;
 import hr.fer.zemris.diprad.actions.AppendAction.MyCounter;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectListener;
+import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public interface DrawingModel extends GraphicalObjectListener {
 	public int getSize();
@@ -30,7 +31,7 @@ public interface DrawingModel extends GraphicalObjectListener {
 
 	public void removeDrawingModelListener(DrawingModelListener l);
 
-	public List<GraphicalObject> getObjectsInRecti(int minX, int maxX, int minY, int maxY);
+	public List<BasicMovementWrapper> getObjectsInRecti(int minX, int maxX, int minY, int maxY);
 
 	public List<GraphicalObject> checkForInterest(MouseEvent e);
 

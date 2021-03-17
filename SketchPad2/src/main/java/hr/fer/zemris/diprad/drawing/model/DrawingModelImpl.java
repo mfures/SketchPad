@@ -8,6 +8,7 @@ import java.util.List;
 import hr.fer.zemris.diprad.actions.AppendAction.MyCounter;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
+import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class DrawingModelImpl implements DrawingModel {
 	private List<GraphicalObject> objects = new ArrayList<>();
@@ -92,13 +93,17 @@ public class DrawingModelImpl implements DrawingModel {
 	}
 
 	@Override
-	public List<GraphicalObject> getObjectsInRecti(int minX, int maxX, int minY, int maxY) {
-		List<GraphicalObject> list = new ArrayList<GraphicalObject>();
+	public List<BasicMovementWrapper> getObjectsInRecti(int minX, int maxX, int minY, int maxY) {
+		List<BasicMovementWrapper> list = new ArrayList<>();
 
-		for (GraphicalObject g : objects) {
-			if (g.isInRect(minX, maxX, minY, maxY)) {
-				list.add(g);
+		for (int i = 0; i < objects.size(); i++) {
+			GraphicalObject g = objects.get(i);
+			if (g instanceof BasicMovement) {
+				if (g.isInRect(minX, maxX, minY, maxY)) {
+					list.add(new BasicMovementWrapper((BasicMovement) g, i));
+				}
 			}
+
 		}
 
 		return list;

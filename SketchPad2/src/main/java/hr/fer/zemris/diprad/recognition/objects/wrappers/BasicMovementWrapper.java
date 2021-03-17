@@ -3,16 +3,22 @@ package hr.fer.zemris.diprad.recognition.objects.wrappers;
 import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 
 public class BasicMovementWrapper {
-	BasicMovement bm;
+	private BasicMovement bm;
+	private int index;
 	private int totalFragments = 1;
 	private int totalHandeledFragments = 0;
 
-	public BasicMovementWrapper(BasicMovement bm) {
+	public BasicMovementWrapper(BasicMovement bm, int index) {
 		this.bm = bm;
+		this.index = index;
 	}
 
 	public BasicMovement getBm() {
 		return bm;
+	}
+
+	public int getIndex() {
+		return index;
 	}
 
 	public int getTotalFragments() {

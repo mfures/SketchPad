@@ -8,8 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import hr.fer.zemris.diprad.SketchPad2;
-import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
-import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable;
 import hr.fer.zemris.diprad.drawing.graphical.objects.SelectionRectangle;
 import hr.fer.zemris.diprad.drawing.model.DrawingModel;
@@ -52,7 +50,7 @@ public class KTableModel {
 	}
 
 	public void recognize(Point a, Point b) {
-		List<BasicMovementWrapper> bmws = handleGraphicalObjects(getObjectsInRectangle(a, b, sP.getModel()));
+		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
 			return;
@@ -87,19 +85,6 @@ public class KTableModel {
 		return tables;
 	}
 
-	private List<BasicMovementWrapper> handleGraphicalObjects(List<GraphicalObject> objects) {
-		List<BasicMovementWrapper> bms = new ArrayList<>();
-
-		for (GraphicalObject go : objects) {
-			if (go instanceof BasicMovement) {
-				bms.add(new BasicMovementWrapper((BasicMovement) go));
-			}
-		}
-
-		objects.clear();
-		return bms;
-	}
-
 	private List<KTable> recognizeTables(List<BasicMovementWrapper> bmws) {
 		List<Line> horizontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
@@ -127,13 +112,15 @@ public class KTableModel {
 		if (pairsVerHor == null) {
 			return null;// No grid found
 		}
-		// System.out.println("Number of paired groups of lines:" + pairsVerHor.size());
+		System.out.println("Number of paired groups of lines:" + pairsVerHor.size());
 
 		List<KTable> tables = new ArrayList<>();
 		for (Pair<LineListWrapper, LineListWrapper> pairVerHor : pairsVerHor) {
 			KTable table = checkForFragmentsAndCreateTable(pairVerHor.t, pairVerHor.k);
 			if (table != null) {
 				tables.add(table);
+			} else {
+				System.out.println("Invalid table");
 			}
 		}
 
@@ -598,13 +585,13 @@ public class KTableModel {
 		return new Pair<List<Line>, List<Line>>(verticalLines, horizontalLines);
 	}
 
-	private List<GraphicalObject> getObjectsInRectangle(Point a, Point b, DrawingModel model) {
+	private List<BasicMovementWrapper> getObjectsInRectangle(Point a, Point b, DrawingModel model) {
 		int minX = Math.min(a.x, b.x);
 		int maxX = Math.max(a.x, b.x);
 		int minY = Math.min(a.y, b.y);
 		int maxY = Math.max(a.y, b.y);
 
-		List<GraphicalObject> objects = model.getObjectsInRecti(minX, maxX, minY, maxY);
+		List<BasicMovementWrapper> objects = model.getObjectsInRecti(minX, maxX, minY, maxY);
 		return objects;
 	}
 
