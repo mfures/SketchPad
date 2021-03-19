@@ -105,6 +105,12 @@ public class KTableModel {
 						} else {
 							System.out.print("nX ");
 						}
+
+						if (true == YModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+							System.out.print("Y ");
+						} else {
+							System.out.print("nY ");
+						}
 					}
 				}
 

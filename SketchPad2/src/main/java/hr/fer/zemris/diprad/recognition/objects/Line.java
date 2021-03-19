@@ -93,6 +93,14 @@ public class Line {
 		return slope * x + intercept;
 	}
 
+	public double distanceFromPointToLine(Point p) {
+		if (Double.isInfinite(slope)) {
+			return Math.abs(this.p1.x - p.x);
+		}
+
+		return Math.abs(-slope * p.x + p.y - intercept) / Math.sqrt(slope * slope + 1);
+	}
+
 	public Double length() {
 		return length;
 	}
