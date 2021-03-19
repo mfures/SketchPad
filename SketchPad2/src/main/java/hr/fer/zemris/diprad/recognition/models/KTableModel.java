@@ -97,6 +97,17 @@ public class KTableModel {
 				} else {
 					System.out.print("nW ");
 				}
+
+				if (i != bmws.size() - 1) {
+					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex()) {
+						if (true == XModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+							System.out.print("X ");
+						} else {
+							System.out.print("nX ");
+						}
+					}
+				}
+
 				System.out.println();
 			}
 		}
