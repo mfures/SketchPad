@@ -14,7 +14,6 @@ public class OneModel {
 		List<Point> points = bmw.getBm().getPoints();
 		List<Integer> acumulatedBreakPoints = LineModel.acumulateBreakPointsWhichAreClose(points);
 
-		System.out.println("Num of break points:" + acumulatedBreakPoints.size());
 		if (acumulatedBreakPoints.size() != 1) {
 			// System.out.println("Bad breakpoint size:" + acumulatedBreakPoints.size());
 			return null;

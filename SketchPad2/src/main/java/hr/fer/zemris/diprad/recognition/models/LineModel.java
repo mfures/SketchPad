@@ -10,6 +10,7 @@ import hr.fer.zemris.diprad.util.MyVector;
 
 public class LineModel {
 	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.15;
+	private static final double MAX_AVERAGE_SQUARE_ERROR = 350;
 
 	public static List<Line> linesInPoints(List<Point> points, List<Integer> breakPoints, BasicMovementWrapper bmw) {
 		Point p1;
@@ -34,16 +35,15 @@ public class LineModel {
 			intercept = p1.y - slope * p1.x;
 
 			if (k < breakPoints.size()) {
-				error = calculateError(points, error, start, breakPoints.get(k), slope, intercept);
+				error = calculateError(points, start, breakPoints.get(k), slope, intercept);
 			} else {
-				error = calculateError(points, error, start, points.size() - 1, slope, intercept);
+				error = calculateError(points, start, points.size() - 1, slope, intercept);
 			}
 
 			error /= points.size();
 
-			if (error > 20) {
+			if (error > MAX_AVERAGE_SQUARE_ERROR) {
 				// System.out.println(error);
-				continue;
 			} else {
 				lines.add(new Line(p1, p2, slope, intercept, bmw));
 
@@ -58,9 +58,8 @@ public class LineModel {
 
 	}
 
-	private static double calculateError(List<Point> points, double error, int start, int limit, double slope,
-			double intercept) {
-
+	private static double calculateError(List<Point> points, int start, int limit, double slope, double intercept) {
+		double error = 0;
 		if (Math.abs(slope) <= 1.0) {
 			for (int i = start; i <= limit; i++) {
 				error += Math.pow(slope * points.get(i).x + intercept - points.get(i).y, 2);
@@ -83,29 +82,14 @@ public class LineModel {
 		List<Point> points = bmw.getBm().getPoints();
 		Point p1 = points.get(0);
 		Point p2 = points.get(points.size() - 1);
+
 		double slope = (p2.y - p1.y) / (p2.x * 1.0 - p1.x);
 		double intercept = p1.y - slope * p1.x;
-		double error = 0.0;
 
-		if (Math.abs(slope) <= 1.0) {
-			for (Point pp : points) {
-				error += Math.pow(slope * pp.x + intercept - pp.y, 2);
-			}
-		} else {
-			if (Double.isInfinite(slope)) {
-				for (Point pp : points) {
-					error += Math.pow(p1.x - pp.x, 2);
-				}
-			} else {
-				for (Point pp : points) {
-					error += Math.pow((pp.y - intercept) / slope - pp.x, 2);
-				}
-			}
-		}
-
+		double error = calculateError(points, 0, points.size() - 1, slope, intercept);
 		error /= points.size();
 
-		if (error > 350) {
+		if (error > MAX_AVERAGE_SQUARE_ERROR) {
 			return null;
 		}
 
@@ -180,13 +164,16 @@ public class LineModel {
 
 		for (int i = index + 1; i < breakPoints.size(); i++) {
 			int p = breakPoints.get(i);
-			if (p - trueBreakPoints.get(counter) > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * numOfPoints
-					&& numOfPoints - p > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * numOfPoints) {
-				trueBreakPoints.add(p);
-				counter++;
-			} else {
-				trueBreakPoints.set(counter, p);
+			if (((numOfPoints - p) > (COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * numOfPoints))) {
+				if (((p - trueBreakPoints.get(counter)) > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE
+						* numOfPoints)) {
+					trueBreakPoints.add(p);
+					counter++;
+				} else {
+					trueBreakPoints.set(counter, p);
+				}
 			}
+
 		}
 
 		return trueBreakPoints;

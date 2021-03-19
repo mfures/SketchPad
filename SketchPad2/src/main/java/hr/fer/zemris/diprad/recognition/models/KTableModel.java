@@ -83,9 +83,14 @@ public class KTableModel {
 			if (bmws.get(i).isUnused()) {
 				One one = OneModel.recognize(bmws.get(i));
 				if (one != null) {
-					System.out.print("one ");
+					System.out.print("1 ");
 				} else {
-					System.out.print("Not one ");
+					System.out.print("n1 ");
+				}
+				if (true == ZModel.recognize(bmws.get(i))) {
+					System.out.print("Z ");
+				} else {
+					System.out.print("nZ ");
 				}
 
 				System.out.println();
