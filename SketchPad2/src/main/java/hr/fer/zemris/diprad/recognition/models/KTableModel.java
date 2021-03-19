@@ -92,7 +92,11 @@ public class KTableModel {
 				} else {
 					System.out.print("nZ ");
 				}
-
+				if (true == WModel.recognize(bmws.get(i))) {
+					System.out.print("W ");
+				} else {
+					System.out.print("nW ");
+				}
 				System.out.println();
 			}
 		}
