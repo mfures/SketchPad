@@ -148,14 +148,17 @@ public class LineModel {
 		return breakPoints;
 	}
 
-	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Integer> breakPoints, int totalNumOfPoints) {
+	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points) {
+		List<Integer> breakPoints = LineModel.calculateBreakPoints(points);
+		int numOfPoints = points.size();
+
 		List<Integer> trueBreakPoints = new ArrayList<>();
 		if (breakPoints.isEmpty()) {
 			return trueBreakPoints;
 		}
 
 		int index = 0;
-		while (breakPoints.get(index) <= COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNumOfPoints) {
+		while (breakPoints.get(index) <= COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * numOfPoints) {
 			index++;
 
 			if (index == breakPoints.size()) {
@@ -164,8 +167,7 @@ public class LineModel {
 		}
 
 		if (index == breakPoints.size() - 1) {
-			if (totalNumOfPoints - breakPoints.get(index) <= COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE
-					* totalNumOfPoints) {
+			if (numOfPoints - breakPoints.get(index) <= COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * numOfPoints) {
 				return trueBreakPoints;
 			}
 		}
@@ -178,8 +180,8 @@ public class LineModel {
 
 		for (int i = index + 1; i < breakPoints.size(); i++) {
 			int p = breakPoints.get(i);
-			if (p - trueBreakPoints.get(counter) > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNumOfPoints
-					&& totalNumOfPoints - p > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNumOfPoints) {
+			if (p - trueBreakPoints.get(counter) > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * numOfPoints
+					&& numOfPoints - p > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * numOfPoints) {
 				trueBreakPoints.add(p);
 				counter++;
 			} else {
