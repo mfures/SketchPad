@@ -108,6 +108,9 @@ public class LineModel {
 		}
 
 		List<MyVector> vectors = MyVector.listOfPointsToListOfVectors(points);
+		// System.out.println("Gotovi vektori");
+		// vectors.forEach((x) -> System.out.print(x + " "));
+		// System.out.println("\n");
 		MyVector v1 = new MyVector();
 		MyVector v2 = new MyVector();
 
@@ -122,8 +125,6 @@ public class LineModel {
 
 			if (cos < 0.8) {
 				breakPoints.add(v1.i2);
-				// Break point is in format (
-
 				// System.out.println("i:" + i + " cos:" + formatter.format(cos) + " v1:" + v1 +
 				// " v2:" + v2);
 			}
@@ -134,6 +135,7 @@ public class LineModel {
 
 	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points) {
 		List<Integer> breakPoints = LineModel.calculateBreakPoints(points);
+		System.out.println("Total inital number of breakPoints: " + breakPoints.size());
 		int numOfPoints = points.size();
 
 		List<Integer> trueBreakPoints = new ArrayList<>();

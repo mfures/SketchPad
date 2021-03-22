@@ -32,7 +32,7 @@ import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
 
 public class KTableModel {
-	public static final double MIN_VECTOR_NORM = 4.2;
+	public static final double MIN_VECTOR_NORM = 5.1;
 	public static final double COORDINATE_TOLERANCE = 0.05;
 	public static final double LENGTH_TOLLERANCE = 0.05;
 	public static final double DISTANCE_TOLERANCE = 0.25;
@@ -81,17 +81,17 @@ public class KTableModel {
 	private void checkCharacterModels(List<BasicMovementWrapper> bmws) {
 		for (int i = 0; i < bmws.size(); i++) {
 			if (bmws.get(i).isUnused()) {
-				One one = OneModel.recognize(bmws.get(i));
-				if (one != null) {
-					System.out.print("1 ");
-				} else {
-					System.out.print("n1 ");
-				}
-				if (true == ZModel.recognize(bmws.get(i))) {
-					System.out.print("Z ");
-				} else {
-					System.out.print("nZ ");
-				}
+//				One one = OneModel.recognize(bmws.get(i));
+//				if (one != null) {
+//					System.out.print("1 ");
+//				} else {
+//					System.out.print("n1 ");
+//				}
+//				if (true == ZModel.recognize(bmws.get(i))) {
+//					System.out.print("Z ");
+//				} else {
+//					System.out.print("nZ ");
+//				}
 				if (true == WModel.recognize(bmws.get(i))) {
 					System.out.print("W ");
 				} else {
@@ -100,17 +100,17 @@ public class KTableModel {
 
 				if (i != bmws.size() - 1) {
 					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex()) {
-						if (true == XModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-							System.out.print("X ");
-						} else {
-							System.out.print("nX ");
-						}
+//						if (true == XModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+//							System.out.print("X ");
+//						} else {
+//							System.out.print("nX ");
+//						}
 
-						if (true == YModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-							System.out.print("Y ");
-						} else {
-							System.out.print("nY ");
-						}
+//						if (true == YModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+//							System.out.print("Y ");
+//						} else {
+//							System.out.print("nY ");
+//						}
 					}
 				}
 

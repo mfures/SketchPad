@@ -13,7 +13,8 @@ public class YModel {
 			return false;
 		}
 		if (!LineModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).isEmpty()) {
-			System.out.println("2");
+			System.out.println("2. breakPoints size: "
+					+ LineModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size());
 			return false;
 		}
 		Line l1 = LineModel.recognize(bmw1);

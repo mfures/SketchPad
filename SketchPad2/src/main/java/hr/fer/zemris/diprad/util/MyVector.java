@@ -71,7 +71,7 @@ public class MyVector {
 
 	@Override
 	public String toString() {
-		return "x:" + v.x + " y:" + v.y + p1.toString() + " " + p2.toString();
+		return "x:" + v.x + " y:" + v.y; // + p1.toString() + " " + p2.toString();
 	}
 
 	public static MyVector initNewVector(Point point, Point point2, int i1, int i2) {
@@ -97,10 +97,15 @@ public class MyVector {
 	 */
 	public static List<MyVector> listOfPointsToListOfVectors(List<Point> points) {
 		List<MyVector> vectors = new ArrayList<MyVector>();
+		// double totalLength = 0 - 0;
 		for (int i = 0; i < points.size() - 1; i++) {
-			vectors.add(MyVector.initNewVector(points.get(i), points.get(i + 1), i, i + 1));
+			MyVector v = MyVector.initNewVector(points.get(i), points.get(i + 1), i, i + 1);
+			vectors.add(v);
+			// System.out.print(v + " ");
+			// totalLength += v.norm();
 		}
 
+		// System.out.println("\nTotal vektor norm: " + totalLength);
 		List<MyVector> vectorsAcumulated = new ArrayList<MyVector>();
 		vectorsAcumulated.add(vectors.get(0));
 
@@ -120,6 +125,19 @@ public class MyVector {
 			}
 		}
 
+		if (vectorsAcumulated.get(vectorsAcumulated.size() - 1).norm() < KTableModel.MIN_VECTOR_NORM) {
+			if (vectorsAcumulated.size() > 1) {
+				int last = vectorsAcumulated.size() - 1;
+				if (vectorsAcumulated.get(last - 1).semiSameDirection(vectorsAcumulated.get(last))) {
+					vectorsAcumulated.get(last - 1).add(vectors.get(last));
+					vectorsAcumulated.get(last - 1).p2 = vectors.get(last).p2;
+					vectorsAcumulated.get(last - 1).i2 = vectors.get(last).i2;
+					vectorsAcumulated.remove(last);
+				}
+			}
+		}
+
 		return vectorsAcumulated;
 	}
+
 }

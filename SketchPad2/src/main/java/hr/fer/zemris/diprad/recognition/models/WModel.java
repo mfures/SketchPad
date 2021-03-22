@@ -11,14 +11,14 @@ public class WModel {
 		List<Point> points = bmw.getBm().getPoints();
 		List<Integer> acumulatedBreakPoints = LineModel.acumulateBreakPointsWhichAreClose(points);
 		if (acumulatedBreakPoints.size() != 3) {
-			// System.out.println("No points");
+			System.out.println("No points: " + acumulatedBreakPoints.size());
 			return false;
 		}
 
 		List<Line> lines = LineModel.linesInPoints(points, acumulatedBreakPoints, bmw);
 
 		if (lines.size() != 4) {
-			// System.out.println("No lines");
+			System.out.println("No lines");
 			return false;
 		}
 
