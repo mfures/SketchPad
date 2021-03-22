@@ -9,7 +9,7 @@ import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.MyVector;
 
 public class LineModel {
-	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.15;
+	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.175;
 	private static final double MAX_AVERAGE_SQUARE_ERROR = 350;
 
 	public static List<Line> linesInPoints(List<Point> points, List<Integer> breakPoints, BasicMovementWrapper bmw) {
@@ -139,6 +139,7 @@ public class LineModel {
 		double totalLength = 0;
 		for (int i = 0; i < breakPoints.size() - 1; i++) {
 			totalLength += MyVector.norm(points.get(breakPoints.get(i)), points.get(breakPoints.get(i + 1)));
+			// System.out.println(totalLength);
 		}
 
 		// System.out.println("Total inital number of breakPoints: " +
@@ -163,18 +164,40 @@ public class LineModel {
 			}
 		}
 
+		// System.out.println("Ajde: " + trueBreakPoints.size());
+
 		if (trueBreakPoints.size() > 2) {
+			activeNorm = MyVector.norm(points.get(trueBreakPoints.get(trueBreakPoints.size() - 1)),
+					points.get(points.size() - 1));
+			// System.out.println(activeNorm);
+			if (activeNorm > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength) {
+				trueBreakPoints.add(points.size() - 1);
+			} else {
+				trueBreakPoints.set(trueBreakPoints.size() - 1, points.size() - 1);
+			}
+			return trueBreakPoints;
+		}
+		if (trueBreakPoints.size() == 1) {
 			trueBreakPoints.add(points.size() - 1);
 			return trueBreakPoints;
 		}
 
 		activeNorm = MyVector.norm(points.get(trueBreakPoints.get(1)), points.get(0));
+		// System.out.println("Hejj?: " + activeNorm);
 		if (activeNorm > (1 - COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE) * totalLength) {
 			trueBreakPoints.set(1, points.size() - 1);
 			return trueBreakPoints;
 		}
 
-		trueBreakPoints.add(points.size() - 1);
+		activeNorm = MyVector.norm(points.get(trueBreakPoints.get(trueBreakPoints.size() - 1)),
+				points.get(points.size() - 1));
+		// System.out.println("Heeej: " + activeNorm);
+		if (activeNorm > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength) {
+			trueBreakPoints.add(points.size() - 1);
+		} else {
+			trueBreakPoints.set(trueBreakPoints.size() - 1, points.size() - 1);
+		}
+
 		return trueBreakPoints;
 	}
 }

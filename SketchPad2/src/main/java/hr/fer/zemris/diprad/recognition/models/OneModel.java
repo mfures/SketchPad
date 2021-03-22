@@ -14,27 +14,28 @@ public class OneModel {
 		List<Point> points = bmw.getBm().getPoints();
 		List<Integer> acumulatedBreakPoints = LineModel.acumulateBreakPointsWhichAreClose(points);
 
-		if (acumulatedBreakPoints.size() != 1) {
-			// System.out.println("Bad breakpoint size:" + acumulatedBreakPoints.size());
+		if (acumulatedBreakPoints.size() != 3) {
+			//System.out.println("Bad breakpoint size:" + acumulatedBreakPoints.size());
 			return null;
 		}
 
 		List<Line> lines = LineModel.linesInPoints(points, acumulatedBreakPoints, bmw);
 
 		if (lines.size() != 2) {
-			// System.out.println("Bad line number:" + lines.size());
+			//System.out.println("Bad line number:" + lines.size());
 			return null;
 		}
 
 		Line l1 = lines.get(0);
-		// System.out.println(l1.getSlope());
+		//System.out.println(l1.getSlope());
 		Line l2 = lines.get(1);
-		// System.out.println(l2.getSlope());
+		//System.out.println(l2.getSlope());
 
-		if (!(l1.getSlope() >= (-5) && l1.getSlope() <= -0.3 && Math.abs(l2.getSlope()) > 5)) {
+		if (!(l1.getSlope() >= (-4.5) && l1.getSlope() <= -0.3 && Math.abs(l2.getSlope()) > 4.5)) {
 			return null;
 		}
 
+		//System.out.println(l1.length() / l2.length());
 		if (l1.length() / l2.length() > 0.85 || l1.length() / l2.length() < 0.15) {
 			return null;
 		}

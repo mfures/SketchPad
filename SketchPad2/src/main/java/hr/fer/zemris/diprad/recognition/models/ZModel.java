@@ -11,7 +11,7 @@ public class ZModel {
 	public static boolean recognize(BasicMovementWrapper bmw) {
 		List<Point> points = bmw.getBm().getPoints();
 		List<Integer> acumulatedBreakPoints = LineModel.acumulateBreakPointsWhichAreClose(points);
-		if (acumulatedBreakPoints.size() != 2) {
+		if (acumulatedBreakPoints.size() != 4) {
 			return false;
 		}
 
