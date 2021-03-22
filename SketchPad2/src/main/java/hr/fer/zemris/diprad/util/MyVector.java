@@ -140,4 +140,11 @@ public class MyVector {
 		return vectorsAcumulated;
 	}
 
+	public static double norm(Point point, Point point2) {
+		double x = point.x - point2.x;
+		double y = point.y - point2.y;
+
+		return Math.sqrt(x * x + y * y);
+	}
+
 }
