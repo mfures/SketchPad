@@ -92,11 +92,11 @@ public class KTableModel {
 //				} else {
 //					System.out.print("nZ ");
 //				}
-				if (true == WModel.recognize(bmws.get(i))) {
-					System.out.print("W ");
-				} else {
-					System.out.print("nW ");
-				}
+//				if (true == WModel.recognize(bmws.get(i))) {
+//					System.out.print("W ");
+//				} else {
+//					System.out.print("nW ");
+//				}
 
 				if (i != bmws.size() - 1) {
 					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex()) {
@@ -566,8 +566,8 @@ public class KTableModel {
 	private void initLines(List<Line> horizontalLines, List<Line> verticalLines, List<BasicMovementWrapper> bmws) {
 		for (BasicMovementWrapper bmw : bmws) {
 			List<Integer> breakPoints = LineModel.acumulateBreakPointsWhichAreClose(bmw.getBm().getPoints());
-			if (!breakPoints.isEmpty()) {
-				if (breakPoints.size() > 3) {
+			if (breakPoints.size() != 2) {
+				if (breakPoints.size() > 5) {
 					continue;
 				}
 
@@ -609,7 +609,7 @@ public class KTableModel {
 	private Pair<List<Line>, List<Line>> calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(
 			BasicMovementWrapper bmw, List<Integer> breakPoints) {
 		List<Line> lines = LineModel.linesInPoints(bmw.getBm().getPoints(), breakPoints, bmw);
-		if (lines.size() != breakPoints.size() + 1) {
+		if (lines.size() != breakPoints.size() - 1) {
 			return null;
 		}
 
