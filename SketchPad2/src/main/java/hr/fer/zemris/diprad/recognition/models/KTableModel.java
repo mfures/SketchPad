@@ -93,7 +93,7 @@ public class KTableModel {
 				} else {
 					System.out.print("nZ ");
 				}
-				
+
 				if (true == WModel.recognize(bmws.get(i))) {
 					System.out.print("W ");
 				} else {
@@ -112,6 +112,12 @@ public class KTableModel {
 							System.out.print("Y ");
 						} else {
 							System.out.print("nY ");
+						}
+
+						if (true == AModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+							System.out.print("A ");
+						} else {
+							System.out.print("nA ");
 						}
 					}
 				}

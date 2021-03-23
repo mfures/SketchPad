@@ -119,7 +119,7 @@ public class LineModel {
 
 	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points, Tester<MyVector> t) {
 		List<Integer> breakPoints = LineModel.calculateBreakPoints(points, t);
-		System.out.println("Initial breakPoints: " + breakPoints.size());
+		// System.out.println("Initial breakPoints: " + breakPoints.size());
 		if (breakPoints.size() == 2) {// first and last index (0 and size-1)
 			return breakPoints;
 		}

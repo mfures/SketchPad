@@ -93,6 +93,18 @@ public class Line {
 		return slope * x + intercept;
 	}
 
+	public double forY(double y) {
+		if (slope == 0) {
+			return Double.POSITIVE_INFINITY;// Should throw an exception
+		}
+
+		if (Double.isInfinite(slope)) {
+			return p1.x;
+		}
+
+		return (y - intercept) / slope;
+	}
+
 	public double distanceFromPointToLine(Point p) {
 		if (Double.isInfinite(slope)) {
 			return Math.abs(this.p1.x - p.x);
@@ -111,6 +123,22 @@ public class Line {
 
 	public double getAverageY() {
 		return averageY;
+	}
+
+	public int getMinX() {
+		return Math.min(p1.x, p2.x);
+	}
+
+	public int getMaxX() {
+		return Math.max(p1.x, p2.x);
+	}
+
+	public int getMinY() {
+		return Math.min(p1.y, p2.y);
+	}
+
+	public int getMaxY() {
+		return Math.max(p1.y, p2.y);
 	}
 
 	@Override
