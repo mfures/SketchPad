@@ -10,7 +10,7 @@ import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.recognition.testers.StrongPositiveColinearityTester;
 import hr.fer.zemris.diprad.util.MyVector;
 
-public class LineModel {
+public class LinearModel {
 	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.175;
 	private static final double MAX_AVERAGE_SQUARE_ERROR = 350;
 
@@ -118,7 +118,7 @@ public class LineModel {
 	}
 
 	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points, Tester<MyVector> t) {
-		List<Integer> breakPoints = LineModel.calculateBreakPoints(points, t);
+		List<Integer> breakPoints = LinearModel.calculateBreakPoints(points, t);
 		// System.out.println("Initial breakPoints: " + breakPoints.size());
 		if (breakPoints.size() == 2) {// first and last index (0 and size-1)
 			return breakPoints;

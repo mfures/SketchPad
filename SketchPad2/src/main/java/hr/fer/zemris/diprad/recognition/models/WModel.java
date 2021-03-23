@@ -9,13 +9,13 @@ import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 public class WModel {
 	public static boolean recognize(BasicMovementWrapper bmw) {
 		List<Point> points = bmw.getBm().getPoints();
-		List<Integer> acumulatedBreakPoints = LineModel.acumulateBreakPointsWhichAreClose(points);
+		List<Integer> acumulatedBreakPoints = LinearModel.acumulateBreakPointsWhichAreClose(points);
 		if (acumulatedBreakPoints.size() != 5) {
 			// System.out.println("No points: " + acumulatedBreakPoints.size());
 			return false;
 		}
 
-		List<Line> lines = LineModel.linesInPoints(points, acumulatedBreakPoints, bmw);
+		List<Line> lines = LinearModel.linesInPoints(points, acumulatedBreakPoints, bmw);
 
 		if (lines.size() != 4) {
 			// System.out.println("No lines");

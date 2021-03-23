@@ -10,8 +10,8 @@ import hr.fer.zemris.diprad.util.MyVector;
 
 public class AModel {
 	public static boolean recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
-		List<Integer> bp1 = LineModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints());
-		List<Integer> bp2 = LineModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints());
+		List<Integer> bp1 = LinearModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints());
+		List<Integer> bp2 = LinearModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints());
 
 		if (!(bp1.size() == 3 && bp2.size() == 2)) {
 			if (!(bp2.size() == 3 && bp1.size() == 2)) {
@@ -28,13 +28,13 @@ public class AModel {
 			bmw2 = btmp;
 		}
 
-		List<Line> lines = LineModel.linesInPoints(bmw1.getBm().getPoints(), bp1, bmw1);
+		List<Line> lines = LinearModel.linesInPoints(bmw1.getBm().getPoints(), bp1, bmw1);
 		if (lines.size() != 2) {
 			// System.out.println("Bad lines");
 			return false;
 		}
 
-		Line l1 = LineModel.recognize(bmw2);
+		Line l1 = LinearModel.recognize(bmw2);
 		if (l1 == null) {
 			// System.out.println("Not a line");
 			return false;

@@ -12,14 +12,14 @@ import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 public class OneModel {
 	public static One recognize(BasicMovementWrapper bmw) {
 		List<Point> points = bmw.getBm().getPoints();
-		List<Integer> acumulatedBreakPoints = LineModel.acumulateBreakPointsWhichAreClose(points);
+		List<Integer> acumulatedBreakPoints = LinearModel.acumulateBreakPointsWhichAreClose(points);
 
 		if (acumulatedBreakPoints.size() != 3) {
 			//System.out.println("Bad breakpoint size:" + acumulatedBreakPoints.size());
 			return null;
 		}
 
-		List<Line> lines = LineModel.linesInPoints(points, acumulatedBreakPoints, bmw);
+		List<Line> lines = LinearModel.linesInPoints(points, acumulatedBreakPoints, bmw);
 
 		if (lines.size() != 2) {
 			//System.out.println("Bad line number:" + lines.size());

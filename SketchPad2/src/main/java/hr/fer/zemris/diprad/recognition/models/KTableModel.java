@@ -573,7 +573,7 @@ public class KTableModel {
 
 	private void initLines(List<Line> horizontalLines, List<Line> verticalLines, List<BasicMovementWrapper> bmws) {
 		for (BasicMovementWrapper bmw : bmws) {
-			List<Integer> breakPoints = LineModel.acumulateBreakPointsWhichAreClose(bmw.getBm().getPoints());
+			List<Integer> breakPoints = LinearModel.acumulateBreakPointsWhichAreClose(bmw.getBm().getPoints());
 			if (breakPoints.size() != 2) {
 				if (breakPoints.size() > 5) {
 					continue;
@@ -602,7 +602,7 @@ public class KTableModel {
 				continue;
 			}
 
-			Line l = LineModel.recognize(bmw);
+			Line l = LinearModel.recognize(bmw);
 			if (l != null) {
 				if (l.getType() == LineType.HORIZONTAL) {
 					horizontalLines.add(l);
@@ -616,7 +616,7 @@ public class KTableModel {
 
 	private Pair<List<Line>, List<Line>> calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(
 			BasicMovementWrapper bmw, List<Integer> breakPoints) {
-		List<Line> lines = LineModel.linesInPoints(bmw.getBm().getPoints(), breakPoints, bmw);
+		List<Line> lines = LinearModel.linesInPoints(bmw.getBm().getPoints(), breakPoints, bmw);
 		if (lines.size() != breakPoints.size() - 1) {
 			return null;
 		}

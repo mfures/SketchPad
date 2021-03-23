@@ -10,12 +10,12 @@ import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 public class ZModel {
 	public static boolean recognize(BasicMovementWrapper bmw) {
 		List<Point> points = bmw.getBm().getPoints();
-		List<Integer> acumulatedBreakPoints = LineModel.acumulateBreakPointsWhichAreClose(points);
+		List<Integer> acumulatedBreakPoints = LinearModel.acumulateBreakPointsWhichAreClose(points);
 		if (acumulatedBreakPoints.size() != 4) {
 			return false;
 		}
 
-		List<Line> lines = LineModel.linesInPoints(points, acumulatedBreakPoints, bmw);
+		List<Line> lines = LinearModel.linesInPoints(points, acumulatedBreakPoints, bmw);
 
 		if (lines.size() != 3) {
 			return false;

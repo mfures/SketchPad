@@ -6,24 +6,24 @@ import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class XModel {
 	public static boolean recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
-		if (LineModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size() != 2) {
+		if (LinearModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size() != 2) {
 			// System.out.println("1: " +
 			// LineModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size());
 			return false;
 		}
-		if (LineModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size() != 2) {
+		if (LinearModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size() != 2) {
 			// System.out.println("w: " +
 			// LineModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size());
 			return false;
 		}
 
-		Line l1 = LineModel.recognize(bmw1);
+		Line l1 = LinearModel.recognize(bmw1);
 		if (l1 == null) {
 			// System.out.println("3");
 			return false;
 		}
 
-		Line l2 = LineModel.recognize(bmw2);
+		Line l2 = LinearModel.recognize(bmw2);
 		if (l2 == null) {
 			// System.out.println("4");
 			return false;

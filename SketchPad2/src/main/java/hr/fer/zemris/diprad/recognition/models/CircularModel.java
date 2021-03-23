@@ -7,7 +7,7 @@ import hr.fer.zemris.diprad.recognition.Pattern;
 import hr.fer.zemris.diprad.recognition.objects.Zero;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
-public class ZeroModel implements Pattern<Zero> {
+public class CircularModel implements Pattern<Zero> {
 	private Point averagePoint = new Point();
 	private double min, max, avg, dist;
 
