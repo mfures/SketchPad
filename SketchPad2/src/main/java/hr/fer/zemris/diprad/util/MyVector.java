@@ -89,23 +89,18 @@ public class MyVector {
 		return v1.v.x * v2.v.x + v1.v.y * v2.v.y;
 	}
 
+	public static List<MyVector> listOfPointsToListOfVectors(List<Point> points) {
+		return listOfPointsToListOfVectors(points, 0, points.size() - 1);
+	}
+
 	/**
 	 * Creates list of vectors from list of points
 	 * 
 	 * @param points
 	 * @return
 	 */
-	public static List<MyVector> listOfPointsToListOfVectors(List<Point> points) {
-		List<MyVector> vectors = new ArrayList<MyVector>();
-		// double totalLength = 0 - 0;
-		for (int i = 0; i < points.size() - 1; i++) {
-			MyVector v = MyVector.initNewVector(points.get(i), points.get(i + 1), i, i + 1);
-			vectors.add(v);
-			// System.out.print(v + " ");
-			// totalLength += v.norm();
-		}
-
-		// System.out.println("\nTotal vektor norm: " + totalLength);
+	public static List<MyVector> listOfPointsToListOfVectors(List<Point> points, int startIndex, int endIndex) {
+		List<MyVector> vectors = initVectorList(points, startIndex, endIndex);
 		List<MyVector> vectorsAcumulated = new ArrayList<MyVector>();
 		vectorsAcumulated.add(vectors.get(0));
 
@@ -138,6 +133,20 @@ public class MyVector {
 		}
 
 		return vectorsAcumulated;
+	}
+
+	public static List<MyVector> initVectorList(List<Point> points, int startIndex, int endIndex) {
+		List<MyVector> vectors = new ArrayList<MyVector>();
+		double totalLength = 0 - 0;
+		for (int i = startIndex; i < endIndex; i++) {
+			MyVector v = MyVector.initNewVector(points.get(i), points.get(i + 1), i, i + 1);
+			vectors.add(v);
+			System.out.print("(" + v + " norm:" + v.norm() + ") ");
+			totalLength += v.norm();
+		}
+
+		System.out.println("\nTotal vektor norm: " + totalLength);
+		return vectors;
 	}
 
 	public static double norm(Point point, Point point2) {

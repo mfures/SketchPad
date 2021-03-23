@@ -81,46 +81,52 @@ public class KTableModel {
 	private void checkCharacterModels(List<BasicMovementWrapper> bmws) {
 		for (int i = 0; i < bmws.size(); i++) {
 			if (bmws.get(i).isUnused()) {
-				One one = OneModel.recognize(bmws.get(i));
-				if (one != null) {
-					System.out.print("1 ");
+				if (CircularModel.recognize(bmws.get(i))) {
+					System.out.println("Circular");
 				} else {
-					System.out.print("n1 ");
+					System.out.println("non circular");
 				}
 
-				if (true == ZModel.recognize(bmws.get(i))) {
-					System.out.print("Z ");
-				} else {
-					System.out.print("nZ ");
-				}
+//				One one = OneModel.recognize(bmws.get(i));
+//				if (one != null) {
+//					System.out.print("1 ");
+//				} else {
+//					System.out.print("n1 ");
+//				}
+//
+//				if (true == ZModel.recognize(bmws.get(i))) {
+//					System.out.print("Z ");
+//				} else {
+//					System.out.print("nZ ");
+//				}
+//
+//				if (true == WModel.recognize(bmws.get(i))) {
+//					System.out.print("W ");
+//				} else {
+//					System.out.print("nW ");
+//				}
 
-				if (true == WModel.recognize(bmws.get(i))) {
-					System.out.print("W ");
-				} else {
-					System.out.print("nW ");
-				}
-
-				if (i != bmws.size() - 1) {
-					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex()) {
-						if (true == XModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-							System.out.print("X ");
-						} else {
-							System.out.print("nX ");
-						}
-
-						if (true == YModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-							System.out.print("Y ");
-						} else {
-							System.out.print("nY ");
-						}
-
-						if (true == AModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-							System.out.print("A ");
-						} else {
-							System.out.print("nA ");
-						}
-					}
-				}
+//				if (i != bmws.size() - 1) {
+//					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
+//						if (true == XModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+//							System.out.print("X ");
+//						} else {
+//							System.out.print("nX ");
+//						}
+//
+//						if (true == YModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+//							System.out.print("Y ");
+//						} else {
+//							System.out.print("nY ");
+//						}
+//
+//						if (true == AModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+//							System.out.print("A ");
+//						} else {
+//							System.out.print("nA ");
+//						}
+//					}
+//				}
 
 				System.out.println();
 			}
