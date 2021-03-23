@@ -4,8 +4,10 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
+import hr.fer.zemris.diprad.recognition.testers.StrongPositiveColinearityTester;
 import hr.fer.zemris.diprad.util.MyVector;
 
 public class LineModel {
@@ -96,32 +98,18 @@ public class LineModel {
 	 * @param points
 	 * @return
 	 */
-	public static List<Integer> calculateBreakPoints(List<Point> points) {
+	public static List<Integer> calculateBreakPoints(List<Point> points, Tester<MyVector> t) {
 		if (points.size() < 3) {
 			return new ArrayList<>();
 		}
 
 		List<MyVector> vectors = MyVector.listOfPointsToListOfVectors(points);
-		// System.out.println("Gotovi vektori");
-		// vectors.forEach((x) -> System.out.print(x + " "));
-		// System.out.println("\n");
-		MyVector v1 = new MyVector();
-		MyVector v2 = new MyVector();
-
-		double cos;
-		// NumberFormat formatter = new DecimalFormat("#0.0000");
 		List<Integer> breakPoints = new ArrayList<>();
 		breakPoints.add(0);
 
 		for (int i = 0; i < vectors.size() - 1; i++) {
-			v1 = vectors.get(i);
-			v2 = vectors.get(i + 1);
-			cos = MyVector.scalarProduct(v1, v2) / (v1.norm() * v2.norm());
-
-			if (cos < 0.8) {
-				breakPoints.add(v1.i2);
-				// System.out.println("i:" + i + " cos:" + formatter.format(cos) + " v1:" + v1 +
-				// " v2:" + v2);
+			if (t.test(vectors.get(i), vectors.get(i + 1))) {
+				breakPoints.add(vectors.get(i).i2);
 			}
 		}
 
@@ -129,8 +117,9 @@ public class LineModel {
 		return breakPoints;
 	}
 
-	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points) {
-		List<Integer> breakPoints = LineModel.calculateBreakPoints(points);
+	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points, Tester<MyVector> t) {
+		List<Integer> breakPoints = LineModel.calculateBreakPoints(points, t);
+		System.out.println("Initial breakPoints: " + breakPoints.size());
 		if (breakPoints.size() == 2) {// first and last index (0 and size-1)
 			return breakPoints;
 		}
@@ -199,5 +188,9 @@ public class LineModel {
 		}
 
 		return trueBreakPoints;
+	}
+
+	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points) {
+		return acumulateBreakPointsWhichAreClose(points, new StrongPositiveColinearityTester());
 	}
 }
