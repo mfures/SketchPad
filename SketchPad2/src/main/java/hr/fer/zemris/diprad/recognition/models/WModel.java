@@ -24,19 +24,19 @@ public class WModel {
 
 		Line l1 = lines.get(0), l2 = lines.get(1), l3 = lines.get(2), l4 = lines.get(3);
 
-		if (!(l1.getSlope() <= (20) && l1.getSlope() >= 0.9)) {
+		if (!(l1.getSlope() <= (30) && l1.getSlope() >= 0.9)) {
 			// System.out.println("Bad l1 slope: " + l1.getSlope());
 			return false;
 		}
-		if (!(l2.getSlope() >= (-20) && l2.getSlope() <= -0.9)) {
+		if (!(l2.getSlope() >= (-30) && l2.getSlope() <= -0.9)) {
 			// System.out.println("Bad l2 slope: " + l2.getSlope());
 			return false;
 		}
-		if (!(l3.getSlope() <= (20) && l3.getSlope() >= 0.9)) {
+		if (!(l3.getSlope() <= (30) && l3.getSlope() >= 0.9)) {
 			// System.out.println("Bad l3 slope: " + l3.getSlope());
 			return false;
 		}
-		if (!(l4.getSlope() >= (-20) && l4.getSlope() <= -0.9)) {
+		if (!(l4.getSlope() >= (-30) && l4.getSlope() <= -0.9)) {
 			// System.out.println("Bad l4 slope: " + l4.getSlope());
 			return false;
 		}
