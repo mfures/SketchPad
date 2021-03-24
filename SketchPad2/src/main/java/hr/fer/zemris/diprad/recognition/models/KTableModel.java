@@ -16,7 +16,6 @@ import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
-import hr.fer.zemris.diprad.recognition.objects.One;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.LineListWrapper;
 import hr.fer.zemris.diprad.recognition.sorters.CoordinateAverageXSorter;
@@ -81,14 +80,17 @@ public class KTableModel {
 	private void checkCharacterModels(List<BasicMovementWrapper> bmws) {
 		for (int i = 0; i < bmws.size(); i++) {
 			if (bmws.get(i).isUnused()) {
-				if (null != CircularModel.recognize(bmws.get(i))) {
-					System.out.println("Circular");
+//				if (null != CircularModel.recognize(bmws.get(i))) {
+//					System.out.println("Circular");
+//				} else {
+//					System.out.println("non circular");
+//				}
+				if (ZeroModel.recognize(bmws.get(i))) {
+					System.out.print("0 ");
 				} else {
-					System.out.println("non circular");
+					System.out.print("n0 ");
 				}
-
-//				One one = OneModel.recognize(bmws.get(i));
-//				if (one != null) {
+//				if (OneModel.recognize(bmws.get(i))) {
 //					System.out.print("1 ");
 //				} else {
 //					System.out.print("n1 ");
