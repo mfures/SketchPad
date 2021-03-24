@@ -79,4 +79,9 @@ public class PointDouble {
 	public static PointDouble mulPoint(PointDouble a, double b) {
 		return new PointDouble(b * a.x, b * a.y);
 	}
+
+	public static PointDouble normalizedPoint(PointDouble p) {
+		double norm = Math.sqrt(p.x * p.x + p.y * p.y);
+		return PointDouble.mulPoint(p, 1 / norm);
+	}
 }

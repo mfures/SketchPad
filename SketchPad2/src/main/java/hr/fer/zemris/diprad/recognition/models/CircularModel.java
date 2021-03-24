@@ -110,6 +110,7 @@ public class CircularModel {
 				max2 = dist;
 			}
 		}
+		System.out.println("Min max ratio: " + min2 / max2);
 
 		System.out.println("Min max ratio: " + min / max);
 		if (!(min / max > 0.1)) {
@@ -122,6 +123,18 @@ public class CircularModel {
 		PointDouble minToCenter2 = new PointDouble(avPointDouble.x - sampledPoints.get(minIndex2).x,
 				avPointDouble.y - sampledPoints.get(minIndex2).y);
 		System.out.println("Min to center vector: " + minToCenter2);
+		PointDouble centerToStart = new PointDouble(sampledPoints.get(0).x - avPointDouble.x,
+				sampledPoints.get(0).y - avPointDouble.y);
+		PointDouble centerToEnd = new PointDouble(sampledPoints.get(sampledPoints.size() - 1).x - avPointDouble.x,
+				sampledPoints.get(sampledPoints.size() - 1).y - avPointDouble.y);
+		PointDouble avCES = PointDouble.mulPoint(PointDouble.addPoints(centerToStart, centerToEnd), 0.5);
+		PointDouble normalized = PointDouble.normalizedPoint(avCES);
+		System.out.println("Center to start vector: " + centerToStart);
+		System.out.println("Center to end vector: " + centerToEnd);
+		System.out.println("Average csce: " + avCES);
+		System.out.println("Normalized:" + normalized);
+		System.out.println("Theta: " + Math.atan2(normalized.y, normalized.x));
+		System.out.println("Theta deg: " + Math.toDegrees(Math.atan2(normalized.y, normalized.x)));
 		double s12, s22;
 		double angle2;
 		int checkSum2 = 0;
