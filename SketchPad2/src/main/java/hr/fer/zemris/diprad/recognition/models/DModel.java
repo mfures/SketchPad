@@ -61,6 +61,9 @@ public class DModel {
 
 		double dist1 = l.distanceFromPointToLine(p1);
 		double dist2 = l.distanceFromPointToLine(p2);
+		if (l.length() * 0.9 > Math.abs(p1.y - p2.y)) {
+			return false;
+		}
 
 		// System.out.println(dist1 + " " + dist2);
 		// System.out.println(co.getTotalNorm());
