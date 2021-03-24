@@ -24,7 +24,7 @@ public class CircularModel {
 		double minMaxRatio = calculateMinMaxDistanceRatio(sampledPoints, avPointDouble, maxVector);
 
 		if (!(minMaxRatio > 0.15)) {
-			System.out.println("Bad max/min ratio:" + minMaxRatio);
+			// System.out.println("Bad max/min ratio:" + minMaxRatio);
 			return null;
 		}
 
@@ -35,7 +35,7 @@ public class CircularModel {
 		}
 
 		return new CircularObject(avPointDouble, minMaxRatio, theta, angle(maxVector), totalAngle > 337.5, totalAngle,
-				bmw);
+				totalNorm, bmw);
 	}
 
 	@SuppressWarnings("unused")

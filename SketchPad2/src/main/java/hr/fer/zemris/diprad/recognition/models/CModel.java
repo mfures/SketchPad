@@ -14,7 +14,7 @@ public class CModel {
 			System.out.println("invalid angle: " + co.getTotalAngle());
 			return false;
 		}
-		if (co.getMinMaxRatio() > 0.55 || co.getMinMaxRatio() < 0.25) {
+		if (co.getMinMaxRatio() > 0.55 || co.getMinMaxRatio() < 0.18) {
 			System.out.println("Bad min max:" + co.getMinMaxRatio());
 			return true;
 		}

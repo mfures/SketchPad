@@ -85,16 +85,16 @@ public class KTableModel {
 //				} else {
 //					System.out.println("non circular");
 //				}
-				if (ZeroModel.recognize(bmws.get(i))) {
-					System.out.print("0 ");
-				} else {
-					System.out.print("n0 ");
-				}
-				if (CModel.recognize(bmws.get(i))) {
-					System.out.print("C ");
-				} else {
-					System.out.print("nC ");
-				}
+//				if (ZeroModel.recognize(bmws.get(i))) {
+//					System.out.print("0 ");
+//				} else {
+//					System.out.print("n0 ");
+//				}
+//				if (CModel.recognize(bmws.get(i))) {
+//					System.out.print("C ");
+//				} else {
+//					System.out.print("nC ");
+//				}
 //				if (OneModel.recognize(bmws.get(i))) {
 //					System.out.print("1 ");
 //				} else {
@@ -113,8 +113,8 @@ public class KTableModel {
 //					System.out.print("nW ");
 //				}
 
-//				if (i != bmws.size() - 1) {
-//					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
+				if (i != bmws.size() - 1) {
+					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
 //						if (true == XModel.recognize(bmws.get(i), bmws.get(i + 1))) {
 //							System.out.print("X ");
 //						} else {
@@ -132,8 +132,14 @@ public class KTableModel {
 //						} else {
 //							System.out.print("nA ");
 //						}
-//					}
-//				}
+
+						if (DModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+							System.out.print("D");
+						} else {
+							System.out.print("nD");
+						}
+					}
+				}
 
 				System.out.println();
 			}

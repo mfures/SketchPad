@@ -11,16 +11,18 @@ public class CircularObject {
 
 	private boolean fullCircle;
 	double totalAngle;
+	double totalNorm;
 	private BasicMovementWrapper bmw;
 
 	public CircularObject(PointDouble averagePoint, double minMaxRatio, double theta, double thetaMaxDistance,
-			boolean fullCircle, double totalAngle, BasicMovementWrapper bmw) {
+			boolean fullCircle, double totalAngle, double totalNorm, BasicMovementWrapper bmw) {
 		this.averagePoint = averagePoint;
 		this.minMaxRatio = minMaxRatio;
 		this.theta = theta;
 		this.thetaMaxDistance = thetaMaxDistance;
 		this.fullCircle = fullCircle;
 		this.totalAngle = totalAngle;
+		this.totalNorm = totalNorm;
 		this.bmw = bmw;
 	}
 
@@ -50,5 +52,9 @@ public class CircularObject {
 
 	public double getTotalAngle() {
 		return totalAngle;
+	}
+
+	public double getTotalNorm() {
+		return totalNorm;
 	}
 }
