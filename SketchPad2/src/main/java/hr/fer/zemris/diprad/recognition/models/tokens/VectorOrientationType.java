@@ -1,0 +1,7 @@
+package hr.fer.zemris.diprad.recognition.models.tokens;
+
+public enum VectorOrientationType {
+	HORIZONTAL_PLUS, HORIZONTAL_MINUS, VERTICAL_PLUS, VERTICAL_MINUS, DIAGONAL_PLUS_PLUS, DIAGONAL_PLUS_MINUS,
+	DIAGONAL_MINUS_PLUS, DIAGONAL_MINUS_MINUS
+
+}
