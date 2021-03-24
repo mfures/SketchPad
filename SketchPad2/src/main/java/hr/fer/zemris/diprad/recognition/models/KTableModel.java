@@ -90,6 +90,11 @@ public class KTableModel {
 				} else {
 					System.out.print("n0 ");
 				}
+				if (CModel.recognize(bmws.get(i))) {
+					System.out.print("C ");
+				} else {
+					System.out.print("nC ");
+				}
 //				if (OneModel.recognize(bmws.get(i))) {
 //					System.out.print("1 ");
 //				} else {

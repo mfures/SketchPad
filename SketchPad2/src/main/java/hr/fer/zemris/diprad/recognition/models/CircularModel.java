@@ -29,15 +29,16 @@ public class CircularModel {
 		}
 
 		double theta = calculateThetaOfOpening(sampledPoints, avPointDouble);
-		VectorOrientationType orientation = angleToOrientation(theta);
 		Double totalAngle = totalAngle(sampledPoints, avPointDouble);
 		if (totalAngle == null) {
 			return null;
 		}
 
-		return new CircularObject(avPointDouble, minMaxRatio, orientation, angle(maxVector), totalAngle > 337.5, bmw);
+		return new CircularObject(avPointDouble, minMaxRatio, theta, angle(maxVector), totalAngle > 337.5, totalAngle,
+				bmw);
 	}
 
+	@SuppressWarnings("unused")
 	private static VectorOrientationType angleToOrientation(double theta) {
 		if (theta < -157.5) {
 			return VectorOrientationType.HORIZONTAL_MINUS;
@@ -91,11 +92,12 @@ public class CircularModel {
 		}
 		checkSum2 /= (sampledPoints.size() - 1);
 		// System.out.println("Check sum: " + checkSum2);
-		if (Math.abs(checkSum2) < 0.8) {
+		if (Math.abs(checkSum2) < 0.775) {
+			// System.out.println("Check sum: " + checkSum2);
 			return null;
 		}
 
-		return Math.toDegrees(totalAngle);
+		return Math.abs(Math.toDegrees(totalAngle));
 	}
 
 	private static double calculateThetaOfOpening(List<PointDouble> sampledPoints, PointDouble avPointDouble) {

@@ -1,26 +1,26 @@
 package hr.fer.zemris.diprad.recognition.objects;
 
-import hr.fer.zemris.diprad.recognition.models.tokens.VectorOrientationType;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.PointDouble;
 
 public class CircularObject {
 	private PointDouble averagePoint;
 	private double minMaxRatio;
-	private VectorOrientationType averagePointToOpeningOrientation;
+	private double theta;
 	private double thetaMaxDistance;
 
 	private boolean fullCircle;
+	double totalAngle;
 	private BasicMovementWrapper bmw;
 
-	public CircularObject(PointDouble averagePoint, double minMaxRatio,
-			VectorOrientationType averagePointToOpeningOrientation, double thetaMaxDistance, boolean fullCircle,
-			BasicMovementWrapper bmw) {
+	public CircularObject(PointDouble averagePoint, double minMaxRatio, double theta, double thetaMaxDistance,
+			boolean fullCircle, double totalAngle, BasicMovementWrapper bmw) {
 		this.averagePoint = averagePoint;
 		this.minMaxRatio = minMaxRatio;
-		this.averagePointToOpeningOrientation = averagePointToOpeningOrientation;
+		this.theta = theta;
 		this.thetaMaxDistance = thetaMaxDistance;
 		this.fullCircle = fullCircle;
+		this.totalAngle = totalAngle;
 		this.bmw = bmw;
 	}
 
@@ -32,8 +32,8 @@ public class CircularObject {
 		return minMaxRatio;
 	}
 
-	public VectorOrientationType getAveragePointToOpeningOrientation() {
-		return averagePointToOpeningOrientation;
+	public double getTheta() {
+		return theta;
 	}
 
 	public boolean isFullCircle() {
@@ -46,5 +46,9 @@ public class CircularObject {
 
 	public double getThetaMaxDistance() {
 		return thetaMaxDistance;
+	}
+
+	public double getTotalAngle() {
+		return totalAngle;
 	}
 }
