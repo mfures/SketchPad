@@ -84,4 +84,9 @@ public class PointDouble {
 		double norm = Math.sqrt(p.x * p.x + p.y * p.y);
 		return PointDouble.mulPoint(p, 1 / norm);
 	}
+
+	public void set(double x, double y) {
+		this.x = x;
+		this.y = y;
+	}
 }

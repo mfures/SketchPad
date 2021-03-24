@@ -8,14 +8,18 @@ public class CircularObject {
 	private PointDouble averagePoint;
 	private double minMaxRatio;
 	private VectorOrientationType averagePointToOpeningOrientation;
+	private double thetaMaxDistance;
+
 	private boolean fullCircle;
 	private BasicMovementWrapper bmw;
 
 	public CircularObject(PointDouble averagePoint, double minMaxRatio,
-			VectorOrientationType averagePointToOpeningOrientation, boolean fullCircle, BasicMovementWrapper bmw) {
+			VectorOrientationType averagePointToOpeningOrientation, double thetaMaxDistance, boolean fullCircle,
+			BasicMovementWrapper bmw) {
 		this.averagePoint = averagePoint;
 		this.minMaxRatio = minMaxRatio;
 		this.averagePointToOpeningOrientation = averagePointToOpeningOrientation;
+		this.thetaMaxDistance = thetaMaxDistance;
 		this.fullCircle = fullCircle;
 		this.bmw = bmw;
 	}
@@ -38,5 +42,9 @@ public class CircularObject {
 
 	public BasicMovementWrapper getBmw() {
 		return bmw;
+	}
+
+	public double getThetaMaxDistance() {
+		return thetaMaxDistance;
 	}
 }

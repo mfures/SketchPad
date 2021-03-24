@@ -81,7 +81,7 @@ public class KTableModel {
 	private void checkCharacterModels(List<BasicMovementWrapper> bmws) {
 		for (int i = 0; i < bmws.size(); i++) {
 			if (bmws.get(i).isUnused()) {
-				if (CircularModel.recognize(bmws.get(i))) {
+				if (null != CircularModel.recognize(bmws.get(i))) {
 					System.out.println("Circular");
 				} else {
 					System.out.println("non circular");

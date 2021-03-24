@@ -2,41 +2,40 @@ package hr.fer.zemris.diprad.recognition.models;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import hr.fer.zemris.diprad.recognition.models.tokens.VectorOrientationType;
+import hr.fer.zemris.diprad.recognition.objects.CircularObject;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.MyVector;
 import hr.fer.zemris.diprad.util.PointDouble;
 
 public class CircularModel {
-	public static boolean recognize(BasicMovementWrapper bmw) {
+	public static CircularObject recognize(BasicMovementWrapper bmw) {
 		return recognize(bmw.getBm().getPoints(), 0, bmw.getBm().getPoints().size() - 1, bmw);
 	}
 
-	public static boolean recognize(List<Point> points, int startIndex, int endIndex, BasicMovementWrapper bmw) {
+	public static CircularObject recognize(List<Point> points, int startIndex, int endIndex, BasicMovementWrapper bmw) {
 		double totalNorm = calculateTotalNorm(points, startIndex, endIndex);
 		int k = (endIndex - startIndex + 1);
 		List<PointDouble> sampledPoints = samplePoints(points, startIndex, endIndex, totalNorm, k);
 		PointDouble avPointDouble = calculateAveragePoint(sampledPoints);
-		double minMaxRatio = calculateMinMaxDistanceRatio(sampledPoints, avPointDouble);
+		PointDouble maxVector = new PointDouble(0, 0);
+		double minMaxRatio = calculateMinMaxDistanceRatio(sampledPoints, avPointDouble, maxVector);
 
 		if (!(minMaxRatio > 0.15)) {
 			System.out.println("Bad max/min ratio:" + minMaxRatio);
-			return false;
+			return null;
 		}
 
 		double theta = calculateThetaOfOpening(sampledPoints, avPointDouble);
 		VectorOrientationType orientation = angleToOrientation(theta);
-		System.out.println("Orientacija: " + orientation);
-		System.out.println("Theta: " + theta);
 		Double totalAngle = totalAngle(sampledPoints, avPointDouble);
 		if (totalAngle == null) {
-			return false;
+			return null;
 		}
 
-		return true;
+		return new CircularObject(avPointDouble, minMaxRatio, orientation, angle(maxVector), totalAngle > 337.5, bmw);
 	}
 
 	private static VectorOrientationType angleToOrientation(double theta) {
@@ -72,7 +71,7 @@ public class CircularModel {
 		double s12, s22;
 		double angle2;
 		Double totalAngle = 0.0;
-		int checkSum2 = 0;
+		double checkSum2 = 0;
 		for (int i = 0; i < sampledPoints.size() - 1; i++) {
 			s12 = calculateSlope(sampledPoints.get(i), avPointDouble);
 			s22 = calculateSlope(avPointDouble, sampledPoints.get(i + 1));
@@ -90,7 +89,8 @@ public class CircularModel {
 			else
 				checkSum2--;
 		}
-		checkSum2 /= ((double) (sampledPoints.size() - 1));
+		checkSum2 /= (sampledPoints.size() - 1);
+		// System.out.println("Check sum: " + checkSum2);
 		if (Math.abs(checkSum2) < 0.8) {
 			return null;
 		}
@@ -104,12 +104,11 @@ public class CircularModel {
 		PointDouble centerToEnd = new PointDouble(sampledPoints.get(sampledPoints.size() - 1).x - avPointDouble.x,
 				sampledPoints.get(sampledPoints.size() - 1).y - avPointDouble.y);
 		PointDouble averageCECS = PointDouble.mulPoint(PointDouble.addPoints(centerToStart, centerToEnd), 0.5);
-		PointDouble normalized = PointDouble.normalizedPoint(averageCECS);
+		return angle(averageCECS);
+	}
 
-		// System.out.println("Center to start vector: " + centerToStart);
-		// System.out.println("Center to end vector: " + centerToEnd);
-		// System.out.println("Average csce: " + averageCECS);
-		// System.out.println("Normalized:" + normalized);
+	private static double angle(PointDouble averageCECS) {
+		PointDouble normalized = PointDouble.normalizedPoint(averageCECS);
 		return Math.toDegrees(Math.atan2(normalized.y, normalized.x));
 	}
 
@@ -121,7 +120,8 @@ public class CircularModel {
 		return totalNorm;
 	}
 
-	private static double calculateMinMaxDistanceRatio(List<PointDouble> sampledPoints, PointDouble avPointDouble) {
+	private static double calculateMinMaxDistanceRatio(List<PointDouble> sampledPoints, PointDouble avPointDouble,
+			PointDouble maxVector) {
 		double min2 = Integer.MAX_VALUE, max2 = 0;
 
 		for (int i = 0; i < sampledPoints.size(); i++) {
@@ -132,6 +132,7 @@ public class CircularModel {
 			}
 			if (max2 < dist) {
 				max2 = dist;
+				maxVector.set(p.x - avPointDouble.x, p.y - avPointDouble.y);
 			}
 		}
 		double minMaxRatio = min2 / max2;
