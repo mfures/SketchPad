@@ -137,15 +137,15 @@ public class MyVector {
 
 	public static List<MyVector> initVectorList(List<Point> points, int startIndex, int endIndex) {
 		List<MyVector> vectors = new ArrayList<MyVector>();
-		double totalLength = 0 - 0;
+		// double totalLength = 0 - 0;
 		for (int i = startIndex; i < endIndex; i++) {
 			MyVector v = MyVector.initNewVector(points.get(i), points.get(i + 1), i, i + 1);
 			vectors.add(v);
-			System.out.print("(" + v + " norm:" + v.norm() + ") ");
-			totalLength += v.norm();
+			// System.out.print("(" + v + " norm:" + v.norm() + ") ");
+			// totalLength += v.norm();
 		}
 
-		System.out.println("\nTotal vektor norm: " + totalLength);
+		// System.out.println("\nTotal vektor norm: " + totalLength);
 		return vectors;
 	}
 
@@ -156,4 +156,17 @@ public class MyVector {
 		return Math.sqrt(x * x + y * y);
 	}
 
+	public static double norm(PointDouble point, PointDouble point2) {
+		double x = point.x - point2.x;
+		double y = point.y - point2.y;
+
+		return Math.sqrt(x * x + y * y);
+	}
+
+	public static double norm(PointDouble point, Point point2) {
+		double x = point.x - point2.x;
+		double y = point.y - point2.y;
+
+		return Math.sqrt(x * x + y * y);
+	}
 }

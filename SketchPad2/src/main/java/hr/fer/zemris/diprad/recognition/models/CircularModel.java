@@ -1,10 +1,13 @@
 package hr.fer.zemris.diprad.recognition.models;
 
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.MyVector;
+import hr.fer.zemris.diprad.util.PointDouble;
 
 public class CircularModel {
 	public static boolean recognize(BasicMovementWrapper bmw) {
@@ -17,12 +20,46 @@ public class CircularModel {
 		for (int i = 0; i < vectors.size(); i++) {
 			totalNorm += vectors.get(i).norm();
 		}
-
-		for (int k = 0; k < (endIndex - startIndex + 1.0) / 2; k++) {
-			for (int i = startIndex; i <= endIndex; i++) {
-
+		int k = (endIndex - startIndex + 1);
+		// k /= 2;
+		// System.out.println("K:" + k);
+		List<PointDouble> sampledPoints = new ArrayList<>();
+		sampledPoints.add(new PointDouble(points.get(startIndex)));
+		PointDouble lastPoint = sampledPoints.get(0);
+		double segmentLength = totalNorm / (k - 1);
+		// System.out.println("Target segment length: " + segmentLength);
+		for (int j = 1, i = startIndex + 1; j < k - 1; j++) {
+			double currentLength = MyVector.norm(lastPoint, points.get(i));
+			// System.out.println("Currentt length initial:" + currentLength);
+			if (currentLength > segmentLength) {
+				PointDouble active = PointDouble.addPoints(lastPoint, PointDouble
+						.mulPoint(PointDouble.subPoints(points.get(i), lastPoint), segmentLength / currentLength));
+				sampledPoints.add(active);
+				lastPoint = active;
+			} else {
+				double totalLength = currentLength;
+				while (totalLength < segmentLength) {
+					i++;
+					currentLength = MyVector.norm(points.get(i - 1), points.get(i));
+					totalLength += currentLength;
+					// System.out.println("Total length: " + totalLength);
+				}
+				totalLength -= currentLength;
+				PointDouble active = PointDouble.addPoints(points.get(i - 1),
+						PointDouble.mulPoint(PointDouble.subPoints(points.get(i), points.get(i - 1)),
+								(segmentLength - totalLength) / currentLength));
+				sampledPoints.add(active);
+				lastPoint = active;
 			}
+
 		}
+
+		sampledPoints.add(new PointDouble(points.get(endIndex)));
+
+		// System.out.println("Total points: " + (endIndex - startIndex + 1));
+		// System.out.println("Calculated points: " + sampledPoints.size());
+		// sampledPoints.forEach((x) -> System.out.print(x + " "));
+		// System.out.println();
 
 		Point averagePoint = new Point(0, 0);
 		for (int i = startIndex; i <= endIndex; i++) {
@@ -30,6 +67,15 @@ public class CircularModel {
 			averagePoint.x += p.x;
 			averagePoint.y += p.y;
 		}
+
+		PointDouble avPointDouble = new PointDouble(0, 0);
+		for (PointDouble p : sampledPoints) {
+			avPointDouble.x += p.x;
+			avPointDouble.y += p.y;
+		}
+		avPointDouble.x /= sampledPoints.size();
+		avPointDouble.y /= sampledPoints.size();
+
 		averagePoint.x = (int) Math.round((averagePoint.x) / (endIndex - startIndex + 1.0));
 		averagePoint.y = (int) Math.round((averagePoint.y) / (endIndex - startIndex + 1.0));
 
@@ -49,10 +95,53 @@ public class CircularModel {
 			}
 		}
 
+		double min2 = Integer.MAX_VALUE, max2 = 0;
+		int minIndex2 = 0, maxIndex2 = 0;
+
+		for (int i = 0; i < sampledPoints.size(); i++) {
+			PointDouble p = sampledPoints.get(i);
+			double dist = Math.sqrt(Math.pow(p.x - avPointDouble.x, 2) + Math.pow(p.y - avPointDouble.y, 2));
+			if (min2 > dist) {
+				minIndex2 = i;
+				min2 = dist;
+			}
+			if (max2 < dist) {
+				maxIndex2 = i;
+				max2 = dist;
+			}
+		}
+
+		System.out.println("Min max ratio: " + min / max);
 		if (!(min / max > 0.1)) {
 			System.out.println("Bad max/min ratio:" + min / max);
-			return false;
+			// return false;
 		}
+
+		System.out.println("Average point double: " + avPointDouble);
+		System.out.println("Min point:            " + sampledPoints.get(minIndex2));
+		PointDouble minToCenter2 = new PointDouble(avPointDouble.x - sampledPoints.get(minIndex2).x,
+				avPointDouble.y - sampledPoints.get(minIndex2).y);
+		System.out.println("Min to center vector: " + minToCenter2);
+		double s12, s22;
+		double angle2;
+		int checkSum2 = 0;
+		for (int i = 0; i < sampledPoints.size() - 1; i++) {
+			s12 = calculateSlope(sampledPoints.get(i), avPointDouble);
+			s22 = calculateSlope(avPointDouble, sampledPoints.get(i + 1));
+			if (Double.isInfinite(s12)) {
+				angle2 = Math.atan(1 / s22);
+			} else if (Double.isInfinite(s22)) {
+				angle2 = Math.atan(-1 / s12);
+			} else {
+				angle2 = Math.atan((s12 - s22) / (1 + s12 * s22));
+			}
+
+			if (angle2 > 0)
+				checkSum2++;
+			else
+				checkSum2--;
+		}
+		System.out.println("Cheksum:" + (checkSum2 / ((double) (sampledPoints.size() - 1))));
 
 		System.out.println("Average point:        " + averagePoint);
 		System.out.println("Min point:            " + points.get(minIndex));
@@ -87,6 +176,10 @@ public class CircularModel {
 
 		System.out.println("Bad check sum");
 		return false;
+	}
+
+	public static double calculateSlope(PointDouble p1, PointDouble p2) {
+		return (p2.y - p1.y) / (p2.x * 1.0 - p1.x);
 	}
 
 	public static double calculateSlope(Point p1, Point p2) {
