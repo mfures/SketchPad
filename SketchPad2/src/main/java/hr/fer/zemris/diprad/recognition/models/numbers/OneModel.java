@@ -1,10 +1,11 @@
-package hr.fer.zemris.diprad.recognition.models;
+package hr.fer.zemris.diprad.recognition.models.numbers;
 
 import java.awt.Point;
 //import java.text.DecimalFormat;
 //import java.text.NumberFormat;
 import java.util.List;
 
+import hr.fer.zemris.diprad.recognition.models.LinearModel;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 

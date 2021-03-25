@@ -1,5 +1,6 @@
-package hr.fer.zemris.diprad.recognition.models;
+package hr.fer.zemris.diprad.recognition.models.letters;
 
+import hr.fer.zemris.diprad.recognition.models.CircularModel;
 import hr.fer.zemris.diprad.recognition.objects.CircularObject;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 

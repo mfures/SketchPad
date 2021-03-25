@@ -1,5 +1,6 @@
-package hr.fer.zemris.diprad.recognition.models;
+package hr.fer.zemris.diprad.recognition.models.letters;
 
+import hr.fer.zemris.diprad.recognition.models.LinearModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
