@@ -4,6 +4,7 @@ import java.awt.Point;
 
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
+import hr.fer.zemris.diprad.util.PointDouble;
 
 public class Line {
 	public static final double MAX_TAN = 0.2;
@@ -24,6 +25,21 @@ public class Line {
 	public Line(Point p1, Point p2, double slope, double intercept, BasicMovementWrapper bmw) {
 		this.p1 = p1;
 		this.p2 = p2;
+		this.slope = slope;
+		this.intercept = intercept;
+		this.bmw = bmw;
+
+		this.averageY = 0.5 * (p1.y + p2.y);
+		this.averageX = 0.5 * (p1.x + p2.x);
+
+		this.tan = calculateTan();
+		this.type = calculateType();
+		this.length = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+	}
+
+	public Line(PointDouble p1, PointDouble p2, double slope, double intercept, BasicMovementWrapper bmw) {
+		this.p1 = p1.toPoint();
+		this.p2 = p2.toPoint();
 		this.slope = slope;
 		this.intercept = intercept;
 		this.bmw = bmw;

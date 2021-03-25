@@ -59,6 +59,10 @@ public class OpenAction extends AbstractAction {
 			model.clear();
 
 			for (GraphicalObject go : tmp) {
+				if(go instanceof BasicMovement) {
+					((BasicMovement) go).initBoundingBox();
+				}
+				
 				model.add(go);
 			}
 

@@ -21,17 +21,23 @@ public class CircularModel {
 		double totalNorm = calculateTotalNorm(points, startIndex, endIndex);
 		int k = (endIndex - startIndex + 1);
 		List<PointDouble> sampledPoints = samplePoints(points, startIndex, endIndex, totalNorm, k);
-		PointDouble avPointDouble = calculateAveragePoint(sampledPoints);
+		return recognize(startIndex, endIndex, bmw, totalNorm, k, sampledPoints);
+	}
+
+	public static CircularObject recognize(int startIndex, int endIndex, BasicMovementWrapper bmw, double totalNorm,
+			int k, List<PointDouble> sampledPoints) {
+		PointDouble avPointDouble = calculateAveragePoint(sampledPoints, startIndex, endIndex);
 		PointDouble maxVector = new PointDouble(0, 0);
-		double minMaxRatio = calculateMinMaxDistanceRatio(sampledPoints, avPointDouble, maxVector);
+		double minMaxRatio = calculateMinMaxDistanceRatio(sampledPoints, avPointDouble, maxVector, startIndex,
+				endIndex);
 
 		if (!(minMaxRatio > 0.15)) {
 			// System.out.println("Bad max/min ratio:" + minMaxRatio);
 			return null;
 		}
 
-		double theta = calculateThetaOfOpening(sampledPoints, avPointDouble);
-		Double totalAngle = totalAngle(sampledPoints, avPointDouble);
+		double theta = calculateThetaOfOpening(sampledPoints, avPointDouble, startIndex, endIndex);
+		Double totalAngle = totalAngle(sampledPoints, avPointDouble, startIndex, endIndex);
 		if (totalAngle == null) {
 			return null;
 		}
@@ -70,12 +76,13 @@ public class CircularModel {
 		return VectorOrientationType.HORIZONTAL_MINUS;
 	}
 
-	private static Double totalAngle(List<PointDouble> sampledPoints, PointDouble avPointDouble) {
+	private static Double totalAngle(List<PointDouble> sampledPoints, PointDouble avPointDouble, int startIndex,
+			int endIndex) {
 		double s12, s22;
 		double angle2;
 		Double totalAngle = 0.0;
 		double checkSum2 = 0;
-		for (int i = 0; i < sampledPoints.size() - 1; i++) {
+		for (int i = startIndex; i < endIndex; i++) {
 			s12 = calculateSlope(sampledPoints.get(i), avPointDouble);
 			s22 = calculateSlope(avPointDouble, sampledPoints.get(i + 1));
 			if (Double.isInfinite(s12)) {
@@ -92,21 +99,22 @@ public class CircularModel {
 			else
 				checkSum2--;
 		}
-		checkSum2 /= (sampledPoints.size() - 1);
-		// System.out.println("Check sum: " + checkSum2);
+		checkSum2 /= (endIndex - startIndex);
+		//System.out.println("Check sum: " + checkSum2);
 		if (Math.abs(checkSum2) < 0.775) {
-			// System.out.println("Check sum: " + checkSum2);
+			//System.out.println("Check sum: " + checkSum2);
 			return null;
 		}
 
 		return Math.abs(Math.toDegrees(totalAngle));
 	}
 
-	private static double calculateThetaOfOpening(List<PointDouble> sampledPoints, PointDouble avPointDouble) {
-		PointDouble centerToStart = new PointDouble(sampledPoints.get(0).x - avPointDouble.x,
-				sampledPoints.get(0).y - avPointDouble.y);
-		PointDouble centerToEnd = new PointDouble(sampledPoints.get(sampledPoints.size() - 1).x - avPointDouble.x,
-				sampledPoints.get(sampledPoints.size() - 1).y - avPointDouble.y);
+	private static double calculateThetaOfOpening(List<PointDouble> sampledPoints, PointDouble avPointDouble,
+			int startIndex, int endIndex) {
+		PointDouble centerToStart = new PointDouble(sampledPoints.get(startIndex).x - avPointDouble.x,
+				sampledPoints.get(startIndex).y - avPointDouble.y);
+		PointDouble centerToEnd = new PointDouble(sampledPoints.get(endIndex).x - avPointDouble.x,
+				sampledPoints.get(endIndex).y - avPointDouble.y);
 		PointDouble averageCECS = PointDouble.mulPoint(PointDouble.addPoints(centerToStart, centerToEnd), 0.5);
 		return angle(averageCECS);
 	}
@@ -125,10 +133,10 @@ public class CircularModel {
 	}
 
 	private static double calculateMinMaxDistanceRatio(List<PointDouble> sampledPoints, PointDouble avPointDouble,
-			PointDouble maxVector) {
+			PointDouble maxVector, int startIndex, int endIndex) {
 		double min2 = Integer.MAX_VALUE, max2 = 0;
 
-		for (int i = 0; i < sampledPoints.size(); i++) {
+		for (int i = startIndex; i <= endIndex; i++) {
 			PointDouble p = sampledPoints.get(i);
 			double dist = Math.sqrt(Math.pow(p.x - avPointDouble.x, 2) + Math.pow(p.y - avPointDouble.y, 2));
 			if (min2 > dist) {
@@ -143,14 +151,15 @@ public class CircularModel {
 		return minMaxRatio;
 	}
 
-	private static PointDouble calculateAveragePoint(List<PointDouble> sampledPoints) {
+	private static PointDouble calculateAveragePoint(List<PointDouble> sampledPoints, int startIndex, int endIndex) {
 		PointDouble avPointDouble = new PointDouble(0, 0);
-		for (PointDouble p : sampledPoints) {
+		for (int i = startIndex; i <= endIndex; i++) {
+			PointDouble p = sampledPoints.get(i);
 			avPointDouble.x += p.x;
 			avPointDouble.y += p.y;
 		}
-		avPointDouble.x /= sampledPoints.size();
-		avPointDouble.y /= sampledPoints.size();
+		avPointDouble.x /= (endIndex - startIndex + 1);
+		avPointDouble.y /= (endIndex - startIndex + 1);
 		return avPointDouble;
 	}
 

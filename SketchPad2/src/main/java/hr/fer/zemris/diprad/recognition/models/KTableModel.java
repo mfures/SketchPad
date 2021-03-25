@@ -18,6 +18,7 @@ import hr.fer.zemris.diprad.recognition.models.letters.BModel;
 import hr.fer.zemris.diprad.recognition.models.letters.CModel;
 import hr.fer.zemris.diprad.recognition.models.letters.DModel;
 import hr.fer.zemris.diprad.recognition.models.letters.HModel;
+import hr.fer.zemris.diprad.recognition.models.letters.JModel;
 import hr.fer.zemris.diprad.recognition.models.letters.WModel;
 import hr.fer.zemris.diprad.recognition.models.numbers.ThreeModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
@@ -130,6 +131,8 @@ public class KTableModel {
 //				} else {
 //					System.out.print("nH ");
 //				}
+
+				System.out.println("Za j: " + JModel.recognize(bmws.get(i)));
 
 				if (i != bmws.size() - 1) {
 					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {

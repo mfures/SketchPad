@@ -9,6 +9,7 @@ import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.recognition.testers.StrongPositiveColinearityTester;
 import hr.fer.zemris.diprad.util.MyVector;
+import hr.fer.zemris.diprad.util.PointDouble;
 
 public class LinearModel {
 
@@ -52,6 +53,27 @@ public class LinearModel {
 
 	}
 
+	private static double calculateError(int start, int limit, double slope, double intercept,
+			List<PointDouble> points) {
+		double error = 0;
+		if (Math.abs(slope) <= 1.0) {
+			for (int i = start; i <= limit; i++) {
+				error += Math.pow(slope * points.get(i).x + intercept - points.get(i).y, 2);
+			}
+		} else {
+			if (Double.isInfinite(slope)) {
+				for (int i = start; i <= limit; i++) {
+					error += Math.pow(points.get(i).x - points.get(i).x, 2);
+				}
+			} else {
+				for (int i = start; i <= limit; i++) {
+					error += Math.pow((points.get(i).y - intercept) / slope - points.get(i).x, 2);
+				}
+			}
+		}
+		return error;
+	}
+
 	private static double calculateError(List<Point> points, int start, int limit, double slope, double intercept) {
 		double error = 0;
 		if (Math.abs(slope) <= 1.0) {
@@ -74,6 +96,23 @@ public class LinearModel {
 
 	public static Line recognize(BasicMovementWrapper bmw) {
 		return recognize(bmw, 0, bmw.getBm().getPoints().size() - 1);
+	}
+
+	public static Line recognize(List<PointDouble> points, int startIndex, int endIndex, BasicMovementWrapper bmw) {
+		PointDouble p1 = points.get(startIndex);
+		PointDouble p2 = points.get(endIndex);
+
+		double slope = (p2.y - p1.y) / (p2.x * 1.0 - p1.x);
+		double intercept = p1.y - slope * p1.x;
+
+		double error = calculateError(startIndex, endIndex, slope, intercept, points);
+		error /= (endIndex - startIndex + 1);
+
+		if (error > KTableModel.MAX_AVERAGE_SQUARE_ERROR) {
+			return null;
+		}
+
+		return new Line(p1, p2, slope, intercept, bmw);
 	}
 
 	public static Line recognize(BasicMovementWrapper bmw, int startIndex, int endIndex) {

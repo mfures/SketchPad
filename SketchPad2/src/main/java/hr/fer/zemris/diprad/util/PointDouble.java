@@ -70,6 +70,10 @@ public class PointDouble {
 		return new PointDouble(a.x - b.x, a.y - b.y);
 	}
 
+	public Point toPoint() {
+		return new Point((int) Math.round(x), (int) Math.round(y));
+	}
+
 	/**
 	 * 
 	 * @param a
