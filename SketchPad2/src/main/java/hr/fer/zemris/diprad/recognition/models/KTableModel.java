@@ -14,6 +14,7 @@ import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
+import hr.fer.zemris.diprad.recognition.models.letters.BModel;
 import hr.fer.zemris.diprad.recognition.models.letters.CModel;
 import hr.fer.zemris.diprad.recognition.models.letters.DModel;
 import hr.fer.zemris.diprad.recognition.models.numbers.ThreeModel;
@@ -147,6 +148,11 @@ public class KTableModel {
 //						} else {
 //							System.out.print("nD");
 //						}
+						if (BModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+							System.out.print("B");
+						} else {
+							System.out.print("nB");
+						}
 					}
 				}
 
