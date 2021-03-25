@@ -116,7 +116,7 @@ public class CircularModel {
 		return Math.toDegrees(Math.atan2(normalized.y, normalized.x));
 	}
 
-	private static double calculateTotalNorm(List<Point> points, int startIndex, int endIndex) {
+	public static double calculateTotalNorm(List<Point> points, int startIndex, int endIndex) {
 		double totalNorm = 0.0;
 		for (int i = startIndex; i < endIndex; i++) {
 			totalNorm += MyVector.norm(points.get(i), points.get(i + 1));
@@ -154,7 +154,7 @@ public class CircularModel {
 		return avPointDouble;
 	}
 
-	private static List<PointDouble> samplePoints(List<Point> points, int startIndex, int endIndex, double totalNorm,
+	public static List<PointDouble> samplePoints(List<Point> points, int startIndex, int endIndex, double totalNorm,
 			int k) {
 		List<PointDouble> sampledPoints = new ArrayList<>();
 		sampledPoints.add(new PointDouble(points.get(startIndex)));
