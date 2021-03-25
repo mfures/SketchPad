@@ -37,7 +37,7 @@ public class CircularModel {
 		}
 
 		return new CircularObject(avPointDouble, minMaxRatio, theta, angle(maxVector), totalAngle > 337.5, totalAngle,
-				totalNorm, bmw);
+				totalNorm, bmw, startIndex, endIndex);
 	}
 
 	@SuppressWarnings("unused")

@@ -15,6 +15,7 @@ import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.letters.DModel;
+import hr.fer.zemris.diprad.recognition.models.numbers.ThreeModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
@@ -98,6 +99,11 @@ public class KTableModel {
 //				} else {
 //					System.out.print("nC ");
 //				}
+				if (ThreeModel.recognize(bmws.get(i))) {
+					System.out.print("3 ");
+				} else {
+					System.out.print("n3 ");
+				}
 //				if (OneModel.recognize(bmws.get(i))) {
 //					System.out.print("1 ");
 //				} else {

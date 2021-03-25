@@ -1,6 +1,5 @@
 package hr.fer.zemris.diprad.recognition.models.numbers;
 
-import java.awt.Point;
 import java.util.List;
 
 import hr.fer.zemris.diprad.recognition.models.CircularModel;
@@ -14,23 +13,47 @@ public class ThreeModel {
 			System.out.println("Bad number of break points: " + breakPoints.size());
 			return false;
 		}
+		CircularObject co1, co2;
+		if (bmw.getBm().getPoints().get(0).y < bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).y) {
+			co1 = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPoints.get(1), bmw);
+			co2 = CircularModel.recognize(bmw.getBm().getPoints(), breakPoints.get(1), breakPoints.get(2), bmw);
+		} else {
+			co2 = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPoints.get(1), bmw);
+			co1 = CircularModel.recognize(bmw.getBm().getPoints(), breakPoints.get(1), breakPoints.get(2), bmw);
+		}
 
-//		CircularObject co = CircularModel.recognize(bmw);
-//		if (co == null) {
-//			//System.out.println("No circular object found");
-//			return false;
-//		}
-//		if (!co.isFullCircle()) {
-//			//System.out.println("Not ful circle");
-//			return false;
-//		}
-//		if (co.getMinMaxRatio() > 0.65 || co.getMinMaxRatio() < 0.25) {
-//			//System.out.println("Bad min max:" + co.getMinMaxRatio());
-//		}
-//		if (Math.abs(co.getThetaMaxDistance()) > 125 || Math.abs(co.getThetaMaxDistance()) < 55) {
-//			//System.out.println("Bad angle:" + co.getThetaMaxDistance());
-//			return false;
-//		}
+		if (co1 == null || co2 == null) {
+			System.out.println("Some are not circular");
+			return false;
+		}
+
+		if (!(angleAndMinMaxTest(co1) && angleAndMinMaxTest(co2))) {
+			return false;
+		}
+
+		System.out.println("c1:" + co1.getTheta());
+		if (!(co1.getTheta() > 130 || co1.getTheta() < -145)) {
+			System.out.println("Bad opening position: " + co1.getTheta());
+			return false;
+		}
+
+		System.out.println("c2:" + co2.getTheta());
+		if (!(co2.getTheta() > 145 || co2.getTheta() < -130)) {
+			System.out.println("Bad opening position: " + co2.getTheta());
+			return false;
+		}
+		return true;
+	}
+
+	private static boolean angleAndMinMaxTest(CircularObject co1) {
+		if (co1.getTotalAngle() < 240 || co1.getTotalAngle() > 305) {
+			System.out.println("invalid angle: " + co1.getTotalAngle());
+			return false;
+		}
+		if (co1.getMinMaxRatio() > 0.55 || co1.getMinMaxRatio() < 0.18) {
+			System.out.println("Bad min max:" + co1.getMinMaxRatio());
+			return false;
+		}
 
 		return true;
 	}
