@@ -137,7 +137,7 @@ public class BModel {
 	private static boolean testForCircularObjectsAndBMW(List<CircularObject> cos, BasicMovementWrapper bmw) {
 		Line l = LinearModel.recognize(bmw);
 		if (l.getType() != LineType.VERTICAL) {
-			System.out.println("Line not vertical");
+			// System.out.println("Line not vertical");
 			return false;
 		}
 

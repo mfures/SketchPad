@@ -73,15 +73,19 @@ public class LinearModel {
 	}
 
 	public static Line recognize(BasicMovementWrapper bmw) {
+		return recognize(bmw, 0, bmw.getBm().getPoints().size() - 1);
+	}
+
+	public static Line recognize(BasicMovementWrapper bmw, int startIndex, int endIndex) {
 		List<Point> points = bmw.getBm().getPoints();
-		Point p1 = points.get(0);
-		Point p2 = points.get(points.size() - 1);
+		Point p1 = points.get(startIndex);
+		Point p2 = points.get(endIndex);
 
 		double slope = (p2.y - p1.y) / (p2.x * 1.0 - p1.x);
 		double intercept = p1.y - slope * p1.x;
 
-		double error = calculateError(points, 0, points.size() - 1, slope, intercept);
-		error /= points.size();
+		double error = calculateError(points, startIndex, endIndex, slope, intercept);
+		error /= (endIndex - startIndex + 1);
 
 		if (error > KTableModel.MAX_AVERAGE_SQUARE_ERROR) {
 			return null;
