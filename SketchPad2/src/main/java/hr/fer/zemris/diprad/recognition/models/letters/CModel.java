@@ -25,6 +25,11 @@ public class CModel {
 			return false;
 		}
 
+		double widthHeightRatio = co.getBoundingBox().getWidth() / co.getBoundingBox().getHeight();
+		if (widthHeightRatio > 1.5 || widthHeightRatio < (2.0 / 3)) {
+			return false;
+		}
+
 		return true;
 	}
 }

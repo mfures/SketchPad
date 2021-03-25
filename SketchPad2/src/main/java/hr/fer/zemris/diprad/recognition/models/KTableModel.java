@@ -14,6 +14,7 @@ import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
+import hr.fer.zemris.diprad.recognition.models.letters.CModel;
 import hr.fer.zemris.diprad.recognition.models.letters.DModel;
 import hr.fer.zemris.diprad.recognition.models.numbers.ThreeModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
@@ -99,11 +100,11 @@ public class KTableModel {
 //				} else {
 //					System.out.print("nC ");
 //				}
-				if (ThreeModel.recognize(bmws.get(i))) {
-					System.out.print("3 ");
-				} else {
-					System.out.print("n3 ");
-				}
+//				if (ThreeModel.recognize(bmws.get(i))) {
+//					System.out.print("3 ");
+//				} else {
+//					System.out.print("n3 ");
+//				}
 //				if (OneModel.recognize(bmws.get(i))) {
 //					System.out.print("1 ");
 //				} else {
@@ -141,12 +142,11 @@ public class KTableModel {
 //						} else {
 //							System.out.print("nA ");
 //						}
-
-						if (DModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-							System.out.print("D");
-						} else {
-							System.out.print("nD");
-						}
+//						if (DModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+//							System.out.print("D");
+//						} else {
+//							System.out.print("nD");
+//						}
 					}
 				}
 

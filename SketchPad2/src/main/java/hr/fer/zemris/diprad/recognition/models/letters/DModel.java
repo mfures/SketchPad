@@ -82,6 +82,11 @@ public class DModel {
 			return false;
 		}
 
+		double widthHeightRatio = co.getBoundingBox().getWidth() / co.getBoundingBox().getHeight();
+		if (widthHeightRatio > 1.05 || widthHeightRatio < 0.3) {
+			return false;
+		}
+
 		return true;
 	}
 }
