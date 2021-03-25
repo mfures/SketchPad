@@ -11,8 +11,6 @@ import hr.fer.zemris.diprad.recognition.testers.StrongPositiveColinearityTester;
 import hr.fer.zemris.diprad.util.MyVector;
 
 public class LinearModel {
-	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.175;
-	private static final double MAX_AVERAGE_SQUARE_ERROR = 350;
 
 	public static List<Line> linesInPoints(List<Point> points, List<Integer> breakPoints, BasicMovementWrapper bmw) {
 		Point p1;
@@ -40,7 +38,7 @@ public class LinearModel {
 
 			error /= points.size();
 
-			if (error > MAX_AVERAGE_SQUARE_ERROR) {
+			if (error > KTableModel.MAX_AVERAGE_SQUARE_ERROR) {
 				// System.out.println(error);
 			} else {
 				lines.add(new Line(p1, p2, slope, intercept, bmw));
@@ -85,51 +83,23 @@ public class LinearModel {
 		double error = calculateError(points, 0, points.size() - 1, slope, intercept);
 		error /= points.size();
 
-		if (error > MAX_AVERAGE_SQUARE_ERROR) {
+		if (error > KTableModel.MAX_AVERAGE_SQUARE_ERROR) {
 			return null;
 		}
 
 		return new Line(p1, p2, slope, intercept, bmw);
 	}
 
-	/**
-	 * This function calculates break points.
-	 * 
-	 * @param points
-	 * @return
-	 */
-	public static List<Integer> calculateBreakPoints(List<Point> points, Tester<MyVector> t) {
-		if (points.size() < 3) {
-			return new ArrayList<>();
-		}
-
-		List<MyVector> vectors = MyVector.listOfPointsToListOfVectors(points);
-		List<Integer> breakPoints = new ArrayList<>();
-		breakPoints.add(0);
-
-		for (int i = 0; i < vectors.size() - 1; i++) {
-			if (t.test(vectors.get(i), vectors.get(i + 1))) {
-				breakPoints.add(vectors.get(i).i2);
-			}
-		}
-
-		breakPoints.add(points.size() - 1);
-		return breakPoints;
-	}
-
 	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points, Tester<MyVector> t) {
-		List<Integer> breakPoints = LinearModel.calculateBreakPoints(points, t);
+		List<Integer> breakPoints = BreakPointsUtil.calculateBreakPoints(points, t);
 		// System.out.println("Initial breakPoints: " + breakPoints.size());
 		if (breakPoints.size() == 2) {// first and last index (0 and size-1)
 			return breakPoints;
 		}
-		List<Integer> trueBreakPoints = new ArrayList<>();
 
-		double totalLength = 0;
-		for (int i = 0; i < breakPoints.size() - 1; i++) {
-			totalLength += MyVector.norm(points.get(breakPoints.get(i)), points.get(breakPoints.get(i + 1)));
-			// System.out.println(totalLength);
-		}
+		double totalLength = LinearModel.calculateTotalLength(points, breakPoints);
+
+		List<Integer> trueBreakPoints = new ArrayList<>();
 
 		// System.out.println("Total inital number of breakPoints: " +
 		// breakPoints.size());
@@ -143,7 +113,7 @@ public class LinearModel {
 			activeNorm = MyVector.norm(points.get(trueBreakPoints.get(trueBreakPoints.size() - 1)),
 					points.get(breakPoints.get(i)));
 			// System.out.println("Trenutna norma: " + activeNorm);
-			if (activeNorm > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength) {
+			if (activeNorm > KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength) {
 				trueBreakPoints.add(breakPoints.get(i));
 			} else {
 				totalLength -= activeNorm;
@@ -153,41 +123,40 @@ public class LinearModel {
 			}
 		}
 
-		// System.out.println("Ajde: " + trueBreakPoints.size());
+		return addLastPointAndCheckEdgeCases(points, totalLength, trueBreakPoints);
+	}
 
-		if (trueBreakPoints.size() > 2) {
-			activeNorm = MyVector.norm(points.get(trueBreakPoints.get(trueBreakPoints.size() - 1)),
-					points.get(points.size() - 1));
-			// System.out.println(activeNorm);
-			if (activeNorm > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength) {
-				trueBreakPoints.add(points.size() - 1);
-			} else {
-				trueBreakPoints.set(trueBreakPoints.size() - 1, points.size() - 1);
-			}
-			return trueBreakPoints;
-		}
+	private static List<Integer> addLastPointAndCheckEdgeCases(List<Point> points, double totalLength,
+			List<Integer> trueBreakPoints) {
+		double activeNorm;
 		if (trueBreakPoints.size() == 1) {
 			trueBreakPoints.add(points.size() - 1);
 			return trueBreakPoints;
 		}
-
-		activeNorm = MyVector.norm(points.get(trueBreakPoints.get(1)), points.get(0));
-		// System.out.println("Hejj?: " + activeNorm);
-		if (activeNorm > (1 - COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE) * totalLength) {
-			trueBreakPoints.set(1, points.size() - 1);
-			return trueBreakPoints;
+		if (trueBreakPoints.size() == 2) {
+			activeNorm = MyVector.norm(points.get(0), points.get(trueBreakPoints.get(1)));
+			if (activeNorm > (1 - KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE) * totalLength) {
+				trueBreakPoints.set(1, points.size() - 1);
+				return trueBreakPoints;
+			}
 		}
 
 		activeNorm = MyVector.norm(points.get(trueBreakPoints.get(trueBreakPoints.size() - 1)),
 				points.get(points.size() - 1));
-		// System.out.println("Heeej: " + activeNorm);
-		if (activeNorm > COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength) {
+		if (activeNorm > KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength) {
 			trueBreakPoints.add(points.size() - 1);
 		} else {
 			trueBreakPoints.set(trueBreakPoints.size() - 1, points.size() - 1);
 		}
-
 		return trueBreakPoints;
+	}
+
+	public static double calculateTotalLength(List<Point> points, List<Integer> breakPoints) {
+		double totalLength = 0;
+		for (int i = 0; i < breakPoints.size() - 1; i++) {
+			totalLength += MyVector.norm(points.get(breakPoints.get(i)), points.get(breakPoints.get(i + 1)));
+		}
+		return totalLength;
 	}
 
 	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points) {

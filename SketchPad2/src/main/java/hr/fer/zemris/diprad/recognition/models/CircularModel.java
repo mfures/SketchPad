@@ -4,9 +4,11 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.tokens.VectorOrientationType;
 import hr.fer.zemris.diprad.recognition.objects.CircularObject;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
+import hr.fer.zemris.diprad.recognition.testers.WeakNegativeColinearityTester;
 import hr.fer.zemris.diprad.util.MyVector;
 import hr.fer.zemris.diprad.util.PointDouble;
 
@@ -191,5 +193,49 @@ public class CircularModel {
 
 	public static double calculateSlope(Point p1, Point p2) {
 		return (p2.y - p1.y) / (p2.x * 1.0 - p1.x);
+	}
+
+	public static List<Integer> generateAcumulatedBreakPoints(BasicMovementWrapper bmw) {
+		return generateAcumulatedBreakPoints(bmw.getBm().getPoints(), new WeakNegativeColinearityTester());
+	}
+
+	private static List<Integer> generateAcumulatedBreakPoints(List<Point> points, Tester<MyVector> t) {
+		List<Integer> breakPoints = BreakPointsUtil.calculateBreakPoints(points, t);
+		if (breakPoints.size() == 2) {
+			return breakPoints;
+		}
+		double totalNorm = calculateTotalNorm(points, 0, points.size() - 1);
+		double activeNorm = 0.0;
+
+		List<Integer> trueBreakPoints = new ArrayList<>();
+		trueBreakPoints.add(0);
+
+		for (int i = 1; i < breakPoints.size() - 1; i++) {
+			activeNorm = calculateTotalNorm(points, trueBreakPoints.get(trueBreakPoints.size() - 1),
+					breakPoints.get(i));
+			if (activeNorm > KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNorm) {
+				trueBreakPoints.add(breakPoints.get(i));
+			}
+		}
+
+		if (trueBreakPoints.size() == 1) {
+			trueBreakPoints.add(points.size() - 1);
+			return trueBreakPoints;
+		}
+		if (trueBreakPoints.size() == 2) {
+			activeNorm = calculateTotalNorm(points, 0, trueBreakPoints.get(1));
+			if (activeNorm > (1 - KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE) * totalNorm) {
+				trueBreakPoints.set(1, points.size() - 1);
+				return trueBreakPoints;
+			}
+		}
+
+		activeNorm = calculateTotalNorm(points, trueBreakPoints.get(trueBreakPoints.size() - 1), points.size() - 1);
+		if (activeNorm > KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalNorm) {
+			trueBreakPoints.add(points.size() - 1);
+		} else {
+			trueBreakPoints.set(trueBreakPoints.size() - 1, points.size() - 1);
+		}
+		return trueBreakPoints;
 	}
 }

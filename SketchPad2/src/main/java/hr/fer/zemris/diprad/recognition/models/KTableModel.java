@@ -36,6 +36,8 @@ public class KTableModel {
 	public static final double COORDINATE_TOLERANCE = 0.05;
 	public static final double LENGTH_TOLLERANCE = 0.05;
 	public static final double DISTANCE_TOLERANCE = 0.25;
+	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.175;
+	public static final double MAX_AVERAGE_SQUARE_ERROR = 350;
 
 	public static final double COORDINATE_MIN = (1 - COORDINATE_TOLERANCE) / (1 + COORDINATE_TOLERANCE);
 	public static final double COORDINATE_MAX = (1 + COORDINATE_TOLERANCE) / (1 - COORDINATE_TOLERANCE);
