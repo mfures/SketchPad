@@ -14,6 +14,7 @@ import hr.fer.zemris.diprad.util.PointDouble;
 
 public class JModel {
 	public static JShape recognize(BasicMovementWrapper bmw) {
+		System.out.println("Ulaz");
 		double totalNorm = CircularModel.calculateTotalNorm(bmw.getBm().getPoints(), 0,
 				bmw.getBm().getPoints().size() - 1);
 		int k = bmw.getBm().getPoints().size();
@@ -92,6 +93,7 @@ public class JModel {
 			return new JShape(co, l, true);
 		} else {
 			// g..J
+			System.out.println("Bok");
 			CircularObject co = null;
 			Line l = null;
 			if (topRightIndex > botLeftIndex) {

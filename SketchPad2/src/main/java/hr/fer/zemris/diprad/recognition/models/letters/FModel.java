@@ -49,6 +49,12 @@ public class FModel {
 			return false;
 		}
 
+		double jWidthHeightRatio = jShape.getBoundingBox().getWidth() / jShape.getBoundingBox().getHeight();
+		if (jWidthHeightRatio < 0.1 || jWidthHeightRatio > 0.70) {
+			// System.out.println("J inapropriate jWidthHeightRatio: " + jWidthHeightRatio);
+			return false;
+		}
+
 		double lengthHeightRatio = l.length() / jShape.getBoundingBox().getHeight();
 		if (lengthHeightRatio < 0.05 || lengthHeightRatio > 0.45) {
 			// System.out.println("1.:" + lengthHeightRatio);

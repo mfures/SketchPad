@@ -18,6 +18,7 @@ import hr.fer.zemris.diprad.recognition.models.letters.BModel;
 import hr.fer.zemris.diprad.recognition.models.letters.CModel;
 import hr.fer.zemris.diprad.recognition.models.letters.DModel;
 import hr.fer.zemris.diprad.recognition.models.letters.FModel;
+import hr.fer.zemris.diprad.recognition.models.letters.GModel;
 import hr.fer.zemris.diprad.recognition.models.letters.HModel;
 import hr.fer.zemris.diprad.recognition.models.letters.JModel;
 import hr.fer.zemris.diprad.recognition.models.letters.WModel;
@@ -167,10 +168,10 @@ public class KTableModel {
 //						} else {
 //							System.out.print("nF ");
 //						}
-						if (true == FModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-							System.out.print("F ");
+						if (true == GModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+							System.out.print("G ");
 						} else {
-							System.out.print("nF ");
+							System.out.print("nG ");
 						}
 					}
 				}

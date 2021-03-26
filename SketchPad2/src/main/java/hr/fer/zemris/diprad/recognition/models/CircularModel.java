@@ -42,7 +42,7 @@ public class CircularModel {
 			return null;
 		}
 
-		return new CircularObject(avPointDouble, minMaxRatio, theta, angle(maxVector), totalAngle > 337.5, totalAngle,
+		return new CircularObject(avPointDouble, minMaxRatio, theta, angle(maxVector), totalAngle > 330, totalAngle,
 				totalNorm, bmw, startIndex, endIndex);
 	}
 
@@ -100,9 +100,9 @@ public class CircularModel {
 				checkSum2--;
 		}
 		checkSum2 /= (endIndex - startIndex);
-		//System.out.println("Check sum: " + checkSum2);
+		// System.out.println("Check sum: " + checkSum2);
 		if (Math.abs(checkSum2) < 0.775) {
-			//System.out.println("Check sum: " + checkSum2);
+			// System.out.println("Check sum: " + checkSum2);
 			return null;
 		}
 
