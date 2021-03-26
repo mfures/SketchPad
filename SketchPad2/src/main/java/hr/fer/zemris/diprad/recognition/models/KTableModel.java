@@ -132,8 +132,6 @@ public class KTableModel {
 //					System.out.print("nH ");
 //				}
 
-				System.out.println("Za j: " + JModel.recognize(bmws.get(i)));
-
 				if (i != bmws.size() - 1) {
 					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
 //						if (true == XModel.recognize(bmws.get(i), bmws.get(i + 1))) {

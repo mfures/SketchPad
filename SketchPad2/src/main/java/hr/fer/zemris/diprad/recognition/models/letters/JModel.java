@@ -7,12 +7,13 @@ import hr.fer.zemris.diprad.recognition.models.CircularModel;
 import hr.fer.zemris.diprad.recognition.models.LinearModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.CircularObject;
+import hr.fer.zemris.diprad.recognition.objects.JShape;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.PointDouble;
 
 public class JModel {
-	public static Boolean recognize(BasicMovementWrapper bmw) {
+	public static JShape recognize(BasicMovementWrapper bmw) {
 		double totalNorm = CircularModel.calculateTotalNorm(bmw.getBm().getPoints(), 0,
 				bmw.getBm().getPoints().size() - 1);
 		int k = bmw.getBm().getPoints().size();
@@ -88,7 +89,7 @@ public class JModel {
 				return null;
 			}
 
-			return true;
+			return new JShape(co, l, true);
 		} else {
 			// g..J
 			CircularObject co = null;
@@ -140,7 +141,7 @@ public class JModel {
 				return null;
 			}
 
-			return false;
+			return new JShape(co, l, false);
 		}
 	}
 }
