@@ -22,7 +22,9 @@ import hr.fer.zemris.diprad.recognition.models.letters.GModel;
 import hr.fer.zemris.diprad.recognition.models.letters.HModel;
 import hr.fer.zemris.diprad.recognition.models.letters.JModel;
 import hr.fer.zemris.diprad.recognition.models.letters.WModel;
+import hr.fer.zemris.diprad.recognition.models.numbers.OneModel;
 import hr.fer.zemris.diprad.recognition.models.numbers.ThreeModel;
+import hr.fer.zemris.diprad.recognition.models.numbers.TwoModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
@@ -101,22 +103,26 @@ public class KTableModel {
 //				} else {
 //					System.out.print("n0 ");
 //				}
-//				if (CModel.recognize(bmws.get(i))) {
-//					System.out.print("C ");
-//				} else {
-//					System.out.print("nC ");
-//				}
-//				if (ThreeModel.recognize(bmws.get(i))) {
-//					System.out.print("3 ");
-//				} else {
-//					System.out.print("n3 ");
-//				}
 //				if (OneModel.recognize(bmws.get(i))) {
 //					System.out.print("1 ");
 //				} else {
 //					System.out.print("n1 ");
 //				}
-//
+				if (true == TwoModel.recognize(bmws.get(i))) {
+					System.out.print("2 ");
+				} else {
+					System.out.print("n2 ");
+				}
+//				if (ThreeModel.recognize(bmws.get(i))) {
+//					System.out.print("3 ");
+//				} else {
+//					System.out.print("n3 ");
+//				}
+//				if (CModel.recognize(bmws.get(i))) {
+//					System.out.print("C ");
+//				} else {
+//					System.out.print("nC ");
+//				}
 //				if (true == ZModel.recognize(bmws.get(i))) {
 //					System.out.print("Z ");
 //				} else {
@@ -168,11 +174,11 @@ public class KTableModel {
 //						} else {
 //							System.out.print("nF ");
 //						}
-						if (true == GModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-							System.out.print("G ");
-						} else {
-							System.out.print("nG ");
-						}
+//						if (true == GModel.recognize(bmws.get(i), bmws.get(i + 1))) {
+//							System.out.print("G ");
+//						} else {
+//							System.out.print("nG ");
+//						}
 					}
 				}
 
