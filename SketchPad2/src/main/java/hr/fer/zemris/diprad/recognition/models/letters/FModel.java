@@ -1,89 +1,78 @@
 package hr.fer.zemris.diprad.recognition.models.letters;
 
-import java.awt.Point;
-
-import hr.fer.zemris.diprad.recognition.models.CircularModel;
 import hr.fer.zemris.diprad.recognition.models.LinearModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
-import hr.fer.zemris.diprad.recognition.objects.CircularObject;
+import hr.fer.zemris.diprad.recognition.objects.JShape;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class FModel {
 	public static boolean recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
-		CircularObject co = initCO(bmw1);
-		if (co == null) {
-			co = initCO(bmw2);
-			if (co == null) {
-				// System.out.println("1.Invalid circular objects");
+		Line l = LinearModel.recognize(bmw1);
+		JShape jShape = null;
+		if (l != null) {
+			if (l.getType() != LineType.HORIZONTAL) {
+				l = LinearModel.recognize(bmw2);
+				if (l != null) {
+					if (l.getType() != LineType.HORIZONTAL) {
+						// System.out.println("No horisontal line");
+						return false;
+					} else {
+						jShape = JModel.recognize(bmw1);
+					}
+				}
+			} else {
+				jShape = JModel.recognize(bmw2);
+			}
+		} else {
+			l = LinearModel.recognize(bmw2);
+			if (l != null) {
+				if (l.getType() != LineType.HORIZONTAL) {
+					// System.out.println("No horisontal line");
+					return false;
+				} else {
+					jShape = JModel.recognize(bmw1);
+				}
+			} else {
+				// System.out.println("No line found");
 				return false;
 			}
-
-			return testForCircularObjectAndBMW(co, bmw1);
 		}
 
-		return testForCircularObjectAndBMW(co, bmw2);
-	}
-
-	// line, co
-	private static CircularObject initCO(BasicMovementWrapper bmw) {
-		CircularObject co = CircularModel.recognize(bmw);
-		if (co == null) {
-			// System.out.println("co was null");
-			return null;
-		}
-
-		if (co.getMinMaxRatio() > 0.55 || co.getMinMaxRatio() < 0.15) {
-			// System.out.println("co minMax: " + co.getMinMaxRatio());
-			return null;
-		}
-
-		return co;
-	}
-
-	private static boolean testForCircularObjectAndBMW(CircularObject co, BasicMovementWrapper bmw) {
-		Line l = LinearModel.recognize(bmw);
-		if (l.getType() != LineType.VERTICAL) {
-			// System.out.println("Line not vertical");
+		if (jShape == null) {
+			// System.out.println("No jshape found");
 			return false;
 		}
 
-		if (co.getTotalAngle() < 220 || co.getTotalAngle() > 305) {
-			// System.out.println("invalid angle: " + co.getTotalAngle());
+		if (!jShape.isForF()) {
+			// System.out.println("Shape was for g not f");
 			return false;
 		}
 
-		if (!(co.getTheta() > 145 || co.getTheta() < -145)) {
-			// System.out.println("Bad opening position: " + co.getTheta());
+		double lengthHeightRatio = l.length() / jShape.getBoundingBox().getHeight();
+		if (lengthHeightRatio < 0.05 || lengthHeightRatio > 0.45) {
+			// System.out.println("1.:" + lengthHeightRatio);
 			return false;
 		}
 
-		Point p1 = co.getBmw().getBm().getPoints().get(0);
-		Point p2 = co.getBmw().getBm().getPoints().get(co.getBmw().getBm().getPoints().size() - 1);
+		double xAtAverageY = jShape.getL().forY(l.getAverageY());
+		double forcedPassedLength = 0.2 * l.length();
+		// System.out.println(l.getMinX() + " " + forcedPassedLength + " " +
+		// xAtAverageY);
+		// System.out.println(l.getMaxX() + " " + forcedPassedLength + " " +
+		// xAtAverageY);
 
-		double dist1 = l.distanceFromPointToLine(p1);
-		double dist2 = l.distanceFromPointToLine(p2);
-		if (l.length() * 0.9 > Math.abs(p1.y - p2.y)) {
+		if (l.getMinX() + forcedPassedLength > xAtAverageY || l.getMaxX() - forcedPassedLength < xAtAverageY) {
+			// System.out.println("Horisontal line doesnt cross");
 			return false;
 		}
 
-		// System.out.println(dist1 + " " + dist2);
-		// System.out.println(co.getTotalNorm());
-
-		if (dist1 - 0.15 * co.getTotalNorm() > 0 || dist2 - 0.15 * co.getTotalNorm() > 0) {
+		if (l.getAverageY() < jShape.getBoundingBox().getP1().y + 0.35 * jShape.getBoundingBox().getHeight()) {
+			// System.out.println("L too high");
 			return false;
 		}
-
-		// System.out.println(p1.x + " " + co.getTotalNorm() + " " + l.forY(p1.y));
-		// System.out.println(p2.x + " " + co.getTotalNorm() + " " + l.forY(p2.y));
-
-		if (p1.x - l.forY(p1.y) - 0.075 * co.getTotalNorm() > 0
-				|| p2.x - l.forY(p2.y) - 0.075 * co.getTotalNorm() > 0) {
-			return false;
-		}
-
-		double widthHeightRatio = co.getBoundingBox().getWidth() / co.getBoundingBox().getHeight();
-		if (widthHeightRatio > 1.05 || widthHeightRatio < 0.3) {
+		if (l.getAverageY() > jShape.getBoundingBox().getP1().y + 0.8 * jShape.getBoundingBox().getHeight()) {
+			// System.out.println("L too low");
 			return false;
 		}
 

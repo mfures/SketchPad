@@ -5,6 +5,7 @@ import java.awt.Point;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.PointDouble;
+import hr.fer.zemris.diprad.util.Rectangle;
 
 public class Line {
 	public static final double MAX_TAN = 0.2;
@@ -19,6 +20,7 @@ public class Line {
 	private double slope;
 	private double intercept;
 	private double tan;
+	private Rectangle boundingBox;
 
 	private BasicMovementWrapper bmw;
 
@@ -35,6 +37,7 @@ public class Line {
 		this.tan = calculateTan();
 		this.type = calculateType();
 		this.length = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+		initBoundingBox();
 	}
 
 	public Line(PointDouble p1, PointDouble p2, double slope, double intercept, BasicMovementWrapper bmw) {
@@ -50,6 +53,7 @@ public class Line {
 		this.tan = calculateTan();
 		this.type = calculateType();
 		this.length = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+		initBoundingBox();
 	}
 
 	private LineType calculateType() {
@@ -155,6 +159,14 @@ public class Line {
 
 	public int getMaxY() {
 		return Math.max(p1.y, p2.y);
+	}
+
+	public void initBoundingBox() {
+		this.boundingBox = new Rectangle(new Point(getMinX(), getMinY()), new Point(getMaxX(), getMaxY()));
+	}
+
+	public Rectangle getBoundingBox() {
+		return boundingBox;
 	}
 
 	@Override
