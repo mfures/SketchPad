@@ -109,6 +109,7 @@ public class LinearModel {
 		error /= (endIndex - startIndex + 1);
 
 		if (error > KTableModel.MAX_AVERAGE_SQUARE_ERROR) {
+			System.out.println(error);
 			return null;
 		}
 

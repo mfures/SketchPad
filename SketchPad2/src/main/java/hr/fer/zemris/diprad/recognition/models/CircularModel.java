@@ -21,7 +21,7 @@ public class CircularModel {
 		double totalNorm = calculateTotalNorm(points, startIndex, endIndex);
 		int k = (endIndex - startIndex + 1);
 		List<PointDouble> sampledPoints = samplePoints(points, startIndex, endIndex, totalNorm, k);
-		return recognize(startIndex, endIndex, bmw, totalNorm, k, sampledPoints);
+		return recognize(0, k - 1, bmw, totalNorm, k, sampledPoints);
 	}
 
 	public static CircularObject recognize(int startIndex, int endIndex, BasicMovementWrapper bmw, double totalNorm,
@@ -32,7 +32,7 @@ public class CircularModel {
 				endIndex);
 
 		if (!(minMaxRatio > 0.15)) {
-			// System.out.println("Bad max/min ratio:" + minMaxRatio);
+			System.out.println("Bad max/min ratio:" + minMaxRatio);
 			return null;
 		}
 
@@ -81,7 +81,7 @@ public class CircularModel {
 		double s12, s22;
 		double angle2;
 		Double totalAngle = 0.0;
-		double checkSum2 = 0;
+		double positive = 0, negative = 0, zero = 0;
 		for (int i = startIndex; i < endIndex; i++) {
 			s12 = calculateSlope(sampledPoints.get(i), avPointDouble);
 			s22 = calculateSlope(avPointDouble, sampledPoints.get(i + 1));
@@ -95,18 +95,25 @@ public class CircularModel {
 
 			totalAngle += angle2;
 			if (angle2 > 0)
-				checkSum2++;
-			else
-				checkSum2--;
-		}
-		checkSum2 /= (endIndex - startIndex);
-		// System.out.println("Check sum: " + checkSum2);
-		if (Math.abs(checkSum2) < 0.775) {
-			// System.out.println("Check sum: " + checkSum2);
-			return null;
+				positive++;
+			else if (angle2 < 0) {
+				negative++;
+			}
 		}
 
-		return Math.abs(Math.toDegrees(totalAngle));
+		double total = positive + negative;
+		positive /= (total);
+		negative /= (total);
+		// System.out.println(positive);
+		// System.out.println(negative);
+		if (positive > 0.775) {
+			return Math.abs(Math.toDegrees(totalAngle));
+		}
+		if (negative > 0.775) {
+			return Math.abs(Math.toDegrees(totalAngle));
+		}
+
+		return null;
 	}
 
 	private static double calculateThetaOfOpening(List<PointDouble> sampledPoints, PointDouble avPointDouble,
