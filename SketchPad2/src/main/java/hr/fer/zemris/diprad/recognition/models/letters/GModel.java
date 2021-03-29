@@ -78,6 +78,10 @@ public class GModel {
 			return false;
 		}
 
+		if (co1.getBoundingBox().getP2().y > co.getBoundingBox().getP1().y) {
+			return false;
+		}
+
 		return true;
 	}
 

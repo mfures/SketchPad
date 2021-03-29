@@ -1,87 +1,112 @@
 package hr.fer.zemris.diprad.recognition.models.letters;
 
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
+
+import hr.fer.zemris.diprad.recognition.models.CircularModel;
 import hr.fer.zemris.diprad.recognition.models.LinearModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
-import hr.fer.zemris.diprad.recognition.objects.JShape;
+import hr.fer.zemris.diprad.recognition.objects.CircularObject;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class FModel {
-	public static boolean recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
-		Line l = LinearModel.recognize(bmw1);
-		JShape jShape = null;
-		if (l != null) {
-			if (l.getType() != LineType.HORIZONTAL) {
-				l = LinearModel.recognize(bmw2);
-				if (l != null) {
-					if (l.getType() != LineType.HORIZONTAL) {
-						// System.out.println("No horisontal line");
-						return false;
-					} else {
-						jShape = JModel.recognize(bmw1);
-					}
-				}
-			} else {
-				jShape = JModel.recognize(bmw2);
-			}
-		} else {
-			l = LinearModel.recognize(bmw2);
-			if (l != null) {
-				if (l.getType() != LineType.HORIZONTAL) {
-					// System.out.println("No horisontal line");
-					return false;
-				} else {
-					jShape = JModel.recognize(bmw1);
-				}
-			} else {
-				// System.out.println("No line found");
-				return false;
-			}
+	public static boolean recognize(BasicMovementWrapper bmw, BasicMovementWrapper bmw2) {
+		Line lHorizontal = LinearModel.recognize(bmw2);
+		if (lHorizontal == null) {
+			//System.out.println("Lh is null");
+			return false;
 		}
-
-		if (jShape == null) {
-			// System.out.println("No jshape found");
+		if (lHorizontal.getType() != LineType.HORIZONTAL) {
+			//System.out.println("Not horizontal");
 			return false;
 		}
 
-		if (!jShape.isForF()) {
-			// System.out.println("Shape was for g not f");
+		List<Integer> segmentIndexes = toSegments(bmw.getBm().getPoints(), 0);
+		if (segmentIndexes == null) {
 			return false;
 		}
 
-		double jWidthHeightRatio = jShape.getBoundingBox().getWidth() / jShape.getBoundingBox().getHeight();
-		if (jWidthHeightRatio < 0.1 || jWidthHeightRatio > 0.70) {
-			// System.out.println("J inapropriate jWidthHeightRatio: " + jWidthHeightRatio);
+		CircularObject co = CircularModel.recognize(bmw.getBm().getPoints(), segmentIndexes.get(1),
+				segmentIndexes.get(2), bmw);
+		if (co == null) {
+			//System.out.println("2.Null je");
+			return false;
+		}
+		if (co.getMinMaxRatio() < 0.15) {
+			//System.out.println("MinMax: " + co.getMinMaxRatio());
 			return false;
 		}
 
-		double lengthHeightRatio = l.length() / jShape.getBoundingBox().getHeight();
-		if (lengthHeightRatio < 0.05 || lengthHeightRatio > 0.45) {
-			// System.out.println("1.:" + lengthHeightRatio);
+		Line l2 = LinearModel.recognize(bmw, segmentIndexes.get(0), segmentIndexes.get(1));
+		Line l1 = LinearModel.recognize(bmw, segmentIndexes.get(2), segmentIndexes.get(3));
+		if (l1 == null || l2 == null) {
+			// System.out.println(l1 + " " + l2);
+			return false;
+		}
+		if (l1.getType() != LineType.VERTICAL) {
+			// System.out.println("Not vertical");
+			return false;
+		}
+		if (l2.getSlope() > 0.2 || l2.getSlope() < -15) {
+			// System.out.println("l2 bad slope: " + l2.getSlope());
+			return false;
+		}
+		if (l1.length() * 1.1 < l2.length() || l2.length() * 25 < l1.length()) {
+			// System.out.println("Bad lengths: " + l1.length() + " " + l2.length());
+			return false;
+		}
+		if (co.getBoundingBox().getP1().y > l1.getMaxY()) {
 			return false;
 		}
 
-		double xAtAverageY = jShape.getL().forY(l.getAverageY());
-		double forcedPassedLength = 0.2 * l.length();
-		// System.out.println(l.getMinX() + " " + forcedPassedLength + " " +
-		// xAtAverageY);
-		// System.out.println(l.getMaxX() + " " + forcedPassedLength + " " +
-		// xAtAverageY);
-
-		if (l.getMinX() + forcedPassedLength > xAtAverageY || l.getMaxX() - forcedPassedLength < xAtAverageY) {
-			// System.out.println("Horisontal line doesnt cross");
+		if (lHorizontal.getAverageY() < l2.getMaxY()) {
+			//System.out.println("To high");
+			return false;
+		}
+		if (lHorizontal.getAverageY() > l1.getMaxY() - 0.10 * l1.length()) {
+			//System.out.println("To low");
 			return false;
 		}
 
-		if (l.getAverageY() < jShape.getBoundingBox().getP1().y + 0.35 * jShape.getBoundingBox().getHeight()) {
-			// System.out.println("L too high");
+		double xAtAverageY = l1.forY(lHorizontal.getAverageY());
+		double forcedPassedLength = 0.1 * l1.length();
+		if (lHorizontal.getMinX() + forcedPassedLength > xAtAverageY
+				|| lHorizontal.getMaxX() - forcedPassedLength < xAtAverageY) {
+			//System.out.println("Horisontal line doesnt cross");
 			return false;
 		}
-		if (l.getAverageY() > jShape.getBoundingBox().getP1().y + 0.8 * jShape.getBoundingBox().getHeight()) {
-			// System.out.println("L too low");
+
+		double widthWidthRatio = lHorizontal.length() / bmw.getBm().getBoundingBox().getWidth();
+		if (widthWidthRatio < 0.3 || widthWidthRatio > 3) {
+			//System.out.println("ww:" + widthWidthRatio);
 			return false;
 		}
 
 		return true;
+	}
+
+	private static List<Integer> toSegments(List<Point> points, int start) {
+		for (int i = start, j = points.size() - 1; i < j;) {
+			if (points.get(i).x < points.get(j).x) {
+				i++;
+			} else if (points.get(i).y < points.get(j).y) {
+				j--;
+			} else {
+				if (i < 2 + start || j > points.size() - 3) {
+					return null;
+				}
+
+				List<Integer> list = new ArrayList<>();
+				list.add(start);
+				list.add(i - 1);
+				list.add(j + 1);
+				list.add(points.size() - 1);
+				return list;
+			}
+		}
+
+		return null;
 	}
 }

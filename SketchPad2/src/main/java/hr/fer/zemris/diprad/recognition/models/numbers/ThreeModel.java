@@ -1,28 +1,27 @@
 package hr.fer.zemris.diprad.recognition.models.numbers;
 
-import java.util.List;
-
 import hr.fer.zemris.diprad.recognition.models.CircularModel;
 import hr.fer.zemris.diprad.recognition.objects.CircularObject;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class ThreeModel {
 	public static boolean recognize(BasicMovementWrapper bmw) {
-		List<Integer> breakPoints = CircularModel.generateAcumulatedBreakPoints(bmw);
-		if (breakPoints.size() != 3) {
-			// System.out.println("Bad number of break points: " + breakPoints.size());
-			return false;
-		}
+		int breakPosition = CircularModel.generateBestBreakPoint(bmw);
+
 		CircularObject co1, co2;
 		int deltaX;
 		if (bmw.getBm().getPoints().get(0).y < bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).y) {
-			co1 = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPoints.get(1), bmw);
-			co2 = CircularModel.recognize(bmw.getBm().getPoints(), breakPoints.get(1), breakPoints.get(2), bmw);
-			deltaX = bmw.getBm().getPoints().get(breakPoints.get(2)).x - bmw.getBm().getPoints().get(0).x;
+			co1 = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPosition, bmw);
+			co2 = CircularModel.recognize(bmw.getBm().getPoints(), breakPosition, bmw.getBm().getPoints().size() - 1,
+					bmw);
+			deltaX = bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x
+					- bmw.getBm().getPoints().get(0).x;
 		} else {
-			co2 = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPoints.get(1), bmw);
-			co1 = CircularModel.recognize(bmw.getBm().getPoints(), breakPoints.get(1), breakPoints.get(2), bmw);
-			deltaX = -(bmw.getBm().getPoints().get(breakPoints.get(2)).x - bmw.getBm().getPoints().get(0).x);
+			co2 = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPosition, bmw);
+			co1 = CircularModel.recognize(bmw.getBm().getPoints(), breakPosition, bmw.getBm().getPoints().size() - 1,
+					bmw);
+			deltaX = -(bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x
+					- bmw.getBm().getPoints().get(0).x);
 		}
 
 		if (co1 == null || co2 == null) {
@@ -32,21 +31,21 @@ public class ThreeModel {
 
 		double avgNorm = (co1.getTotalNorm() + co2.getTotalNorm()) / 2;
 		// Jesu li prošli srednju točku s lijeve strane
-		if (bmw.getBm().getPoints().get(0).x > bmw.getBm().getPoints().get(breakPoints.get(1)).x + avgNorm * 0.05) {
+		if (bmw.getBm().getPoints().get(0).x > bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.05) {
 			// System.out.println("1");
 			return false;
 		}
-		if (bmw.getBm().getPoints().get(breakPoints.get(2)).x > bmw.getBm().getPoints().get(breakPoints.get(1)).x
-				+ avgNorm * 0.05) {
+		if (bmw.getBm().getPoints().get(
+				bmw.getBm().getPoints().size() - 1).x > bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.05) {
 			// System.out.println("2");
 			return false;
 		}
 		// Jesu li prošli srednju točku s desne strane
-		if (co1.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPoints.get(1)).x + avgNorm * 0.05) {
+		if (co1.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.05) {
 			// System.out.println("11");
 			return false;
 		}
-		if (co2.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPoints.get(1)).x + avgNorm * 0.05) {
+		if (co2.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.05) {
 			// System.out.println("22");
 			return false;
 		}
@@ -61,13 +60,13 @@ public class ThreeModel {
 			return false;
 		}
 
-		if (!(co1.getTheta() > 130 || co1.getTheta() < -145)) {
-			// System.out.println("Bad opening position: " + co1.getTheta());
+		if (!(co1.getTheta() > 120 || co1.getTheta() < -155)) {
+			// System.out.println("1Bad opening position: " + co1.getTheta());
 			return false;
 		}
 
-		if (!(co2.getTheta() > 145 || co2.getTheta() < -130)) {
-			// System.out.println("Bad opening position: " + co2.getTheta());
+		if (!(co2.getTheta() > 135 || co2.getTheta() < -120)) {
+			// System.out.println("2Bad opening position: " + co2.getTheta());
 			return false;
 		}
 
@@ -85,7 +84,7 @@ public class ThreeModel {
 			// System.out.println("Upper part too high");
 			return false;
 		}
-		if (co2.getBoundingBox().getHeight() > co1.getBoundingBox().getHeight() * 2.1) {
+		if (co2.getBoundingBox().getHeight() > co1.getBoundingBox().getHeight() * 2.5) {
 			// System.out.println("Lower part too high");
 			return false;
 		}
