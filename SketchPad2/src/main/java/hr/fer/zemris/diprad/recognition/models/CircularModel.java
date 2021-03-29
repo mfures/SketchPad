@@ -43,7 +43,7 @@ public class CircularModel {
 		}
 
 		return new CircularObject(avPointDouble, minMaxRatio, theta, angle(maxVector), totalAngle > 330, totalAngle,
-				totalNorm, bmw, startIndex, endIndex);
+				totalNorm, bmw, startIndex, endIndex, sampledPoints);
 	}
 
 	@SuppressWarnings("unused")
@@ -81,7 +81,7 @@ public class CircularModel {
 		double s12, s22;
 		double angle2;
 		Double totalAngle = 0.0;
-		double positive = 0, negative = 0, zero = 0;
+		double positive = 0, negative = 0;
 		for (int i = startIndex; i < endIndex; i++) {
 			s12 = calculateSlope(sampledPoints.get(i), avPointDouble);
 			s22 = calculateSlope(avPointDouble, sampledPoints.get(i + 1));
@@ -253,5 +253,14 @@ public class CircularModel {
 			trueBreakPoints.set(trueBreakPoints.size() - 1, points.size() - 1);
 		}
 		return trueBreakPoints;
+	}
+
+	public static List<Integer> generateAcumulatedBreakPoints(BasicMovementWrapper bmw, double d) {
+		return generateAcumulatedBreakPoints(bmw.getBm().getPoints(), new WeakNegativeColinearityTester(d));
+
+	}
+
+	public static int generateBestBreakPoint(BasicMovementWrapper bmw) {
+		return BreakPointsUtil.calculateBestBreakPoint(bmw.getBm().getPoints());
 	}
 }

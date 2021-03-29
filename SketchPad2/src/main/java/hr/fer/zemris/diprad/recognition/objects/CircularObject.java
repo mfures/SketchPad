@@ -1,6 +1,5 @@
 package hr.fer.zemris.diprad.recognition.objects;
 
-import java.awt.Point;
 import java.util.List;
 
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
@@ -22,7 +21,7 @@ public class CircularObject {
 
 	public CircularObject(PointDouble averagePoint, double minMaxRatio, double theta, double thetaMaxDistance,
 			boolean fullCircle, double totalAngle, double totalNorm, BasicMovementWrapper bmw, int startIndex,
-			int endIndex) {
+			int endIndex, List<PointDouble> sampledPoints) {
 		this.averagePoint = averagePoint;
 		this.minMaxRatio = minMaxRatio;
 		this.theta = theta;
@@ -34,15 +33,14 @@ public class CircularObject {
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
 
-		initBoundingBox();
+		initBoundingBox(sampledPoints);
 	}
 
-	public void initBoundingBox() {
-		int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = 0, maxY = 0;
+	public void initBoundingBox(List<PointDouble> sampledPoints) {
+		double minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = 0, maxY = 0;
 
-		List<Point> points = bmw.getBm().getPoints();
 		for (int i = startIndex; i <= endIndex; i++) {
-			Point p = points.get(i);
+			PointDouble p = sampledPoints.get(i);
 			if (p.x < minX) {
 				minX = p.x;
 			}
@@ -57,7 +55,7 @@ public class CircularObject {
 			}
 		}
 
-		this.boundingBox = new Rectangle(new Point(minX, minY), new Point(maxX, maxY));
+		this.boundingBox = new Rectangle(new PointDouble(minX, minY), new PointDouble(maxX, maxY));
 	}
 
 	public PointDouble getAveragePoint() {

@@ -36,4 +36,31 @@ public class BreakPointsUtil {
 		breakPoints.add(points.size() - 1);
 		return breakPoints;
 	}
+
+	public static Integer calculateBestBreakPoint(List<Point> points) {
+		if (points.size() < 3) {
+			return -1;
+		}
+
+		List<MyVector> vectors = MyVector.listOfPointsToListOfVectors(points);
+		List<Integer> breakPoints = new ArrayList<>();
+		breakPoints.add(0);
+
+		double cos, cosMin = 1;
+		int min = -1;
+
+		for (int i = 0; i < vectors.size() - 1; i++) {
+			cos = MyVector.scalarProduct(vectors.get(i), vectors.get(i + 1))
+					/ (vectors.get(i).norm() * vectors.get(i + 1).norm());
+
+			//System.out.println("i:" + i + " cos:" + cos);
+			if (cos < cosMin) {
+				cosMin = cos;
+				min = vectors.get(i).i2;
+			}
+		}
+
+		//System.out.println(min);
+		return min;
+	}
 }

@@ -108,11 +108,11 @@ public class KTableModel {
 //				} else {
 //					System.out.print("n1 ");
 //				}
-				if (true == TwoModel.recognize(bmws.get(i))) {
-					System.out.print("2 ");
-				} else {
-					System.out.print("n2 ");
-				}
+//				if (true == TwoModel.recognize(bmws.get(i))) {
+//					System.out.print("2 ");
+//				} else {
+//					System.out.print("n2 ");
+//				}
 //				if (ThreeModel.recognize(bmws.get(i))) {
 //					System.out.print("3 ");
 //				} else {
@@ -139,6 +139,11 @@ public class KTableModel {
 //				} else {
 //					System.out.print("nH ");
 //				}
+				if (true == GModel.recognize(bmws.get(i))) {
+					System.out.print("G ");
+				} else {
+					System.out.print("nG ");
+				}
 
 				if (i != bmws.size() - 1) {
 					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
