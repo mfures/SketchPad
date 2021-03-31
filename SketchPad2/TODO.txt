@@ -1,0 +1,1 @@
+Change error function in linear model to represent norma to length ratio
