@@ -290,4 +290,12 @@ public class KTable extends GraphicalObject {
 		return new Rectangle(new PointDouble(p.x - widthScaled, p.y - heightScaled),
 				new PointDouble(p.x + width + widthScaled, p.y + height + heightScaled));
 	}
+
+	public double getAvgWidth() {
+		return width / (numOfVerticalLines - 1.0);
+	}
+
+	public double getAvgHeight() {
+		return height / (numOfHorisontalLines - 1.0);
+	}
 }

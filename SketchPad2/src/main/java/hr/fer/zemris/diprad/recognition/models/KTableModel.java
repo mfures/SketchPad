@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -14,17 +15,7 @@ import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
-import hr.fer.zemris.diprad.recognition.models.letters.BModel;
-import hr.fer.zemris.diprad.recognition.models.letters.CModel;
-import hr.fer.zemris.diprad.recognition.models.letters.DModel;
-import hr.fer.zemris.diprad.recognition.models.letters.FModel;
-import hr.fer.zemris.diprad.recognition.models.letters.GModel;
-import hr.fer.zemris.diprad.recognition.models.letters.HModel;
-import hr.fer.zemris.diprad.recognition.models.letters.JModel;
-import hr.fer.zemris.diprad.recognition.models.letters.WModel;
-import hr.fer.zemris.diprad.recognition.models.numbers.OneModel;
 import hr.fer.zemris.diprad.recognition.models.numbers.ThreeModel;
-import hr.fer.zemris.diprad.recognition.models.numbers.TwoModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
@@ -66,7 +57,7 @@ public class KTableModel {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
 		// TODO not here
-		checkCharacterModels(bmws);
+		// checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
@@ -78,18 +69,47 @@ public class KTableModel {
 			return;
 		}
 
-		// System.out.println("Našao sam ovoliko tablica:" + tables.size());
+		System.out.println("Našao sam ovoliko tablica:" + tables.size());
 		// TODO remove
 		for (var table : tables) {
-			debugDrawTable(table);
+			handleTopRightCorner(table, bmws);
+			// debugDrawTable(table);
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
 			// SketchPad2.debugDraw(new
 			// SelectionRectangle(table.getExpandedBoundingRectangle()));
 
-			clearBMsModel(table);
+			// clearBMsModel(table);
 		}
 	}
 
+	private Line handleTopRightCorner(KTable table, List<BasicMovementWrapper> bmws) {
+		double minX = table.getP().x - table.getAvgWidth() * 2;
+		double maxX = table.getP().x + table.getAvgWidth() / 2;
+		double minY = table.getP().y - table.getAvgWidth() * 2;
+		double maxY = table.getP().y + table.getAvgWidth() / 2;
+
+		List<Line> lines = new ArrayList<>();
+		for (BasicMovementWrapper bmw : bmws) {
+			if (bmw.getBm().isInRect((int) minX, (int) maxX, (int) minY, (int) maxY)) {
+				Line l = LinearModel.recognize(bmw);
+				if (l != null) {
+					lines.add(l);
+				}
+			}
+		}
+
+		for (Line l : lines) {
+			if (!(l.getSlope() <= (30) && l.getSlope() >= 0.9)) {
+				System.out.println("Bad l1 slope: " + l.getSlope());
+			} else {
+				System.out.println("Dobar: " + l.getSlope());
+			}
+		}
+
+		return null;
+	}
+
+	@SuppressWarnings("unused")
 	private void checkCharacterModels(List<BasicMovementWrapper> bmws) {
 		for (int i = 0; i < bmws.size(); i++) {
 			if (bmws.get(i).isUnused()) {
@@ -192,6 +212,7 @@ public class KTableModel {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void clearBMsModel(KTable table) {
 		DrawingModel model = sP.getModel();
 		for (BasicMovementWrapper bmw : table.getBmws()) {
@@ -348,6 +369,12 @@ public class KTableModel {
 		for (Line l : horizontalLinesWrap.lines) {
 			l.getBmw().resetTotalHandeledFragments();
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private void debugDrawRectangle(int minx, int maxx, int miny, int maxy) {
+		sP.getModel().add(new SelectionRectangle(new Point(minx, miny), new Point(maxx, maxy)));
+		sP.getCanvas().repaint();
 	}
 
 	@SuppressWarnings("unused")
