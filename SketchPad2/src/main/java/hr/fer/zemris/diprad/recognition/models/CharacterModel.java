@@ -27,7 +27,7 @@ public class CharacterModel {
 			maxY = Math.max(maxY, bmws[i].getBm().getBoundingBox().getIp2().y);
 		}
 
-		boundingBox = new Rectangle(new PointDouble(minX, minY), new PointDouble(maxX, maxY));
+		this.boundingBox = new Rectangle(new PointDouble(minX, minY), new PointDouble(maxX, maxY));
 	}
 
 	public String getCharacter() {

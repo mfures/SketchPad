@@ -32,7 +32,7 @@ public class CircularModel {
 				endIndex);
 
 		if (!(minMaxRatio > 0.15)) {
-			System.out.println("Bad max/min ratio:" + minMaxRatio);
+			//System.out.println("Bad max/min ratio:" + minMaxRatio);
 			return null;
 		}
 

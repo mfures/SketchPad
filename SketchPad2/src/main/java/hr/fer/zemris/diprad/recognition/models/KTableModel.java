@@ -14,7 +14,9 @@ import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
-import hr.fer.zemris.diprad.recognition.models.numbers.ThreeModel;
+import hr.fer.zemris.diprad.recognition.models.letters.AModel;
+import hr.fer.zemris.diprad.recognition.models.letters.CModel;
+import hr.fer.zemris.diprad.recognition.models.letters.WModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
@@ -109,6 +111,15 @@ public class KTableModel {
 				}
 			}
 		}
+
+		List<CharacterModel> leftCMs = checkCharacterModels(leftBmws);
+		List<CharacterModel> rightCMs = checkCharacterModels(rightBmws);
+
+		System.out.println("Lijevo: " + leftCMs.size());
+		leftCMs.forEach((x) -> System.out.print(x.getCharacter() + " "));
+		System.out.println("\nDesno: " + rightCMs.size());
+		rightCMs.forEach((x) -> System.out.print(x.getCharacter() + " "));
+
 	}
 
 	private Line getLineInCorner(KTable table, List<BasicMovementWrapper> bmws) {
@@ -132,8 +143,12 @@ public class KTableModel {
 		return null;
 	}
 
-	@SuppressWarnings("unused")
-	private void checkCharacterModels(List<BasicMovementWrapper> bmws) {
+	private List<CharacterModel> checkCharacterModels(List<BasicMovementWrapper> bmws) {
+		CharacterModel cm = null;
+		List<CharacterModel> cms = new ArrayList<>();
+
+		System.out.println("Ulaz sa ovoliko elemenata: " + bmws.size());
+
 		for (int i = 0; i < bmws.size(); i++) {
 			if (bmws.get(i).isUnused()) {
 //				if (null != CircularModel.recognize(bmws.get(i))) {
@@ -156,27 +171,24 @@ public class KTableModel {
 //				} else {
 //					System.out.print("n2 ");
 //				}
-				if (ThreeModel.recognize(bmws.get(i))) {
-					System.out.print("3 ");
-				} else {
-					System.out.print("n3 ");
-				}
-//				if (CModel.recognize(bmws.get(i))) {
-//					System.out.print("C ");
+//				if (ThreeModel.recognize(bmws.get(i))) {
+//					System.out.print("3 ");
 //				} else {
-//					System.out.print("nC ");
+//					System.out.print("n3 ");
 //				}
+				cm = CModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
 //				if (true == ZModel.recognize(bmws.get(i))) {
 //					System.out.print("Z ");
 //				} else {
 //					System.out.print("nZ ");
 //				}
-//
-//				if (true == WModel.recognize(bmws.get(i))) {
-//					System.out.print("W ");
-//				} else {
-//					System.out.print("nW ");
-//				}
+				cm = WModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
 //				if (true == HModel.recognize(bmws.get(i))) {
 //					System.out.print("H ");
 //				} else {
@@ -202,11 +214,10 @@ public class KTableModel {
 //							System.out.print("nY ");
 //						}
 //
-//						if (true == AModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-//							System.out.print("A ");
-//						} else {
-//							System.out.print("nA ");
-//						}
+						cm = AModel.recognize(bmws.get(i), bmws.get(i + 1));
+						if (null != cm) {
+							cms.add(cm);
+						}
 //						if (DModel.recognize(bmws.get(i), bmws.get(i + 1))) {
 //							System.out.print("D");
 //						} else {
@@ -233,6 +244,8 @@ public class KTableModel {
 				System.out.println();
 			}
 		}
+
+		return cms;
 	}
 
 	@SuppressWarnings("unused")

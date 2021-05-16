@@ -145,18 +145,16 @@ public class LinearModel {
 
 		List<Integer> trueBreakPoints = new ArrayList<>();
 
-		// System.out.println("Total inital number of breakPoints: " +
-		// breakPoints.size());
+		System.out.println("Total inital number of breakPoints: " + breakPoints.size());
 
 		double activeNorm;
 		trueBreakPoints.add(0);
-		// System.out.println("Total length: " + totalLength);
-		// System.out.println("Uvijet: " +
-		// COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength);
+		System.out.println("Total length: " + totalLength);
+		System.out.println("Uvijet: " + KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength);
 		for (int i = 1; i < breakPoints.size() - 1; i++) {
 			activeNorm = MyVector.norm(points.get(trueBreakPoints.get(trueBreakPoints.size() - 1)),
 					points.get(breakPoints.get(i)));
-			// System.out.println("Trenutna norma: " + activeNorm);
+			 System.out.println("Trenutna norma: " + activeNorm);
 			if (activeNorm > KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE * totalLength) {
 				trueBreakPoints.add(breakPoints.get(i));
 			} else {
