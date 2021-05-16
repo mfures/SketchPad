@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -56,7 +55,6 @@ public class KTableModel {
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		// TODO not here
 		// checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
@@ -70,7 +68,6 @@ public class KTableModel {
 		}
 
 		System.out.println("Našao sam ovoliko tablica:" + tables.size());
-		// TODO remove
 		for (var table : tables) {
 			Line l = getLineInCorner(table, bmws);
 			if (l != null) {
@@ -112,10 +109,6 @@ public class KTableModel {
 				}
 			}
 		}
-
-		System.out.println("Desno: " + rightBmws.size());
-		System.out.println("Lijevo: " + leftBmws.size());
-
 	}
 
 	private Line getLineInCorner(KTable table, List<BasicMovementWrapper> bmws) {
