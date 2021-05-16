@@ -72,7 +72,10 @@ public class KTableModel {
 		System.out.println("Našao sam ovoliko tablica:" + tables.size());
 		// TODO remove
 		for (var table : tables) {
-			handleTopRightCorner(table, bmws);
+			Line l = getLineInCorner(table, bmws);
+			if (l != null) {
+				handleCorner(l, table, bmws);
+			}
 			// debugDrawTable(table);
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
 			// SketchPad2.debugDraw(new
@@ -82,27 +85,54 @@ public class KTableModel {
 		}
 	}
 
-	private Line handleTopRightCorner(KTable table, List<BasicMovementWrapper> bmws) {
+	private void handleCorner(Line l, KTable table, List<BasicMovementWrapper> bmws) {
+		double yDiff = l.getMaxY() - l.getMinY();
+
+		double minX = l.getMinX();
+		double maxX = l.getMaxX() + table.getWidth() * 0.35;
+		double minX2 = l.getMinX() - table.getWidth() * 0.35;
+		double maxX2 = l.getMaxX();
+
+		double minY = l.getMinY() - 0.1 * yDiff;// Both should be -
+		double maxY = l.getMaxY() - 0.1 * yDiff;
+		List<BasicMovementWrapper> leftBmws = new ArrayList<>();
+		List<BasicMovementWrapper> rightBmws = new ArrayList<>();
+
+		for (BasicMovementWrapper bmw : bmws) {
+			if (bmw.isUnused()) {
+				Rectangle bb = bmw.getBm().getBoundingBox();
+				if ((l.forX(bb.getP1().x) < bb.getP1().y) && (l.forX(bb.getP2().x) < bb.getP2().y)) {
+					if (bmw.getBm().isInRect((int) minX2, (int) maxX2, (int) minY, (int) maxY)) {
+						leftBmws.add(bmw);
+					}
+				} else if ((l.forX(bb.getP1().x) > bb.getP1().y) && (l.forX(bb.getP2().x) > bb.getP2().y)) {
+					if (bmw.getBm().isInRect((int) minX, (int) maxX, (int) minY, (int) maxY)) {
+						rightBmws.add(bmw);
+					}
+				}
+			}
+		}
+
+		System.out.println("Desno: " + rightBmws.size());
+		System.out.println("Lijevo: " + leftBmws.size());
+
+	}
+
+	private Line getLineInCorner(KTable table, List<BasicMovementWrapper> bmws) {
 		double minX = table.getP().x - table.getAvgWidth() * 2;
 		double maxX = table.getP().x + table.getAvgWidth() / 2;
 		double minY = table.getP().y - table.getAvgWidth() * 2;
 		double maxY = table.getP().y + table.getAvgWidth() / 2;
 
-		List<Line> lines = new ArrayList<>();
 		for (BasicMovementWrapper bmw : bmws) {
 			if (bmw.getBm().isInRect((int) minX, (int) maxX, (int) minY, (int) maxY)) {
 				Line l = LinearModel.recognize(bmw);
 				if (l != null) {
-					lines.add(l);
+					if (l.getSlope() <= 15 && l.getSlope() >= (1.0 / 15)) {
+						bmw.incTotalHandeledFragments();
+						return l;
+					}
 				}
-			}
-		}
-
-		for (Line l : lines) {
-			if (!(l.getSlope() <= (30) && l.getSlope() >= 0.9)) {
-				System.out.println("Bad l1 slope: " + l.getSlope());
-			} else {
-				System.out.println("Dobar: " + l.getSlope());
 			}
 		}
 
