@@ -1,5 +1,6 @@
 package hr.fer.zemris.diprad.recognition.models.letters;
 
+import hr.fer.zemris.diprad.recognition.models.CharacterModel;
 import hr.fer.zemris.diprad.recognition.models.CircularModel;
 import hr.fer.zemris.diprad.recognition.models.LinearModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
@@ -8,18 +9,20 @@ import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class HModel {
-	public static boolean recognize(BasicMovementWrapper bmw) {
+	private static final String H = "h";
+
+	public static CharacterModel recognize(BasicMovementWrapper bmw) {
 		int breakPosition = CircularModel.generateBestBreakPoint(bmw);
 		if (breakPosition == -1) {
 			// System.out.println("Bad number of break points: ");
-			return false;
+			return null;
 		}
 		CircularObject co;
 		Line l;
 
 		if (bmw.getBm().getPoints().get(0).y < bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).y) {
 			if (bmw.getBm().getPoints().get(0).x > bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x) {
-				return false;
+				return null;
 			}
 
 			l = LinearModel.recognize(bmw, 0, breakPosition);
@@ -27,7 +30,7 @@ public class HModel {
 					bmw);
 		} else {
 			if (bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x > bmw.getBm().getPoints().get(0).x) {
-				return false;
+				return null;
 			}
 
 			l = LinearModel.recognize(bmw, breakPosition, bmw.getBm().getPoints().size() - 1);
@@ -36,27 +39,27 @@ public class HModel {
 
 		if (co == null || l == null) {
 			// System.out.println("Some are null");
-			return false;
+			return null;
 		}
 
 		if (co.getMinMaxRatio() > 0.55 || co.getMinMaxRatio() < 0.15) {
 			// System.out.println("co minMax: " + co.getMinMaxRatio());
-			return false;
+			return null;
 		}
 
 		if (l.getType() != LineType.VERTICAL) {
 			// System.out.println("Line not vertical");
-			return false;
+			return null;
 		}
 
 		if (co.getTotalAngle() < 220 || co.getTotalAngle() > 305) {
 			// System.out.println("invalid angle: " + co.getTotalAngle());
-			return false;
+			return null;
 		}
 
 		if (co.getTheta() > 125 || co.getTheta() < 55) {
 			// System.out.println("Bad opening position: " + co.getTheta());
-			return false;
+			return null;
 		}
 		if (co.getBoundingBox().getWidth() > 0.9 * l.length() || co.getBoundingBox().getWidth() < 0.2 * l.length()) {
 			// System.out.println("bad co width ratio: " + co.getBoundingBox().getWidth() /
@@ -70,9 +73,9 @@ public class HModel {
 		double deltaY = co.getBoundingBox().getP2().y - l.getMaxY();
 		if (Math.abs(deltaY) > 0.15 * l.length()) {
 			// System.out.println("Delta y");
-			return false;
+			return null;
 		}
 
-		return true;
+		return new CharacterModel(H, bmw);
 	}
 }

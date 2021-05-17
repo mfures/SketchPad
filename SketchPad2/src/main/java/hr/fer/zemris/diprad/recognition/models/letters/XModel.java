@@ -1,37 +1,40 @@
 package hr.fer.zemris.diprad.recognition.models.letters;
 
+import hr.fer.zemris.diprad.recognition.models.CharacterModel;
 import hr.fer.zemris.diprad.recognition.models.LinearModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class XModel {
-	public static boolean recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
+	private static final String X = "X";
+
+	public static CharacterModel recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
 		if (LinearModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size() != 2) {
 			// System.out.println("1: " +
 			// LineModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size());
-			return false;
+			return null;
 		}
 		if (LinearModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size() != 2) {
 			// System.out.println("w: " +
 			// LineModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size());
-			return false;
+			return null;
 		}
 
 		Line l1 = LinearModel.recognize(bmw1);
 		if (l1 == null) {
 			// System.out.println("3");
-			return false;
+			return null;
 		}
 
 		Line l2 = LinearModel.recognize(bmw2);
 		if (l2 == null) {
 			// System.out.println("4");
-			return false;
+			return null;
 		}
 		if (l1.getSlope() / l2.getSlope() > 0) {
 			// System.out.println("5");
-			return false;
+			return null;
 		}
 
 		if (l2.getSlope() < 0) {
@@ -42,28 +45,28 @@ public class XModel {
 
 		if (l1.getType() == LineType.HORIZONTAL && l2.getType() == LineType.VERTICAL) {
 			// System.out.println("6");
-			return false;
+			return null;
 		}
 
 		if (l2.getType() == LineType.HORIZONTAL && l1.getType() == LineType.VERTICAL) {
 			// System.out.println("7");
-			return false;
+			return null;
 		}
 
 		if (!(l1.getSlope() >= (-20) && l1.getSlope() <= -0.3)) {
 			// System.out.println("8");
-			return false;
+			return null;
 		}
 		if (!(l2.getSlope() <= (20) && l2.getSlope() >= 0.3)) {
 			// System.out.println("9");
-			return false;
+			return null;
 		}
 
 		double lRatio = l1.length() / l2.length();
 		double lengthTolerance = 0.5;
 		if (lRatio > (1 + lengthTolerance) || lRatio < (1 / (1 + lengthTolerance))) {
 			// System.out.println("10");
-			return false;
+			return null;
 		}
 
 		int minX = Math.min(l1.getP1().x, l1.getP2().x);
@@ -73,7 +76,7 @@ public class XModel {
 		if (l2.getAverageX() >= maxX || l2.getAverageX() <= minX || l2.getAverageY() >= maxY
 				|| l2.getAverageY() <= minY) {
 			// System.out.println("11");
-			return false;
+			return null;
 		}
 
 		double maxRatio = 2;
@@ -84,9 +87,9 @@ public class XModel {
 		if (distanceRatioX > maxRatio || distanceRatioY > maxRatio || distanceRatioY < minRatio
 				|| distanceRatioY < minRatio) {
 			// System.out.println("12");
-			return false;
+			return null;
 		}
 
-		return true;
+		return new CharacterModel(X, bmw1, bmw2);
 	}
 }

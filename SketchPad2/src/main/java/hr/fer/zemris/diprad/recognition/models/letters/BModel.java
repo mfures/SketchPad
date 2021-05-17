@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import hr.fer.zemris.diprad.recognition.models.CharacterModel;
 import hr.fer.zemris.diprad.recognition.models.CircularModel;
 import hr.fer.zemris.diprad.recognition.models.LinearModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
@@ -12,20 +13,22 @@ import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 
 public class BModel {
-	public static boolean recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
+	private static final String B = "B";
+
+	public static CharacterModel recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
 
 		List<CircularObject> cos = initCOs(bmw1);
 		if (cos == null) {
 			cos = initCOs(bmw2);
 			if (cos == null) {
 				// System.out.println("1.Invalid circular objects");
-				return false;
+				return null;
 			}
 
-			return testForCircularObjectsAndBMW(cos, bmw1);
+			return testForCircularObjectsAndBMW(cos, bmw1,bmw2);
 		}
 
-		return testForCircularObjectsAndBMW(cos, bmw2);
+		return testForCircularObjectsAndBMW(cos, bmw2,bmw1);
 	}
 
 	private static List<CircularObject> initCOs(BasicMovementWrapper bmw) {
@@ -134,11 +137,11 @@ public class BModel {
 		return true;
 	}
 
-	private static boolean testForCircularObjectsAndBMW(List<CircularObject> cos, BasicMovementWrapper bmw) {
+	private static CharacterModel testForCircularObjectsAndBMW(List<CircularObject> cos, BasicMovementWrapper bmw,BasicMovementWrapper bmw2) {
 		Line l = LinearModel.recognize(bmw);
 		if (l.getType() != LineType.VERTICAL) {
 			// System.out.println("Line not vertical");
-			return false;
+			return null;
 		}
 
 		Point p1 = cos.get(0).getBmw().getBm().getPoints().get(0);
@@ -150,20 +153,20 @@ public class BModel {
 		double dist3 = l.distanceFromPointToLine(p3);
 
 		if (l.length() * 0.9 > Math.abs(p1.y - p3.y)) {
-			return false;
+			return null;
 		}
 
 		double totalNorm = cos.get(0).getTotalNorm() + cos.get(1).getTotalNorm();
 
 		if (dist1 - 0.15 * totalNorm > 0 || dist2 - 0.15 * totalNorm > 0 || dist3 - 0.15 * totalNorm > 0) {
-			return false;
+			return null;
 		}
 
 		if (p1.x - l.forY(p1.y) - 0.075 * totalNorm > 0 || p2.x - l.forY(p2.y) - 0.075 * totalNorm > 0
 				|| p3.x - l.forY(p3.y) - 0.075 * totalNorm > 0) {
-			return false;
+			return null;
 		}
 
-		return true;
+		return new CharacterModel(B, bmw, bmw2);
 	}
 }

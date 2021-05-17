@@ -15,8 +15,20 @@ import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.LineValueSupplier;
 import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.letters.AModel;
+import hr.fer.zemris.diprad.recognition.models.letters.BModel;
 import hr.fer.zemris.diprad.recognition.models.letters.CModel;
+import hr.fer.zemris.diprad.recognition.models.letters.DModel;
+import hr.fer.zemris.diprad.recognition.models.letters.FModel;
+import hr.fer.zemris.diprad.recognition.models.letters.GModel;
+import hr.fer.zemris.diprad.recognition.models.letters.HModel;
 import hr.fer.zemris.diprad.recognition.models.letters.WModel;
+import hr.fer.zemris.diprad.recognition.models.letters.XModel;
+import hr.fer.zemris.diprad.recognition.models.letters.YModel;
+import hr.fer.zemris.diprad.recognition.models.letters.ZModel;
+import hr.fer.zemris.diprad.recognition.models.numbers.OneModel;
+import hr.fer.zemris.diprad.recognition.models.numbers.ThreeModel;
+import hr.fer.zemris.diprad.recognition.models.numbers.TwoModel;
+import hr.fer.zemris.diprad.recognition.models.numbers.ZeroModel;
 import hr.fer.zemris.diprad.recognition.models.tokens.LineType;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
@@ -38,7 +50,7 @@ public class KTableModel {
 	public static final double COORDINATE_TOLERANCE = 0.05;
 	public static final double LENGTH_TOLLERANCE = 0.05;
 	public static final double DISTANCE_TOLERANCE = 0.25;
-	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.175;
+	public static final double COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE = 0.7;
 	public static final double MAX_AVERAGE_SQUARE_ERROR = 350;
 
 	public static final double COORDINATE_MIN = (1 - COORDINATE_TOLERANCE) / (1 + COORDINATE_TOLERANCE);
@@ -57,7 +69,7 @@ public class KTableModel {
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		// checkCharacterModels(bmws);
+		checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
@@ -151,97 +163,71 @@ public class KTableModel {
 
 		for (int i = 0; i < bmws.size(); i++) {
 			if (bmws.get(i).isUnused()) {
-//				if (null != CircularModel.recognize(bmws.get(i))) {
-//					System.out.println("Circular");
-//				} else {
-//					System.out.println("non circular");
-//				}
-//				if (ZeroModel.recognize(bmws.get(i))) {
-//					System.out.print("0 ");
-//				} else {
-//					System.out.print("n0 ");
-//				}
-//				if (OneModel.recognize(bmws.get(i))) {
-//					System.out.print("1 ");
-//				} else {
-//					System.out.print("n1 ");
-//				}
-//				if (true == TwoModel.recognize(bmws.get(i))) {
-//					System.out.print("2 ");
-//				} else {
-//					System.out.print("n2 ");
-//				}
-//				if (ThreeModel.recognize(bmws.get(i))) {
-//					System.out.print("3 ");
-//				} else {
-//					System.out.print("n3 ");
-//				}
+				cm = ZeroModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = OneModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = TwoModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = ThreeModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
 				cm = CModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
 				}
-//				if (true == ZModel.recognize(bmws.get(i))) {
-//					System.out.print("Z ");
-//				} else {
-//					System.out.print("nZ ");
-//				}
+				cm = ZModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
 				cm = WModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
 				}
-//				if (true == HModel.recognize(bmws.get(i))) {
-//					System.out.print("H ");
-//				} else {
-//					System.out.print("nH ");
-//				}
-//				if (true == GModel.recognize(bmws.get(i))) {
-//					System.out.print("G ");
-//				} else {
-//					System.out.print("nG ");
-//				}
-
+				cm = HModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = GModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+					System.out.println("G");
+				}
 				if (i != bmws.size() - 1) {
 					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
-//						if (true == XModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-//							System.out.print("X ");
-//						} else {
-//							System.out.print("nX ");
-//						}
-//
-//						if (true == YModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-//							System.out.print("Y ");
-//						} else {
-//							System.out.print("nY ");
-//						}
-//
+						cm = XModel.recognize(bmws.get(i), bmws.get(i + 1));
+						if (null != cm) {
+							cms.add(cm);
+						}
+						cm = YModel.recognize(bmws.get(i), bmws.get(i + 1));
+						if (null != cm) {
+							cms.add(cm);
+						}
 						cm = AModel.recognize(bmws.get(i), bmws.get(i + 1));
 						if (null != cm) {
 							cms.add(cm);
 						}
-//						if (DModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-//							System.out.print("D");
-//						} else {
-//							System.out.print("nD");
-//						}
-//						if (BModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-//							System.out.print("B");
-//						} else {
-//							System.out.print("nB");
-//						}
-//						if (true == FModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-//							System.out.print("F ");
-//						} else {
-//							System.out.print("nF ");
-//						}
-//						if (true == GModel.recognize(bmws.get(i), bmws.get(i + 1))) {
-//							System.out.print("G ");
-//						} else {
-//							System.out.print("nG ");
-//						}
+						cm = DModel.recognize(bmws.get(i), bmws.get(i + 1));
+						if (null != cm) {
+							cms.add(cm);
+						}
+						cm = BModel.recognize(bmws.get(i), bmws.get(i + 1));
+						if (null != cm) {
+							cms.add(cm);
+						}
+						cm = FModel.recognize(bmws.get(i), bmws.get(i + 1));
+						if (null != cm) {
+							cms.add(cm);
+						}
 					}
 				}
-
-				System.out.println();
 			}
 		}
 
