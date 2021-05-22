@@ -7,6 +7,7 @@ import hr.fer.zemris.diprad.util.Rectangle;
 public class CharacterModel {
 	private String character;
 	private Rectangle boundingBox;
+	private BasicMovementWrapper[] bmws;
 
 	public CharacterModel(String s, BasicMovementWrapper... bmws) {
 		if (bmws.length == 0) {
@@ -28,6 +29,7 @@ public class CharacterModel {
 		}
 
 		this.boundingBox = new Rectangle(new PointDouble(minX, minY), new PointDouble(maxX, maxY));
+		this.bmws=bmws;
 	}
 
 	public String getCharacter() {
@@ -36,5 +38,9 @@ public class CharacterModel {
 
 	public Rectangle getBoundingBox() {
 		return boundingBox;
+	}
+
+	public BasicMovementWrapper[] getBmws() {
+		return bmws;
 	}
 }
