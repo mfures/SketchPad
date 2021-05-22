@@ -11,18 +11,18 @@ public class ZeroModel {
 	public static CharacterModel recognize(BasicMovementWrapper bmw) {
 		CircularObject co = CircularModel.recognize(bmw);
 		if (co == null) {
-			// System.out.println("No circular object found");
+			 System.out.println("No circular object found");
 			return null;
 		}
 		if (!co.isFullCircle()) {
-			// System.out.println("Not ful circle");
+			 System.out.println("Not ful circle");
 			return null;
 		}
 		if (co.getMinMaxRatio() > 0.65 || co.getMinMaxRatio() < 0.25) {
-			// System.out.println("Bad min max:" + co.getMinMaxRatio());
+			 System.out.println("Bad min max:" + co.getMinMaxRatio());
 		}
-		if (Math.abs(co.getThetaMaxDistance()) > 125 || Math.abs(co.getThetaMaxDistance()) < 55) {
-			// System.out.println("Bad angle:" + co.getThetaMaxDistance());
+		if (Math.abs(co.getThetaMaxDistance()) > 140 || Math.abs(co.getThetaMaxDistance()) < 40) {
+			 System.out.println("Bad angle:" + co.getThetaMaxDistance());
 			return null;
 		}
 

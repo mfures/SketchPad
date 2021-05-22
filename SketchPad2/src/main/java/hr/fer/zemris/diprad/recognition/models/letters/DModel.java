@@ -47,6 +47,10 @@ public class DModel {
 	private static CharacterModel testForCircularObjectAndBMW(CircularObject co, BasicMovementWrapper bmw,
 			BasicMovementWrapper bmw2) {
 		Line l = LinearModel.recognize(bmw);
+		if(l==null) {
+			return null;
+		}
+		
 		if (l.getType() != LineType.VERTICAL) {
 			// System.out.println("Line not vertical");
 			return null;

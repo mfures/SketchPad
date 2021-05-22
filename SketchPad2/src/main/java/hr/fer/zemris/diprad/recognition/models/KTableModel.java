@@ -60,16 +60,16 @@ public class KTableModel {
 	public static final double DISTANCE_MIN = (1 - DISTANCE_TOLERANCE) / (1 + DISTANCE_TOLERANCE);
 	public static final double DISTANCE_MAX = (1 + DISTANCE_TOLERANCE) / (1 - DISTANCE_TOLERANCE);
 
-	private SketchPad2 sP;
+	private static SketchPad2 sP;
 
-	public KTableModel(SketchPad2 sP) {
-		this.sP = sP;
+	public KTableModel(SketchPad2 sPad) {
+		sP = sPad;
 	}
 
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		// checkCharacterModels(bmws);
+		checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
@@ -92,6 +92,7 @@ public class KTableModel {
 				System.out.println("Dobio sam iznimku: " + e.getMessage());
 				System.out.println("Crtam tablicu bez varijabli");
 			}
+
 			// debugDrawTable(table);
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
 			// SketchPad2.debugDraw(new
@@ -108,25 +109,35 @@ public class KTableModel {
 		double maxX = l.getMaxX() + table.getWidth() * 0.35;
 		double minX2 = l.getMinX() - table.getWidth() * 0.35;
 		double maxX2 = l.getMaxX();
+		double minX3 = l.getMinX() - table.getWidth() * 0.35;
+		double maxX3 = l.getMinX() + table.getWidth() * 0.35;
 
-		double minY = l.getMinY() - 0.1 * yDiff;// Both should be -
+		double minY = l.getMinY() - 0.15 * yDiff;
 		double maxY = l.getMaxY() - 0.1 * yDiff;
+		double minY2 = l.getMinY() - 1.6 * yDiff;// Both should be -
+		double maxY2 = l.getMaxY() - 1 * yDiff;
 		List<BasicMovementWrapper> leftBmws = new ArrayList<>();
 		List<BasicMovementWrapper> rightBmws = new ArrayList<>();
+		List<BasicMovementWrapper> topBmws = new ArrayList<>();
 
-		// debugDrawRectangle((int)minX, (int)maxX, (int)minY, (int)maxY);
-		// debugDrawRectangle((int)minX2, (int)maxX2, (int)minY, (int)maxY);
+		// debugDrawRectangle((int) minX, (int) maxX, (int) minY, (int) maxY);
+		// debugDrawRectangle((int) minX2, (int) maxX2, (int) minY, (int) maxY);
+		// debugDrawRectangle((int) minX3, (int) maxX3, (int) minY2, (int) maxY2);
 
 		for (BasicMovementWrapper bmw : bmws) {
 			if (bmw.isUnused()) {
 				Rectangle bb = bmw.getBm().getBoundingBox();
-				if ((l.forX(bb.getP1().x) < bb.getP1().y) && (l.forX(bb.getP2().x) < bb.getP2().y)) {
-					if (bmw.getBm().isInRect((int) minX2, (int) maxX2, (int) minY, (int) maxY)) {
-						leftBmws.add(bmw);
-					}
-				} else if ((l.forX(bb.getP1().x) > bb.getP1().y) && (l.forX(bb.getP2().x) > bb.getP2().y)) {
-					if (bmw.getBm().isInRect((int) minX, (int) maxX, (int) minY, (int) maxY)) {
-						rightBmws.add(bmw);
+				if (bmw.getBm().isInRect((int) minX3, (int) maxX3, (int) minY2, (int) maxY2)) {
+					topBmws.add(bmw);
+				} else {
+					if ((l.forX(bb.getP1().x) < bb.getP1().y) && (l.forX(bb.getP2().x) < bb.getP2().y)) {
+						if (bmw.getBm().isInRect((int) minX2, (int) maxX2, (int) minY, (int) maxY)) {
+							leftBmws.add(bmw);
+						}
+					} else if ((l.forX(bb.getP1().x) > bb.getP1().y) && (l.forX(bb.getP2().x) > bb.getP2().y)) {
+						if (bmw.getBm().isInRect((int) minX, (int) maxX, (int) minY, (int) maxY)) {
+							rightBmws.add(bmw);
+						}
 					}
 				}
 			}
@@ -150,18 +161,36 @@ public class KTableModel {
 
 		});
 
+		List<CharacterModel> topCMs = checkCharacterModels(topBmws);
+		Collections.sort(topCMs, new Comparator<CharacterModel>() {
+			@Override
+			public int compare(CharacterModel o1, CharacterModel o2) {
+				return Integer.compare(o1.getBoundingBox().getIp1().x, o2.getBoundingBox().getIp1().x);
+			}
+
+		});
+
 		System.out.println("Lijevo: " + leftCMs.size());
 		leftCMs.forEach((x) -> System.out.print(x.getCharacter() + " "));
 		System.out.println("\nDesno: " + rightCMs.size());
 		rightCMs.forEach((x) -> System.out.print(x.getCharacter() + " "));
+		System.out.println("\nGore: " + topCMs.size());
+		topCMs.forEach((x) -> System.out.print(x.getCharacter() + " "));
 
 		List<VariableModel> leftVMs = constructVariables(leftCMs);
-		System.out.println("\nLijevo varijable: " + leftCMs.size());
+		VariableModel.validateVariableListOrFail(leftVMs);
+		System.out.println("\nLijevo varijable: " + leftVMs.size());
 		leftVMs.forEach((x) -> System.out.print(x.getVariable() + " "));
 
 		List<VariableModel> rightVMs = constructVariables(rightCMs);
-		System.out.println("\nDesno varijable: " + leftCMs.size());
+		VariableModel.validateVariableListOrFail(rightVMs);
+		System.out.println("\nDesno varijable: " + rightCMs.size());
 		rightVMs.forEach((x) -> System.out.print(x.getVariable() + " "));
+
+		List<VariableModel> topVMs = constructVariables(topCMs);
+		VariableModel.validateVariableListOrFail(topVMs);
+		System.out.println("\nGore varijable: " + topVMs.size());
+		topVMs.forEach((x) -> System.out.print(x.getVariable() + " "));
 
 	}
 
@@ -460,6 +489,12 @@ public class KTableModel {
 	@SuppressWarnings("unused")
 	public void debugDrawRectangle(int minx, int maxx, int miny, int maxy) {
 		sP.getModel().add(new SelectionRectangle(new Point(minx, miny), new Point(maxx, maxy)));
+		sP.getCanvas().repaint();
+	}
+
+	@SuppressWarnings("unused")
+	public static void debugDrawRectangleStatic(Rectangle r) {
+		sP.getModel().add(new SelectionRectangle(new Point(r.getIp1().x, r.getIp1().y),new Point(r.getIp2().x, r.getIp2().y)));
 		sP.getCanvas().repaint();
 	}
 

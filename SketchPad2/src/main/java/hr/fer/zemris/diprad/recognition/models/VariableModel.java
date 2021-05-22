@@ -1,5 +1,7 @@
 package hr.fer.zemris.diprad.recognition.models;
 
+import java.util.List;
+
 import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
 
@@ -15,16 +17,18 @@ public class VariableModel {
 							+ cms.length);
 		}
 
-		this.cms=cms;
-		
+		this.cms = cms;
+
 		if (cms.length == 1) {
 			this.variable = cms[0].getCharacter();
-			this.boundingBox=cms[0].getBoundingBox().copyOf();
+			this.boundingBox = cms[0].getBoundingBox().copyOf();
 		} else {
 			this.variable = cms[0].getCharacter() + cms[1].getCharacter();
 
-			Rectangle bb1 = cms[0].getBmws()[0].getBm().getBoundingBox();
-			Rectangle bb2 = cms[1].getBmws()[0].getBm().getBoundingBox();
+			Rectangle bb1 = cms[0].getBoundingBox();
+			Rectangle bb2 = cms[1].getBoundingBox();
+			KTableModel.debugDrawRectangleStatic(bb1);
+			KTableModel.debugDrawRectangleStatic(bb2);
 			int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
 
 			if (overlapLength > 0) {
@@ -43,6 +47,7 @@ public class VariableModel {
 			}
 
 			double height1 = bb1.getIp2().y - bb1.getIp1().y;
+
 			double height2 = bb2.getIp2().y - bb2.getIp1().y;
 
 			if (height2 / height1 < 0.35 || height2 / height1 > 1.3) {
@@ -58,7 +63,7 @@ public class VariableModel {
 			if (bb1.getIp2().y > bb2.getIp2().y) {
 				throw new RuntimeException("Index heigher end than char");
 			}
-			
+
 			initBoundingBox();
 		}
 	}
@@ -85,7 +90,7 @@ public class VariableModel {
 
 	public CharacterModel[] getCms() {
 		return cms;
-	}	
+	}
 
 	public Rectangle getBoundingBox() {
 		return boundingBox;
@@ -93,6 +98,11 @@ public class VariableModel {
 
 	public boolean hasIndex() {
 		return this.cms.length == 2;
+	}
+
+	public double getCharacherHeight() {
+		Rectangle bb1 = cms[0].getBmws()[0].getBm().getBoundingBox();
+		return bb1.getIp2().y - bb1.getIp1().y;
 	}
 
 	@Override
@@ -118,5 +128,51 @@ public class VariableModel {
 		} else if (!variable.equals(other.variable))
 			return false;
 		return true;
+	}
+
+	public static void validateVariableListOrFail(List<VariableModel> vms) {
+		if (vms.size() > 1) {
+			for (int i = 0; i < vms.size() - 1; i++) {
+				validOrFail(vms.get(i), vms.get(i + 1));
+			}
+		}
+	}
+
+	public static void validOrFail(VariableModel vm1, VariableModel vm2) {
+		Rectangle bb1 = vm1.getBoundingBox();
+		Rectangle bb2 = vm2.getBoundingBox();
+
+
+		int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
+
+		if (overlapLength > 0) {
+			if ((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x) > 0.1
+					|| (overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x) > 0.1) {
+				throw new RuntimeException("Too overlap beetwen variables");
+
+			}
+		} else {
+			double distance = -overlapLength;
+			double minDistanceRatio = Math.min((distance) / (bb1.getIp2().x - bb1.getIp1().x),
+					(distance) / (bb2.getIp2().x - bb2.getIp1().x));
+			if (minDistanceRatio > 1.1) {
+				throw new RuntimeException("Variables to far away (ratio):" + minDistanceRatio);
+			}
+		}
+
+		double height1 = vm1.getCharacherHeight();
+		double height2 = vm2.getCharacherHeight();
+
+		if (height2 / height1 < 0.6 || height2 / height1 > 1.0 / 0.6) {
+			throw new RuntimeException("Bad character variable height ration" + height2 / height1 + " " + vm1.variable
+					+ " " + vm2.variable);
+		}
+
+		if (bb1.getIp1().y + 0.5 * height1 > bb2.getIp2().y) {
+			throw new RuntimeException("Variable to high: " + vm2.getVariable());
+		}
+		if (bb2.getIp1().y + 0.5 * height1 > bb1.getIp2().y) {
+			throw new RuntimeException("Variable to high: " + vm1.getVariable());
+		}
 	}
 }
