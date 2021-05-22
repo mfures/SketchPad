@@ -1,18 +1,26 @@
 package hr.fer.zemris.diprad.recognition.models;
 
+import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
 
 public class VariableModel {
 	private String variable;
 	private CharacterModel[] cms;
+	private Rectangle boundingBox;
 
 	public VariableModel(CharacterModel... cms) {
+		if (cms.length > 2 || cms.length < 1) {
+			throw new RuntimeException(
+					"Incorrect number of carachter models given. Expected no more than 2 and no less than 1. This should never happen. Number of: "
+							+ cms.length);
+		}
 
-		this.cms = cms;
-
+		this.cms=cms;
+		
 		if (cms.length == 1) {
 			this.variable = cms[0].getCharacter();
-		} else if (cms.length == 2) {
+			this.boundingBox=cms[0].getBoundingBox().copyOf();
+		} else {
 			this.variable = cms[0].getCharacter() + cms[1].getCharacter();
 
 			Rectangle bb1 = cms[0].getBmws()[0].getBm().getBoundingBox();
@@ -50,10 +58,25 @@ public class VariableModel {
 			if (bb1.getIp2().y > bb2.getIp2().y) {
 				throw new RuntimeException("Index heigher end than char");
 			}
-		} else {
-			throw new RuntimeException(
-					"Too much carachter models given. Expected no more than 2. This should never happen");
+			
+			initBoundingBox();
 		}
+	}
+
+	private void initBoundingBox() {
+		double minX = cms[0].getBoundingBox().getIp1().x;
+		double maxX = cms[0].getBoundingBox().getIp2().x;
+		double minY = cms[0].getBoundingBox().getIp1().y;
+		double maxY = cms[0].getBoundingBox().getIp2().y;
+
+		for (int i = 1; i < cms.length; i++) {
+			minX = Math.min(minX, cms[i].getBoundingBox().getIp1().x);
+			maxX = Math.max(maxX, cms[i].getBoundingBox().getIp2().x);
+			minY = Math.min(minY, cms[i].getBoundingBox().getIp1().y);
+			maxY = Math.max(maxY, cms[i].getBoundingBox().getIp2().y);
+		}
+
+		this.boundingBox = new Rectangle(new PointDouble(minX, minY), new PointDouble(maxX, maxY));
 	}
 
 	public String getVariable() {
@@ -62,6 +85,10 @@ public class VariableModel {
 
 	public CharacterModel[] getCms() {
 		return cms;
+	}	
+
+	public Rectangle getBoundingBox() {
+		return boundingBox;
 	}
 
 	public boolean hasIndex() {

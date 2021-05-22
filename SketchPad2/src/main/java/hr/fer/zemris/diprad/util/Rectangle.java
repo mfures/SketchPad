@@ -118,4 +118,8 @@ public class Rectangle {
 	public String toString() {
 		return p1.toString() + "," + p2.toString();
 	}
+
+	public Rectangle copyOf() {
+		return new Rectangle(new PointDouble(p1.x, p1.y), new PointDouble(p2.x, p2.y));
+	}
 }
