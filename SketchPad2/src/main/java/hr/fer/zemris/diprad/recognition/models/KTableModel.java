@@ -69,7 +69,7 @@ public class KTableModel {
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		checkCharacterModels(bmws);
+		//checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
@@ -198,33 +198,44 @@ public class KTableModel {
 				cm = GModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
-					System.out.println("G");
 				}
 				if (i != bmws.size() - 1) {
 					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
 						cm = XModel.recognize(bmws.get(i), bmws.get(i + 1));
 						if (null != cm) {
 							cms.add(cm);
+							i++;
+							continue;
 						}
 						cm = YModel.recognize(bmws.get(i), bmws.get(i + 1));
 						if (null != cm) {
 							cms.add(cm);
+							i++;
+							continue;
 						}
 						cm = AModel.recognize(bmws.get(i), bmws.get(i + 1));
 						if (null != cm) {
 							cms.add(cm);
+							i++;
+							continue;
 						}
 						cm = DModel.recognize(bmws.get(i), bmws.get(i + 1));
 						if (null != cm) {
 							cms.add(cm);
+							i++;
+							continue;
 						}
 						cm = BModel.recognize(bmws.get(i), bmws.get(i + 1));
 						if (null != cm) {
 							cms.add(cm);
+							i++;
+							continue;
 						}
 						cm = FModel.recognize(bmws.get(i), bmws.get(i + 1));
 						if (null != cm) {
 							cms.add(cm);
+							i++;
+							continue;
 						}
 					}
 				}

@@ -18,6 +18,10 @@ public class CircularModel {
 	}
 
 	public static CircularObject recognize(List<Point> points, int startIndex, int endIndex, BasicMovementWrapper bmw) {
+		if(endIndex<=startIndex||endIndex==-1||startIndex==-1) {
+			return null;
+		}
+		
 		double totalNorm = calculateTotalNorm(points, startIndex, endIndex);
 		int k = (endIndex - startIndex + 1);
 		List<PointDouble> sampledPoints = samplePoints(points, startIndex, endIndex, totalNorm, k);
