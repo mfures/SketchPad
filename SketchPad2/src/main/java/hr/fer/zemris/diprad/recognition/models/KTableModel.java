@@ -114,8 +114,8 @@ public class KTableModel {
 		List<BasicMovementWrapper> leftBmws = new ArrayList<>();
 		List<BasicMovementWrapper> rightBmws = new ArrayList<>();
 
-		 debugDrawRectangle((int)minX, (int)maxX, (int)minY, (int)maxY);
-		 debugDrawRectangle((int)minX2, (int)maxX2, (int)minY, (int)maxY);
+		// debugDrawRectangle((int)minX, (int)maxX, (int)minY, (int)maxY);
+		// debugDrawRectangle((int)minX2, (int)maxX2, (int)minY, (int)maxY);
 
 		for (BasicMovementWrapper bmw : bmws) {
 			if (bmw.isUnused()) {

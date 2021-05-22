@@ -1,5 +1,7 @@
 package hr.fer.zemris.diprad.recognition.models;
 
+import hr.fer.zemris.diprad.util.Rectangle;
+
 public class VariableModel {
 	private String variable;
 	private CharacterModel[] cms;
@@ -12,6 +14,32 @@ public class VariableModel {
 			this.variable = cms[0].getCharacter();
 		} else if (cms.length == 2) {
 			this.variable = cms[0].getCharacter() + cms[1].getCharacter();
+
+			Rectangle bb1 = cms[0].getBmws()[0].getBm().getBoundingBox();
+			Rectangle bb2 = cms[1].getBmws()[0].getBm().getBoundingBox();
+			int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
+
+			if (overlapLength > 0) {
+				if ((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x) > 0.35
+						|| (overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x) > 0.35) {
+					throw new RuntimeException("Too much variable and index overlap");
+
+				}
+			} else {
+				double distance = -overlapLength;
+				double minDistanceRatio = Math.min((distance) / (bb1.getIp2().x - bb1.getIp1().x),
+						(distance) / (bb2.getIp2().x - bb2.getIp1().x));
+				if (minDistanceRatio > 0.7) {
+					throw new RuntimeException("Variable and index to far away (ratio):" + minDistanceRatio);
+				}
+			}
+
+			double height1 = bb1.getIp2().y - bb1.getIp1().y;
+			double height2 = bb2.getIp2().y - bb2.getIp1().y;
+
+			if (height2 / height1 < 0.35 || height2 / height1 > 1.3) {
+				throw new RuntimeException("Bad variable height ration" + height2 / height1);
+			}
 
 			// TODO
 		} else {
