@@ -41,7 +41,15 @@ public class VariableModel {
 				throw new RuntimeException("Bad variable height ration" + height2 / height1);
 			}
 
-			// TODO
+			if (bb1.getIp1().y > bb2.getIp1().y) {
+				throw new RuntimeException("Index heigher start than char");
+			}
+			if (bb2.getIp1().y > bb1.getIp2().y - 0.2 * height1) {
+				throw new RuntimeException("Index starts too low");
+			}
+			if (bb1.getIp2().y > bb2.getIp2().y) {
+				throw new RuntimeException("Index heigher end than char");
+			}
 		} else {
 			throw new RuntimeException(
 					"Too much carachter models given. Expected no more than 2. This should never happen");

@@ -69,7 +69,7 @@ public class KTableModel {
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		 checkCharacterModels(bmws);
+		// checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
@@ -88,8 +88,8 @@ public class KTableModel {
 				if (l != null) {
 					handleCorner(l, table, bmws);
 				}
-			}catch (Exception e){
-				System.out.println("Dobio sam iznimku: "+e.getMessage());
+			} catch (Exception e) {
+				System.out.println("Dobio sam iznimku: " + e.getMessage());
 				System.out.println("Crtam tablicu bez varijabli");
 			}
 			// debugDrawTable(table);

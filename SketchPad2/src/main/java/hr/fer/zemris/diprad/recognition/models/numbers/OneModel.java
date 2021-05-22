@@ -51,8 +51,8 @@ public class OneModel {
 		}
 
 		// System.out.println(l1.length() / l2.length());
-		if (l1.length() / l2.length() > 0.85 || l1.length() / l2.length() < 0.15) {
-			//System.out.println("2");
+		if (l1.length() / l2.length() > 0.9 || l1.length() / l2.length() < 0.15) {
+			//System.out.println("ratio: "+l1.length()/l2.length());
 			return null;
 		}
 
@@ -61,7 +61,7 @@ public class OneModel {
 			return null;
 		}
 		if (l2.getP2().y < l2.getP2().y) {
-			//System.out.println("4");
+//			System.out.println("4");
 			return null;
 		}
 
