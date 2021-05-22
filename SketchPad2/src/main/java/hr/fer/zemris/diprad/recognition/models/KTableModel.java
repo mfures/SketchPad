@@ -69,7 +69,7 @@ public class KTableModel {
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		//checkCharacterModels(bmws);
+		checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
@@ -109,6 +109,9 @@ public class KTableModel {
 		List<BasicMovementWrapper> leftBmws = new ArrayList<>();
 		List<BasicMovementWrapper> rightBmws = new ArrayList<>();
 
+		//debugDrawRectangle((int)minX, (int)maxX, (int)minY, (int)maxY);
+		//debugDrawRectangle((int)minX2, (int)maxX2, (int)minY, (int)maxY);
+
 		for (BasicMovementWrapper bmw : bmws) {
 			if (bmw.isUnused()) {
 				Rectangle bb = bmw.getBm().getBoundingBox();
@@ -124,8 +127,24 @@ public class KTableModel {
 			}
 		}
 
+	
 		List<CharacterModel> leftCMs = checkCharacterModels(leftBmws);
+		Collections.sort(leftCMs,new Comparator<CharacterModel>() {
+			@Override
+			public int compare(CharacterModel o1, CharacterModel o2) {
+				return Integer.compare(o1.getBoundingBox().getIp1().x,o2.getBoundingBox().getIp1().x);
+			}
+
+		});
+		
 		List<CharacterModel> rightCMs = checkCharacterModels(rightBmws);
+		Collections.sort(rightCMs,new Comparator<CharacterModel>() {
+			@Override
+			public int compare(CharacterModel o1, CharacterModel o2) {
+				return Integer.compare(o1.getBoundingBox().getIp1().x,o2.getBoundingBox().getIp1().x);
+			}
+
+		});
 
 		System.out.println("Lijevo: " + leftCMs.size());
 		leftCMs.forEach((x) -> System.out.print(x.getCharacter() + " "));
@@ -405,7 +424,7 @@ public class KTableModel {
 	}
 
 	@SuppressWarnings("unused")
-	private void debugDrawRectangle(int minx, int maxx, int miny, int maxy) {
+	public void debugDrawRectangle(int minx, int maxx, int miny, int maxy) {
 		sP.getModel().add(new SelectionRectangle(new Point(minx, miny), new Point(maxx, maxy)));
 		sP.getCanvas().repaint();
 	}
