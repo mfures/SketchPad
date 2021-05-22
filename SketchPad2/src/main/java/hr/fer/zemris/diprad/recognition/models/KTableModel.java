@@ -69,7 +69,7 @@ public class KTableModel {
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		checkCharacterModels(bmws);
+		 checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
@@ -83,9 +83,14 @@ public class KTableModel {
 
 		System.out.println("Našao sam ovoliko tablica:" + tables.size());
 		for (var table : tables) {
-			Line l = getLineInCorner(table, bmws);
-			if (l != null) {
-				handleCorner(l, table, bmws);
+			try {
+				Line l = getLineInCorner(table, bmws);
+				if (l != null) {
+					handleCorner(l, table, bmws);
+				}
+			}catch (Exception e){
+				System.out.println("Dobio sam iznimku: "+e.getMessage());
+				System.out.println("Crtam tablicu bez varijabli");
 			}
 			// debugDrawTable(table);
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
@@ -109,8 +114,8 @@ public class KTableModel {
 		List<BasicMovementWrapper> leftBmws = new ArrayList<>();
 		List<BasicMovementWrapper> rightBmws = new ArrayList<>();
 
-		//debugDrawRectangle((int)minX, (int)maxX, (int)minY, (int)maxY);
-		//debugDrawRectangle((int)minX2, (int)maxX2, (int)minY, (int)maxY);
+		 debugDrawRectangle((int)minX, (int)maxX, (int)minY, (int)maxY);
+		 debugDrawRectangle((int)minX2, (int)maxX2, (int)minY, (int)maxY);
 
 		for (BasicMovementWrapper bmw : bmws) {
 			if (bmw.isUnused()) {
@@ -127,21 +132,20 @@ public class KTableModel {
 			}
 		}
 
-	
 		List<CharacterModel> leftCMs = checkCharacterModels(leftBmws);
-		Collections.sort(leftCMs,new Comparator<CharacterModel>() {
+		Collections.sort(leftCMs, new Comparator<CharacterModel>() {
 			@Override
 			public int compare(CharacterModel o1, CharacterModel o2) {
-				return Integer.compare(o1.getBoundingBox().getIp1().x,o2.getBoundingBox().getIp1().x);
+				return Integer.compare(o1.getBoundingBox().getIp1().x, o2.getBoundingBox().getIp1().x);
 			}
 
 		});
-		
+
 		List<CharacterModel> rightCMs = checkCharacterModels(rightBmws);
-		Collections.sort(rightCMs,new Comparator<CharacterModel>() {
+		Collections.sort(rightCMs, new Comparator<CharacterModel>() {
 			@Override
 			public int compare(CharacterModel o1, CharacterModel o2) {
-				return Integer.compare(o1.getBoundingBox().getIp1().x,o2.getBoundingBox().getIp1().x);
+				return Integer.compare(o1.getBoundingBox().getIp1().x, o2.getBoundingBox().getIp1().x);
 			}
 
 		});
@@ -151,6 +155,36 @@ public class KTableModel {
 		System.out.println("\nDesno: " + rightCMs.size());
 		rightCMs.forEach((x) -> System.out.print(x.getCharacter() + " "));
 
+		List<VariableModel> leftVMs = constructVariables(leftCMs);
+		System.out.println("\nLijevo varijable: " + leftCMs.size());
+		leftVMs.forEach((x) -> System.out.print(x.getVariable() + " "));
+
+		List<VariableModel> rightVMs = constructVariables(rightCMs);
+		System.out.println("\nDesno varijable: " + leftCMs.size());
+		rightVMs.forEach((x) -> System.out.print(x.getVariable() + " "));
+
+	}
+
+	private List<VariableModel> constructVariables(List<CharacterModel> cms) {
+		List<VariableModel> variables = new ArrayList<>();
+
+		for (int i = 0; i < cms.size(); i++) {
+			if (Character.isDigit(cms.get(i).getCharacter().charAt(0))) {
+				throw new RuntimeException("Bad digit placement");
+			}
+
+			if (i != cms.size() - 1) {
+				if (Character.isDigit(cms.get(i + 1).getCharacter().charAt(0))) {
+					variables.add(new VariableModel(cms.get(i), cms.get(i + 1)));
+					i++;
+				}
+			} else {
+				variables.add(new VariableModel(cms.get(i)));
+			}
+
+		}
+
+		return variables;
 	}
 
 	private Line getLineInCorner(KTable table, List<BasicMovementWrapper> bmws) {

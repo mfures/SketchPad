@@ -14,13 +14,13 @@ public class AModel {
 	private static final String A = "A";
 
 	public static CharacterModel recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
-		//System.out.println("Test za A");
+		System.out.println("Test za A");
 		List<Integer> bp1 = LinearModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints());
 		List<Integer> bp2 = LinearModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints());
 
 		if (!(bp1.size() == 3 && bp2.size() == 2)) {
 			if (!(bp2.size() == 3 && bp1.size() == 2)) {
-				 //System.out.println("Bad sizes: " + bp1.size() + " " + bp2.size());
+				System.out.println("Bad sizes: " + bp1.size() + " " + bp2.size());
 				return null;
 			}
 
@@ -35,18 +35,18 @@ public class AModel {
 
 		List<Line> lines = LinearModel.linesInPoints(bmw1.getBm().getPoints(), bp1, bmw1);
 		if (lines.size() != 2) {
-			 //System.out.println("Bad lines");
+			System.out.println("Bad lines");
 			return null;
 		}
 
 		Line l1 = LinearModel.recognize(bmw2);
 		if (l1 == null) {
-			//System.out.println("Not a line");
+			System.out.println("Not a line");
 			return null;
 		}
 
 		if (l1.getType() != LineType.HORIZONTAL) {
-			 //System.out.println("Not horizontal");
+			System.out.println("Not horizontal");
 			return null;
 		}
 
@@ -56,7 +56,7 @@ public class AModel {
 		double minLengthRatio = 1 / maxLengthRatio;
 		double lengthRatio = l01.length() / l02.length();
 		if (lengthRatio > maxLengthRatio || lengthRatio < minLengthRatio) {
-			 //System.out.println("Bad length ratio: " + lengthRatio);
+			System.out.println("Bad length ratio: " + lengthRatio);
 			return null;
 		}
 
@@ -66,18 +66,18 @@ public class AModel {
 			l02 = tmp;
 		}
 		if (l01.getSlope() <= -25 || l01.getSlope() > -0.8) {
-			 //System.out.println("Bad l01 slope: " + l01.getSlope());
+			System.out.println("Bad l01 slope: " + l01.getSlope());
 			return null;
 		}
 		if (l02.getSlope() >= 25 || l02.getSlope() < 0.8) {
-			 //System.out.println("Bad l02 slope: " + l02.getSlope());
+			System.out.println("Bad l02 slope: " + l02.getSlope());
 			return null;
 		}
 
 		double baseLength = MyVector.norm(new Point(l01.getMinX(), l01.getMaxY()),
 				new Point(l02.getMaxX(), l02.getMaxY()));
 		if (l1.length() / baseLength > 2 || l1.length() / baseLength < 0.5) {
-			 //System.out.println("Bad base length ratio: " + l1.length() / baseLength);
+			System.out.println("Bad base length ratio: " + l1.length() / baseLength);
 			return null;
 		}
 
@@ -85,19 +85,29 @@ public class AModel {
 		double targetX2 = l02.forY(l1.getAverageY());
 		double dist = targetX2 - targetX1;
 		if (dist <= 0) {
-			 //System.out.println("l1 to high");
+			System.out.println("l1 to high");
 			return null;
 		}
 
-		if (!(l1.getMinX() < (targetX1 + 0.20 * dist) && (l1.getMaxX() > (targetX2 - 0.20 * dist)))) {
-			 //System.out.println("l1 doesnt cross both lines");
+		if (!(l1.getMinX() < (targetX1 + 0.5 * dist) && (l1.getMaxX() > (targetX2 - 0.5 * dist)))) {
+			System.out.println(dist);
+			System.out.println(targetX1);
+			System.out.println(targetX2);
+			System.out.println("TUUUUUUUUUUUUUUUUUUUUUUUUUUU");
+			System.out.println(l1.getMinX());
+			System.out.println(l1.getMaxX());
+			System.out.println(l1.getMaxX());
+			System.out.println(targetX1 + 0.25 * dist);
+			System.out.println(l1.getMinX());
+			System.out.println(targetX2 - 0.25 * dist);
+			System.out.println("l1 doesnt cross both lines");
 			return null;
 		}
 		if (l1.length() / dist > 3) {
-			 //System.out.println("L1 too wide: " + l1.length() / dist);
+			System.out.println("L1 too wide: " + l1.length() / dist);
 			return null;
 		}
 
-		return new CharacterModel(A, bmw1,bmw2);
+		return new CharacterModel(A, bmw1, bmw2);
 	}
 }
