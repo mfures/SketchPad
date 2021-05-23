@@ -44,14 +44,16 @@ public class OpenAction extends AbstractAction {
 			List<GraphicalObject> tmp = new ArrayList<>();
 
 			for (String line : lines) {
-				if (line.startsWith("!")) {
+				if (line.isEmpty()) {
+
+				} else if (line.startsWith("!")) {
 					// skips, will be used for multidocument model
 				} else if (line.startsWith("BM")) {
 					tmp.add(BasicMovement.parseBasicMovement(line));
 				} else if (line.startsWith("KT")) {
 					tmp.add(KTable.parseKTable(line));
 				} else {
-					throw new RuntimeException();
+					throw new RuntimeException("Bad line start: " + line);
 				}
 			}
 
@@ -59,10 +61,10 @@ public class OpenAction extends AbstractAction {
 			model.clear();
 
 			for (GraphicalObject go : tmp) {
-				if(go instanceof BasicMovement) {
+				if (go instanceof BasicMovement) {
 					((BasicMovement) go).initBoundingBox();
 				}
-				
+
 				model.add(go);
 			}
 

@@ -27,6 +27,8 @@ public class VariableModel {
 
 			Rectangle bb1 = cms[0].getBoundingBox();
 			Rectangle bb2 = cms[1].getBoundingBox();
+			//KTableModel.debugDrawRectangleStatic(bb1);
+			//KTableModel.debugDrawRectangleStatic(bb2);
 			int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
 
 			if (overlapLength > 0) {
@@ -48,14 +50,14 @@ public class VariableModel {
 
 			double height2 = bb2.getIp2().y - bb2.getIp1().y;
 
-			if (height2 / height1 < 0.35 || height2 / height1 > 1.3) {
+			if (height2 / height1 < 0.2 || height2 / height1 > 1.1) {
 				throw new RuntimeException("Bad variable height ration" + height2 / height1);
 			}
 
 			if (bb1.getIp1().y > bb2.getIp1().y) {
 				throw new RuntimeException("Index heigher start than char");
 			}
-			if (bb2.getIp1().y > bb1.getIp2().y - 0.2 * height1) {
+			if (bb2.getIp1().y > bb1.getIp2().y - 0.1 * height1) {
 				throw new RuntimeException("Index starts too low");
 			}
 			if (bb1.getIp2().y > bb2.getIp2().y) {
@@ -139,7 +141,6 @@ public class VariableModel {
 	public static void validOrFail(VariableModel vm1, VariableModel vm2) {
 		Rectangle bb1 = vm1.getBoundingBox();
 		Rectangle bb2 = vm2.getBoundingBox();
-
 
 		int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
 

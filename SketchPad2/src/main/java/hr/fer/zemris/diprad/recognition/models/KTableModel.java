@@ -103,12 +103,12 @@ public class KTableModel {
 		}
 	}
 
-	private void handleCorner(Line l, KTable table, List<BasicMovementWrapper> bmws) {
+	private List<List<VariableModel>> handleCorner(Line l, KTable table, List<BasicMovementWrapper> bmws) {
 		double yDiff = l.getMaxY() - l.getMinY();
 
 		double minX = l.getMinX();
 		double maxX = l.getMaxX() + table.getWidth() * 0.35;
-		double minX2 = l.getMinX() - table.getWidth() * 0.35;
+		double minX2 = l.getMinX() - table.getHeight() * 0.35;
 		double maxX2 = l.getMaxX();
 		double minX3 = l.getMinX() - table.getWidth() * 0.35;
 		double maxX3 = l.getMinX() + table.getWidth() * 0.35;
@@ -121,8 +121,8 @@ public class KTableModel {
 		List<BasicMovementWrapper> rightBmws = new ArrayList<>();
 		List<BasicMovementWrapper> topBmws = new ArrayList<>();
 
-		// debugDrawRectangle((int) minX, (int) maxX, (int) minY, (int) maxY);
-		// debugDrawRectangle((int) minX2, (int) maxX2, (int) minY, (int) maxY);
+		 //debugDrawRectangle((int) minX, (int) maxX, (int) minY, (int) maxY);
+		 //debugDrawRectangle((int) minX2, (int) maxX2, (int) minY, (int) maxY);
 		// debugDrawRectangle((int) minX3, (int) maxX3, (int) minY2, (int) maxY2);
 
 		for (BasicMovementWrapper bmw : bmws) {
@@ -185,7 +185,7 @@ public class KTableModel {
 
 		List<VariableModel> rightVMs = constructVariables(rightCMs);
 		VariableModel.validateVariableListOrFail(rightVMs);
-		System.out.println("\nDesno varijable: " + rightCMs.size());
+		System.out.println("\nDesno varijable: " + rightVMs.size());
 		rightVMs.forEach((x) -> System.out.print(x.getVariable() + " "));
 
 		List<VariableModel> topVMs = constructVariables(topCMs);
@@ -193,6 +193,11 @@ public class KTableModel {
 		System.out.println("\nGore varijable: " + topVMs.size());
 		topVMs.forEach((x) -> System.out.print(x.getVariable() + " "));
 
+		List<List<VariableModel>> variables=new ArrayList<List<VariableModel>>();
+		variables.add(leftVMs);
+		variables.add(rightVMs);
+		variables.add(topVMs);
+		return variables;
 	}
 
 	private List<VariableModel> constructVariables(List<CharacterModel> cms) {
@@ -200,7 +205,7 @@ public class KTableModel {
 
 		for (int i = 0; i < cms.size(); i++) {
 			if (Character.isDigit(cms.get(i).getCharacter().charAt(0))) {
-				throw new RuntimeException("Bad digit placement");
+				throw new RuntimeException("Bad digit placement(i): "+i+" size: "+cms.size());
 			}
 
 			if (i != cms.size() - 1) {
@@ -242,46 +247,10 @@ public class KTableModel {
 		CharacterModel cm = null;
 		List<CharacterModel> cms = new ArrayList<>();
 
-		System.out.println("Ulaz sa ovoliko elemenata: " + bmws.size());
+		//System.out.println("Ulaz sa ovoliko elemenata: " + bmws.size());
 
 		for (int i = 0; i < bmws.size(); i++) {
 			if (bmws.get(i).isUnused()) {
-				cm = ZeroModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
-				cm = OneModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
-				cm = TwoModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
-				cm = ThreeModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
-				cm = CModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
-				cm = ZModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
-				cm = WModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
-				cm = HModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
-				cm = GModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
 				if (i != bmws.size() - 1) {
 					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
 						cm = XModel.recognize(bmws.get(i), bmws.get(i + 1));
@@ -322,6 +291,43 @@ public class KTableModel {
 						}
 					}
 				}
+				
+				cm = ZeroModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = OneModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = TwoModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = ThreeModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = CModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = ZModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = WModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = HModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}
+				cm = GModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+				}				
 			}
 		}
 
@@ -354,8 +360,8 @@ public class KTableModel {
 		List<Line> horizontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
 		initLines(horizontalLines, verticalLines, bmws);
-		System.out.println("NUM VERT:" + verticalLines.size());
-		System.out.println("NUM HOR:" + horizontalLines.size());
+		//System.out.println("NUM VERT:" + verticalLines.size());
+		//System.out.println("NUM HOR:" + horizontalLines.size());
 
 		List<LineListWrapper> verticalGroups = groupLinesByLength(verticalLines);
 		List<LineListWrapper> horizontalGroups = groupLinesByLength(horizontalLines);
@@ -660,7 +666,7 @@ public class KTableModel {
 
 	@SuppressWarnings("unused")
 	private void debugTestRectangle(Rectangle overlap) {
-		System.out.println(overlap);
+		//System.out.println(overlap);
 		sP.getModel().add(new SelectionRectangle(new Point((int) overlap.getP1().x, (int) overlap.getP1().y),
 				new Point((int) overlap.getP2().x, (int) overlap.getP2().y)));
 		sP.getCanvas().repaint();
@@ -669,7 +675,7 @@ public class KTableModel {
 	@SuppressWarnings("unused")
 	private void debugWriteRectangles(List<Pair<Rectangle, LineListWrapper>> horizontalRectangles) {
 		for (var x : horizontalRectangles) {
-			System.out.println(x.t);
+			//System.out.println(x.t);
 			sP.getModel().add(new SelectionRectangle(new Point((int) x.t.getP1().x, (int) x.t.getP1().y),
 					new Point((int) x.t.getP2().x, (int) x.t.getP2().y)));
 			sP.getCanvas().repaint();
@@ -834,8 +840,8 @@ public class KTableModel {
 	private Pair<List<Line>, List<Line>> calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(
 			BasicMovementWrapper bmw, List<Integer> breakPoints) {
 		List<Line> lines = LinearModel.linesInPoints(bmw.getBm().getPoints(), breakPoints, bmw);
-		System.out.println(lines.size());
-		System.out.println(breakPoints.size() - 1);
+		//System.out.println(lines.size());
+		//System.out.println(breakPoints.size() - 1);
 		if (lines.size() != breakPoints.size() - 1) {
 			return null;
 		}

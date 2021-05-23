@@ -12,12 +12,12 @@ public class XModel {
 	public static CharacterModel recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
 		if (LinearModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size() != 2) {
 			// System.out.println("1: " +
-			// LineModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size());
+			// LinearModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size());
 			return null;
 		}
 		if (LinearModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size() != 2) {
 			// System.out.println("w: " +
-			// LineModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size());
+			// LinearModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size());
 			return null;
 		}
 
@@ -79,14 +79,14 @@ public class XModel {
 			return null;
 		}
 
-		double maxRatio = 2;
+		double maxRatio = 3;
 		double minRatio = 1 / maxRatio;
 		double distanceRatioX = (maxX - l2.getAverageX()) / (l2.getAverageX() - minX);
 		double distanceRatioY = (maxY - l2.getAverageY()) / (l2.getAverageY() - minY);
 
 		if (distanceRatioX > maxRatio || distanceRatioY > maxRatio || distanceRatioY < minRatio
 				|| distanceRatioY < minRatio) {
-			// System.out.println("12");
+			// System.out.println("distance ratio x: "+distanceRatioX+" y: "+distanceRatioY);
 			return null;
 		}
 

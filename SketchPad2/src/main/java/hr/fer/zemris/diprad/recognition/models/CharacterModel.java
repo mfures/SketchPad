@@ -21,13 +21,11 @@ public class CharacterModel {
 		double minY = bmws[0].getBm().getBoundingBox().getIp1().y;
 		double maxY = bmws[0].getBm().getBoundingBox().getIp2().y;
 
-		System.out.println(minX + " " + maxX + " " + minY + " " + maxY);
 		for (int i = 1; i < bmws.length; i++) {
 			minX = Math.min(minX, bmws[i].getBm().getBoundingBox().getIp1().x);
 			maxX = Math.max(maxX, bmws[i].getBm().getBoundingBox().getIp2().x);
 			minY = Math.min(minY, bmws[i].getBm().getBoundingBox().getIp1().y);
 			maxY = Math.max(maxY, bmws[i].getBm().getBoundingBox().getIp2().y);
-			System.out.println(minX + " " + maxX + " " + minY + " " + maxY);
 		}
 
 		this.boundingBox = new Rectangle(new PointDouble(minX, minY), new PointDouble(maxX, maxY));
