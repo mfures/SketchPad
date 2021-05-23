@@ -9,6 +9,7 @@ public class VariableModel {
 	private String variable;
 	private CharacterModel[] cms;
 	private Rectangle boundingBox;
+	private boolean center = false;
 
 	public VariableModel(CharacterModel... cms) {
 		if (cms.length > 2 || cms.length < 1) {
@@ -27,15 +28,20 @@ public class VariableModel {
 
 			Rectangle bb1 = cms[0].getBoundingBox();
 			Rectangle bb2 = cms[1].getBoundingBox();
-			//KTableModel.debugDrawRectangleStatic(bb1);
-			//KTableModel.debugDrawRectangleStatic(bb2);
+			// KTableModel.debugDrawRectangleStatic(bb1);
+			// KTableModel.debugDrawRectangleStatic(bb2);
 			int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
 
 			if (overlapLength > 0) {
-				if ((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x) > 0.35
-						|| (overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x) > 0.35) {
-					throw new RuntimeException("Too much variable and index overlap");
-
+				if ((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x) > 0.45
+						|| (overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x) > 0.45) {
+					if (cms[0].getCharacter() != "f" && cms[0].getCharacter() != "g" && cms[0].getCharacter() != "W"
+							&& cms[0].getCharacter() != "Y") {
+						System.out.println((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x));
+						System.out.println((overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x));
+						throw new RuntimeException(
+								"Too much variable and index overlap (character): " + cms[0].getCharacter());
+					}
 				}
 			} else {
 				double distance = -overlapLength;
@@ -50,14 +56,14 @@ public class VariableModel {
 
 			double height2 = bb2.getIp2().y - bb2.getIp1().y;
 
-			if (height2 / height1 < 0.2 || height2 / height1 > 1.1) {
+			if (height2 / height1 < 0.2 || height2 / height1 > 1.8) {
 				throw new RuntimeException("Bad variable height ration" + height2 / height1);
 			}
 
 			if (bb1.getIp1().y > bb2.getIp1().y) {
 				throw new RuntimeException("Index heigher start than char");
 			}
-			if (bb2.getIp1().y > bb1.getIp2().y - 0.1 * height1) {
+			if (bb2.getIp1().y > bb1.getIp2().y + 0.05 * height1) {
 				throw new RuntimeException("Index starts too low");
 			}
 			if (bb1.getIp2().y > bb2.getIp2().y) {
@@ -103,6 +109,14 @@ public class VariableModel {
 	public double getCharacherHeight() {
 		Rectangle bb1 = cms[0].getBmws()[0].getBm().getBoundingBox();
 		return bb1.getIp2().y - bb1.getIp1().y;
+	}
+
+	public boolean isCenter() {
+		return center;
+	}
+
+	public void setCenter(boolean center) {
+		this.center = center;
 	}
 
 	@Override
@@ -172,6 +186,13 @@ public class VariableModel {
 		}
 		if (bb2.getIp1().y + 0.5 * height1 > bb1.getIp2().y) {
 			throw new RuntimeException("Variable to high: " + vm1.getVariable());
+		}
+
+	}
+
+	public void setBmwsToUsed() {
+		for (CharacterModel cm : cms) {
+			cm.setBmsToUsed();
 		}
 	}
 }

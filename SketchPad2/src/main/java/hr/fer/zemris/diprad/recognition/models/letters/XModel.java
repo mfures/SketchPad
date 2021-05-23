@@ -79,7 +79,7 @@ public class XModel {
 			return null;
 		}
 
-		double maxRatio = 3;
+		double maxRatio = 4;
 		double minRatio = 1 / maxRatio;
 		double distanceRatioX = (maxX - l2.getAverageX()) / (l2.getAverageX() - minX);
 		double distanceRatioY = (maxY - l2.getAverageY()) / (l2.getAverageY() - minY);

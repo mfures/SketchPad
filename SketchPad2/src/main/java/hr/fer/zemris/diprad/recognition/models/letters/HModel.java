@@ -71,8 +71,10 @@ public class HModel {
 		}
 
 		double deltaY = co.getBoundingBox().getP2().y - l.getMaxY();
-		if (Math.abs(deltaY) > 0.15 * l.length()) {
+		if (Math.abs(deltaY) > 0.30 * l.length()) {
 			// System.out.println("Delta y");
+//			System.out.println(Math.abs(deltaY));
+//			System.out.println(0.30 * l.length());
 			return null;
 		}
 

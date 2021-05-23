@@ -15,7 +15,7 @@ public class CharacterModel {
 		}
 
 		this.character = s;
-		
+
 		double minX = bmws[0].getBm().getBoundingBox().getIp1().x;
 		double maxX = bmws[0].getBm().getBoundingBox().getIp2().x;
 		double minY = bmws[0].getBm().getBoundingBox().getIp1().y;
@@ -42,5 +42,11 @@ public class CharacterModel {
 
 	public BasicMovementWrapper[] getBmws() {
 		return bmws;
+	}
+
+	public void setBmsToUsed() {
+		for (BasicMovementWrapper bmw : bmws) {
+			bmw.incTotalHandeledFragments();
+		}
 	}
 }
