@@ -69,10 +69,11 @@ public class KTableModel {
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		checkCharacterModels(bmws);
+		// checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
+			System.out.println("No tables found");
 			return;
 		}
 
@@ -353,8 +354,8 @@ public class KTableModel {
 		List<Line> horizontalLines = new ArrayList<>();
 		List<Line> verticalLines = new ArrayList<>();
 		initLines(horizontalLines, verticalLines, bmws);
-		// System.out.println("NUM VERT:" + verticalLines.size());
-		// System.out.println("NUM HOR:" + horizontalLines.size());
+		System.out.println("NUM VERT:" + verticalLines.size());
+		System.out.println("NUM HOR:" + horizontalLines.size());
 
 		List<LineListWrapper> verticalGroups = groupLinesByLength(verticalLines);
 		List<LineListWrapper> horizontalGroups = groupLinesByLength(horizontalLines);
@@ -494,7 +495,8 @@ public class KTableModel {
 
 	@SuppressWarnings("unused")
 	public static void debugDrawRectangleStatic(Rectangle r) {
-		sP.getModel().add(new SelectionRectangle(new Point(r.getIp1().x, r.getIp1().y),new Point(r.getIp2().x, r.getIp2().y)));
+		sP.getModel().add(
+				new SelectionRectangle(new Point(r.getIp1().x, r.getIp1().y), new Point(r.getIp2().x, r.getIp2().y)));
 		sP.getCanvas().repaint();
 	}
 
@@ -788,6 +790,7 @@ public class KTableModel {
 		for (BasicMovementWrapper bmw : bmws) {
 			List<Integer> breakPoints = LinearModel.acumulateBreakPointsWhichAreClose(bmw.getBm().getPoints());
 			if (breakPoints.size() != 2) {
+				// System.out.println(breakPoints.size());
 				if (breakPoints.size() > 5) {
 					continue;
 				}
@@ -795,6 +798,7 @@ public class KTableModel {
 				Pair<List<Line>, List<Line>> verHorLines = calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(
 						bmw, breakPoints);
 				if (verHorLines == null) {
+					// System.out.println("Ver hor null");
 					continue;
 				}
 
@@ -830,6 +834,8 @@ public class KTableModel {
 	private Pair<List<Line>, List<Line>> calculateVerticalAndHorizontalLinesFromMovementAndBreakPoints(
 			BasicMovementWrapper bmw, List<Integer> breakPoints) {
 		List<Line> lines = LinearModel.linesInPoints(bmw.getBm().getPoints(), breakPoints, bmw);
+		System.out.println(lines.size());
+		System.out.println(breakPoints.size() - 1);
 		if (lines.size() != breakPoints.size() - 1) {
 			return null;
 		}

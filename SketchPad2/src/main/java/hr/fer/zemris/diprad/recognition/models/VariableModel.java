@@ -27,8 +27,6 @@ public class VariableModel {
 
 			Rectangle bb1 = cms[0].getBoundingBox();
 			Rectangle bb2 = cms[1].getBoundingBox();
-			KTableModel.debugDrawRectangleStatic(bb1);
-			KTableModel.debugDrawRectangleStatic(bb2);
 			int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
 
 			if (overlapLength > 0) {

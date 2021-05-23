@@ -136,7 +136,7 @@ public class LinearModel {
 
 	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points, Tester<MyVector> t) {
 		List<Integer> breakPoints = BreakPointsUtil.calculateBreakPoints(points, t);
-		// System.out.println("Initial breakPoints: " + breakPoints.size());
+		System.out.println("Initial breakPoints: " + breakPoints.size());
 		if (breakPoints.size() == 2) {// first and last index (0 and size-1)
 			return breakPoints;
 		}
@@ -147,20 +147,20 @@ public class LinearModel {
 
 		List<Integer> trueBreakPoints = new ArrayList<>();
 
-//		System.out.println("Total inital number of breakPoints: " + breakPoints.size());
+		System.out.println("Total inital number of breakPoints: " + breakPoints.size());
 
 		double activeNorm;
 		trueBreakPoints.add(0);
-//		System.out.println("Total length: " + totalLength);
-//		System.out.println("Uvijet: "
-//				+ ((1.0 / (numOfBreakPoints - 1)) * KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE)
-//						* totalLength);
+		System.out.println("Total length: " + totalLength);
+		System.out.println("Uvijet: "
+				+ ((1.0 / (numOfBreakPoints - 1)) * KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE)
+						* totalLength * lengthCoef(totalLength));
 		for (int i = 1; i < breakPoints.size() - 1; i++) {
 			activeNorm = MyVector.norm(points.get(trueBreakPoints.get(trueBreakPoints.size() - 1)),
 					points.get(breakPoints.get(i)));
-			//System.out.println("Trenutna norma: " + activeNorm);
+			System.out.println("Trenutna norma: " + activeNorm);
 			if (activeNorm > ((1.0 / (numOfBreakPoints - 1))
-					* KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE) * totalLength) {
+					* KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE) * totalLength* lengthCoef(totalLength)) {
 				trueBreakPoints.add(breakPoints.get(i));
 			} else {
 				totalLength -= activeNorm;
@@ -172,7 +172,7 @@ public class LinearModel {
 		}
 
 		return addLastPointAndCheckEdgeCases(points, totalLength, trueBreakPoints,
-				((1.0 / (numOfBreakPoints - 1)) * KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE));
+				((1.0 / (numOfBreakPoints - 1)) * KTableModel.COEF_BREAK_POINT_SEGMENT_RELATIVE_MINIMUM_SIZE)* lengthCoef(totalLength));
 	}
 
 	private static List<Integer> addLastPointAndCheckEdgeCases(List<Point> points, double totalLength,
@@ -192,8 +192,8 @@ public class LinearModel {
 		}
 		activeNorm = MyVector.norm(points.get(trueBreakPoints.get(trueBreakPoints.size() - 1)),
 				points.get(points.size() - 1));
-		//System.out.println("Trenutna norma: " + activeNorm);
-		//System.out.println("Uvijet: " + minPercentage * totalLength);
+		// System.out.println("Trenutna norma: " + activeNorm);
+		// System.out.println("Uvijet: " + minPercentage * totalLength);
 		if (activeNorm > minPercentage * totalLength) {
 			trueBreakPoints.add(points.size() - 1);
 		} else {
@@ -213,5 +213,14 @@ public class LinearModel {
 
 	public static List<Integer> acumulateBreakPointsWhichAreClose(List<Point> points) {
 		return acumulateBreakPointsWhichAreClose(points, new StrongPositiveColinearityTester());
+	}
+
+	public static double lengthCoef(double length) {
+		if (length <= 0)
+			return 1;
+		if (length >= 1000)
+			return 0.5;
+
+		return (-length) / 2000 + 1;
 	}
 }
