@@ -69,7 +69,7 @@ public class KTableModel {
 	public void recognize(Point a, Point b) {
 		List<BasicMovementWrapper> bmws = getObjectsInRectangle(a, b, sP.getModel());
 
-		 checkCharacterModels(bmws);
+		checkCharacterModels(bmws);
 
 		List<KTable> tables = recognizeTables(bmws);
 		if (tables.isEmpty()) {
@@ -91,6 +91,15 @@ public class KTableModel {
 					List<List<VariableModel>> leftRightVariables = null;
 					List<List<VariableModel>> topDownVariables = null;
 
+					if (table.getR() == 2) {
+						leftRightVariables = initLeftVariable(table, bmws);
+						System.out.println("left variable: " + leftRightVariables.get(0).get(0).getVariable());
+					}
+					if (table.getS() == 2) {
+						topDownVariables = initTopVariable(table, bmws);
+						System.out.println("top variable: " + topDownVariables.get(0).get(0).getVariable());
+					}
+
 					if (table.getR() == 4) {
 						leftRightVariables = initLeftRightVariables(table, bmws);
 						System.out.println("left variable: " + leftRightVariables.get(0).get(0).getVariable());
@@ -101,6 +110,8 @@ public class KTableModel {
 						System.out.println("top variable: " + topDownVariables.get(0).get(0).getVariable());
 						System.out.println("down variable: " + topDownVariables.get(1).get(0).getVariable());
 					}
+
+					getTableValuesAndSingleCellRoundings(table, bmws);
 				}
 			} catch (Exception e) {
 				System.out.println("Dobio sam iznimku: " + e.getMessage());
@@ -114,6 +125,42 @@ public class KTableModel {
 
 			// clearBMsModel(table);
 		}
+	}
+
+	private void getTableValuesAndSingleCellRoundings(KTable table, List<BasicMovementWrapper> bmws) {
+		Rectangle bb = table.getBoundingRectangle();
+		double minx = bb.getP1().x - 0.15 * table.getAvgWidth();
+		double maxx = bb.getP1().x + 1.15 * table.getAvgWidth();
+		double miny = bb.getP1().y - 0.15 * table.getAvgHeight();
+		double maxy = bb.getP1().y + 1.15 * table.getAvgHeight();
+
+		for (int r = 0; r < table.getR(); r++) {
+			for (int s = 0; s < table.getS(); s++) {
+				debugDrawRectangle((int) (minx + s * table.getAvgWidth()), (int) (maxx + s * table.getAvgWidth()),
+						(int) (miny + r * table.getAvgHeight()), (int) (maxy + r * table.getAvgHeight()));
+			}
+		}
+
+		// TODO Auto-generated method stub
+
+	}
+
+	private List<List<VariableModel>> initTopVariable(KTable table, List<BasicMovementWrapper> bmws) {
+		Rectangle bb = table.getBoundingRectangle();
+		double minx3 = bb.getP1().x + 0.4 * table.getWidth();
+		double maxx3 = bb.getP1().x + 1.1 * table.getWidth();
+		double miny3 = bb.getP1().y - 0.7 * table.getAvgHeight();
+		double maxy3 = bb.getP1().y + 0.1 * table.getAvgHeight();
+
+		// debugDrawRectangle((int) minx3, (int) maxx3, (int) miny3, (int) maxy3);
+
+		Line l2 = getHorizontalLineInRectangle(minx3, maxx3, miny3, maxy3, bmws);
+		if (l2 != null) {
+			return getVariablesFromHorizontalLine(l2, bmws);
+		} else {
+			throw new RuntimeException("Bad lines, l2 set but l3 not");
+		}
+
 	}
 
 	private List<List<VariableModel>> initTopDownVariables(KTable table, List<BasicMovementWrapper> bmws) {
@@ -166,6 +213,25 @@ public class KTableModel {
 		}
 	}
 
+	private List<List<VariableModel>> initLeftVariable(KTable table, List<BasicMovementWrapper> bmws) {
+		Rectangle bb = table.getBoundingRectangle();
+
+		double minx3 = bb.getP1().x - 0.7 * table.getAvgWidth();
+		double maxx3 = bb.getP1().x + 0.1 * table.getAvgWidth();
+		double miny3 = bb.getP1().y + 0.4 * table.getHeight();
+		double maxy3 = bb.getP1().y + 1.1 * table.getHeight();
+
+		// debugDrawRectangle((int) minx3, (int) maxx3, (int) miny3, (int) maxy3);
+
+		Line l2 = getVerticalLineInRectangle(minx3, maxx3, miny3, maxy3, bmws);
+		if (l2 != null) {
+			return getVariablesFromVerticalLine(l2, bmws);
+		} else {
+			throw new RuntimeException("Bad lines, l2 not set");
+		}
+
+	}
+
 	private List<List<VariableModel>> initLeftRightVariables(KTable table, List<BasicMovementWrapper> bmws) {
 		Rectangle bb = table.getBoundingRectangle();
 		double minx1 = bb.getP1().x - 0.7 * table.getAvgWidth();
@@ -216,6 +282,22 @@ public class KTableModel {
 		}
 	}
 
+	private List<List<VariableModel>> getVariablesFromHorizontalLine(Line l1, List<BasicMovementWrapper> bmws) {
+		double minx1 = l1.getAverageX() - 0.4 * l1.length();
+		double maxx1 = l1.getAverageX() + 0.4 * l1.length();
+		double miny1 = l1.getAverageY() - l1.length();
+		double maxy1 = l1.getAverageY() + 0.1 * l1.length();
+
+		// debugDrawRectangle((int) minx1, (int) maxx1, (int) miny1, (int) maxy1);
+		List<VariableModel> leftVMs = getVariablesInRecti(minx1, maxx1, miny1, maxy1, bmws);
+		if (leftVMs.size() != 1)
+			throw new RuntimeException("Incorect number of variables found top: " + leftVMs.size());
+
+		List<List<VariableModel>> leftRight = new ArrayList<>();
+		leftRight.add(leftVMs);
+		return leftRight;
+	}
+
 	private List<List<VariableModel>> getVariablesFromHorizontalLines(Line l1, Line l2, boolean leftCenter,
 			List<BasicMovementWrapper> bmws) {
 		double minx1 = l1.getAverageX() - 0.4 * l1.length();
@@ -228,8 +310,8 @@ public class KTableModel {
 		double miny2 = l2.getAverageY() - 0.1 * l2.length();
 		double maxy2 = l2.getAverageY() + l2.length();
 
-		//debugDrawRectangle((int) minx1, (int) maxx1, (int) miny1, (int) maxy1);
-		//debugDrawRectangle((int) minx2, (int) maxx2, (int) miny2, (int) maxy2);
+		// debugDrawRectangle((int) minx1, (int) maxx1, (int) miny1, (int) maxy1);
+		// debugDrawRectangle((int) minx2, (int) maxx2, (int) miny2, (int) maxy2);
 		List<VariableModel> leftVMs = getVariablesInRecti(minx1, maxx1, miny1, maxy1, bmws);
 		List<VariableModel> rightVMs = getVariablesInRecti(minx2, maxx2, miny2, maxy2, bmws);
 		if (leftVMs.size() != 1 && rightVMs.size() != 1)
@@ -244,6 +326,23 @@ public class KTableModel {
 		List<List<VariableModel>> leftRight = new ArrayList<>();
 		leftRight.add(leftVMs);
 		leftRight.add(rightVMs);
+		return leftRight;
+	}
+
+	private List<List<VariableModel>> getVariablesFromVerticalLine(Line l1, List<BasicMovementWrapper> bmws) {
+		double minx1 = l1.getAverageX() - l1.length();
+		double maxx1 = l1.getAverageX() + 0.1 * l1.length();
+		double miny1 = l1.getAverageY() - 0.4 * l1.length();
+		double maxy1 = l1.getAverageY() + 0.4 * l1.length();
+
+		// debugDrawRectangle((int) minx1, (int) maxx1, (int) miny1, (int) maxy1);
+		// debugDrawRectangle((int) minx2, (int) maxx2, (int) miny2, (int) maxy2);
+		List<VariableModel> leftVMs = getVariablesInRecti(minx1, maxx1, miny1, maxy1, bmws);
+		if (leftVMs.size() != 1)
+			throw new RuntimeException("Incorect number of variables found left: " + leftVMs.size());
+
+		List<List<VariableModel>> leftRight = new ArrayList<>();
+		leftRight.add(leftVMs);
 		return leftRight;
 	}
 
@@ -525,42 +624,51 @@ public class KTableModel {
 						}
 					}
 				}
-
-				cm = ZeroModel.recognize(bmws.get(i));
+				cm = ZModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
-				}
-				cm = OneModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
+					continue;
 				}
 				cm = TwoModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
+					continue;
+				}
+				cm = ZeroModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+					continue;
+				}
+				cm = OneModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+					continue;
 				}
 				cm = ThreeModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
+					continue;
 				}
 				cm = CModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
+					continue;
 				}
-				cm = ZModel.recognize(bmws.get(i));
-				if (null != cm) {
-					cms.add(cm);
-				}
+
 				cm = WModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
+					continue;
 				}
 				cm = HModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
+					continue;
 				}
 				cm = GModel.recognize(bmws.get(i));
 				if (null != cm) {
 					cms.add(cm);
+					continue;
 				}
 			}
 		}
