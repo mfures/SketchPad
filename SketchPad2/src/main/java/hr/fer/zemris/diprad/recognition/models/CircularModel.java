@@ -13,15 +13,24 @@ import hr.fer.zemris.diprad.util.MyVector;
 import hr.fer.zemris.diprad.util.PointDouble;
 
 public class CircularModel {
+	public static CharacterModel recognizeC(BasicMovementWrapper bmw) {
+		CircularObject co = recognize(bmw);
+		if (co == null) {
+			return null;
+		}
+
+		return new CharacterModel("CO", co, bmw);
+	}
+
 	public static CircularObject recognize(BasicMovementWrapper bmw) {
 		return recognize(bmw.getBm().getPoints(), 0, bmw.getBm().getPoints().size() - 1, bmw);
 	}
 
 	public static CircularObject recognize(List<Point> points, int startIndex, int endIndex, BasicMovementWrapper bmw) {
-		if(endIndex<=startIndex||endIndex==-1||startIndex==-1) {
+		if (endIndex <= startIndex || endIndex == -1 || startIndex == -1) {
 			return null;
 		}
-		
+
 		double totalNorm = calculateTotalNorm(points, startIndex, endIndex);
 		int k = (endIndex - startIndex + 1);
 		List<PointDouble> sampledPoints = samplePoints(points, startIndex, endIndex, totalNorm, k);
@@ -36,7 +45,7 @@ public class CircularModel {
 				endIndex);
 
 		if (!(minMaxRatio > 0.1)) {
-			//System.out.println("Bad max/min ratio:" + minMaxRatio);
+			// System.out.println("Bad max/min ratio:" + minMaxRatio);
 			return null;
 		}
 

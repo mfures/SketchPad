@@ -2,10 +2,12 @@ package hr.fer.zemris.diprad.recognition.models;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import hr.fer.zemris.diprad.SketchPad2;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable;
@@ -44,6 +46,7 @@ import hr.fer.zemris.diprad.recognition.testers.LinesAverageYDistanceTester;
 import hr.fer.zemris.diprad.util.Pair;
 import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
+import hr.fer.zemris.diprad.util.Rounding;
 
 public class KTableModel {
 	public static final double MIN_VECTOR_NORM = 5.1;
@@ -129,20 +132,178 @@ public class KTableModel {
 
 	private void getTableValuesAndSingleCellRoundings(KTable table, List<BasicMovementWrapper> bmws) {
 		Rectangle bb = table.getBoundingRectangle();
-		double minx = bb.getP1().x - 0.15 * table.getAvgWidth();
-		double maxx = bb.getP1().x + 1.15 * table.getAvgWidth();
-		double miny = bb.getP1().y - 0.15 * table.getAvgHeight();
-		double maxy = bb.getP1().y + 1.15 * table.getAvgHeight();
+		double minx = bb.getP1().x - 0.25 * table.getAvgWidth();
+		double maxx = bb.getP1().x + 1.25 * table.getAvgWidth();
+		double miny = bb.getP1().y - 0.25 * table.getAvgHeight();
+		double maxy = bb.getP1().y + 1.25 * table.getAvgHeight();
+		int[][] values = new int[table.getR()][table.getS()];
+		List<Rounding> roundings = new ArrayList<>();
 
-		for (int r = 0; r < table.getR(); r++) {
-			for (int s = 0; s < table.getS(); s++) {
-				debugDrawRectangle((int) (minx + s * table.getAvgWidth()), (int) (maxx + s * table.getAvgWidth()),
-						(int) (miny + r * table.getAvgHeight()), (int) (maxy + r * table.getAvgHeight()));
-			}
+		handleSingleCell(table, bmws, minx, maxx, miny, maxy, values, roundings);
+		handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 2, 1);
+		handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 1, 2);
+		handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 2, 2);
+		if (table.getR() > 2) {
+			handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 4, 1);
+			handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 4, 2);
+		}
+		if (table.getS() > 2) {
+			handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 1, 4);
+			handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 2, 4);
+		}
+		if (table.getR() > 2 && table.getS() > 2) {
+			handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 4, 4);
 		}
 
-		// TODO Auto-generated method stub
+		System.out.println("Vrijednosti");
+		for (int i = 0; i < table.getR(); i++) {
+			for (int j = 0; j < table.getS(); j++) {
+				System.out.print(values[i][j] + " ");
+			}
+			System.out.println();
+		}
+		System.out.println("Zaokruženja");
+		roundings.forEach(x -> System.out.println(x.getP1() + " " + x.getP2()));
+	}
 
+	private void handleMultiCell(KTable table, List<BasicMovementWrapper> bmws, double minx, double maxx, double miny,
+			double maxy, int[][] values, List<Rounding> roundings, int rSize, int sSize) {
+		maxx += (sSize - 1) * table.getAvgWidth();
+		maxy += (rSize - 1) * table.getAvgHeight();
+//		if (rSize == 1 && sSize == 2) {
+//			debugDrawRectangle((int) minx, (int) maxx, (int) miny, (int) maxy);
+//		}
+		System.out.println("Ulaz: " + rSize + " " + sSize);
+
+		for (int r = 0; r < table.getR() - rSize + 1; r++) {
+			for (int s = 0; s < table.getS() - sSize + 1; s++) {
+				List<BasicMovementWrapper> list = new ArrayList<>();
+
+				for (BasicMovementWrapper bmw : bmws) {
+					if (bmw.isUnused()) {
+						if (!bmw.isDiscarded()) {
+							if (bmw.getBm().isInRect((int) (minx + s * table.getAvgWidth()),
+									(int) (maxx + s * table.getAvgWidth()), (int) (miny + r * table.getAvgHeight()),
+									(int) (maxy + r * table.getAvgHeight()))) {
+								list.add(bmw);
+							}
+
+						}
+					}
+				}
+
+				List<CharacterModel> characters = checkMultiCellCharacters(list);
+				if (characters.size() == 1) {
+					roundings.add(new Rounding(new Point(r, s), new Point(rSize, sSize)));
+				} else {
+					characters.forEach(new Consumer<CharacterModel>() {
+						@Override
+						public void accept(CharacterModel t) {
+							t.decBmsFragments();
+							t.setBmsToDiscarded();
+						}
+					});
+				}
+			}
+		}
+	}
+
+	private void handleSingleCell(KTable table, List<BasicMovementWrapper> bmws, double minx, double maxx, double miny,
+			double maxy, int[][] values, List<Rounding> roundings) {
+		for (int r = 0; r < table.getR(); r++) {
+			for (int s = 0; s < table.getS(); s++) {
+				List<BasicMovementWrapper> list = new ArrayList<>();
+
+				for (BasicMovementWrapper bmw : bmws) {
+					if (bmw.isUnused()) {
+						if (!bmw.isDiscarded()) {
+							if (bmw.getBm().isInRect((int) (minx + s * table.getAvgWidth()),
+									(int) (maxx + s * table.getAvgWidth()), (int) (miny + r * table.getAvgHeight()),
+									(int) (maxy + r * table.getAvgHeight()))) {
+								list.add(bmw);
+							}
+
+						}
+					}
+				}
+
+				List<CharacterModel> characters = checkSingleCellCharacters(list);
+				Collections.sort(characters, new Comparator<CharacterModel>() {
+					@Override
+					public int compare(CharacterModel o1, CharacterModel o2) {
+						return Integer.compare(o1.getBoundingBox().getIp1().x, o2.getBoundingBox().getIp1().x);
+					}
+
+				});
+				if (characters.isEmpty()) {
+					values[r][s] = -1;
+				} else if (characters.size() == 1) {
+					CharacterModel cm = characters.get(0);
+					if (cm.getCharacter() == "0") {
+						values[r][s] = 0;
+					} else if (cm.getCharacter() == "1") {
+						values[r][s] = 1;
+					} else if (cm.getCharacter() == "X") {
+						values[r][s] = 2;
+					} else {
+						cm.decBmsFragments();
+						cm.setBmsToDiscarded();
+						values[r][s] = -1;
+
+					}
+				} else if (characters.size() == 2) {
+					Collections.sort(characters, new Comparator<CharacterModel>() {
+						@Override
+						public int compare(CharacterModel o1, CharacterModel o2) {
+							return Integer.compare(o1.getBoundingBox().getIp1().x, o2.getBoundingBox().getIp1().x);
+						}
+					});
+
+					CharacterModel cm = characters.get(0);
+					CharacterModel cm2 = characters.get(1);
+					if (cm.getCharacter() == "CO" || cm.getCharacter() == "0") {
+						if (cm.getBoundingBox().getIp2().x > cm2.getBoundingBox().getIp2().x) {
+							if (cm2.getCharacter() == "0") {
+								values[r][s] = 0;
+								roundings.add(new Rounding(new Point(r, s), new Point(1, 1)));
+							} else if (cm2.getCharacter() == "1") {
+								values[r][s] = 1;
+								roundings.add(new Rounding(new Point(r, s), new Point(1, 1)));
+							} else if (cm2.getCharacter() == "X") {
+								values[r][s] = 2;
+								roundings.add(new Rounding(new Point(r, s), new Point(1, 1)));
+							} else {
+								cm.decBmsFragments();
+								cm.setBmsToDiscarded();
+								cm2.decBmsFragments();
+								cm2.setBmsToDiscarded();
+								values[r][s] = -1;
+							}
+						} else {
+							cm.decBmsFragments();
+							cm.setBmsToDiscarded();
+							cm2.decBmsFragments();
+							cm2.setBmsToDiscarded();
+							values[r][s] = -1;
+						}
+
+					} else {
+						cm.decBmsFragments();
+						cm.setBmsToDiscarded();
+						cm2.decBmsFragments();
+						cm2.setBmsToDiscarded();
+					}
+				} else {
+					characters.forEach(new Consumer<CharacterModel>() {
+						@Override
+						public void accept(CharacterModel t) {
+							t.decBmsFragments();
+							t.setBmsToDiscarded();
+						}
+					});
+				}
+			}
+		}
 	}
 
 	private List<List<VariableModel>> initTopVariable(KTable table, List<BasicMovementWrapper> bmws) {
@@ -574,6 +735,78 @@ public class KTableModel {
 		}
 
 		return null;
+	}
+
+	private List<CharacterModel> checkMultiCellCharacters(List<BasicMovementWrapper> bmws) {
+		CharacterModel cm = null;
+		List<CharacterModel> cms = new ArrayList<>();
+
+		for (int i = 0; i < bmws.size(); i++) {
+			if (bmws.get(i).isUnused()) {
+				if (!bmws.get(i).isDiscarded()) {
+					cm = CircularModel.recognizeC(bmws.get(i));
+					if (null != cm) {
+						if (cm.getCo().isFullCircle()) {
+							cms.add(cm);
+							bmws.get(i).incTotalHandeledFragments();
+						}
+
+						continue;
+					}
+				}
+			}
+
+			bmws.get(i).setDiscarded(true);
+		}
+
+		return cms;
+	}
+
+	private List<CharacterModel> checkSingleCellCharacters(List<BasicMovementWrapper> bmws) {
+		CharacterModel cm = null;
+		List<CharacterModel> cms = new ArrayList<>();
+
+		for (int i = 0; i < bmws.size(); i++) {
+			if (bmws.get(i).isUnused()) {
+				if (i != bmws.size() - 1) {
+					if (bmws.get(i).getIndex() + 1 == bmws.get(i + 1).getIndex() && bmws.get(i + 1).isUnused()) {
+						cm = XModel.recognize(bmws.get(i), bmws.get(i + 1));
+						if (null != cm) {
+							cms.add(cm);
+							bmws.get(i).incTotalHandeledFragments();
+							i++;
+							bmws.get(i).incTotalHandeledFragments();
+							continue;
+						}
+					}
+				}
+				cm = ZeroModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+					bmws.get(i).incTotalHandeledFragments();
+					continue;
+				}
+				cm = OneModel.recognize(bmws.get(i));
+				if (null != cm) {
+					cms.add(cm);
+					bmws.get(i).incTotalHandeledFragments();
+					continue;
+				}
+				cm = CircularModel.recognizeC(bmws.get(i));
+				if (null != cm) {
+					if (cm.getCo().isFullCircle()) {
+						cms.add(cm);
+						bmws.get(i).incTotalHandeledFragments();
+					}
+
+					continue;
+				}
+			}
+
+			bmws.get(i).setDiscarded(true);
+		}
+
+		return cms;
 	}
 
 	private List<CharacterModel> checkCharacterModels(List<BasicMovementWrapper> bmws) {

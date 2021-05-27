@@ -1,5 +1,6 @@
 package hr.fer.zemris.diprad.recognition.models;
 
+import hr.fer.zemris.diprad.recognition.objects.CircularObject;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
@@ -8,6 +9,7 @@ public class CharacterModel {
 	private String character;
 	private Rectangle boundingBox;
 	private BasicMovementWrapper[] bmws;
+	private CircularObject co;
 
 	public CharacterModel(String s, BasicMovementWrapper... bmws) {
 		if (bmws.length == 0) {
@@ -32,6 +34,14 @@ public class CharacterModel {
 		this.bmws = bmws;
 	}
 
+	public CharacterModel(String string, CircularObject co, BasicMovementWrapper bmw) {
+		this.character = string;
+		this.co = co;
+		this.bmws = new BasicMovementWrapper[1];
+		this.bmws[0] = bmw;
+		this.boundingBox = bmws[0].getBm().getBoundingBox().copyOf();
+	}
+
 	public String getCharacter() {
 		return character;
 	}
@@ -44,9 +54,25 @@ public class CharacterModel {
 		return bmws;
 	}
 
+	public CircularObject getCo() {
+		return co;
+	}
+
 	public void setBmsToUsed() {
 		for (BasicMovementWrapper bmw : bmws) {
 			bmw.incTotalHandeledFragments();
+		}
+	}
+
+	public void decBmsFragments() {
+		for (BasicMovementWrapper bmw : bmws) {
+			bmw.decTotalHandeledFragments();
+		}
+	}
+	
+	public void setBmsToDiscarded() {
+		for (BasicMovementWrapper bmw : bmws) {
+			bmw.setDiscarded(true);
 		}
 	}
 }

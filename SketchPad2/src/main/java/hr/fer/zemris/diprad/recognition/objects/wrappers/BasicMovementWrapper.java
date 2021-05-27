@@ -7,6 +7,7 @@ public class BasicMovementWrapper {
 	private int index;
 	private int totalFragments = 1;
 	private int totalHandeledFragments = 0;
+	private boolean discarded=false;
 
 	public BasicMovementWrapper(BasicMovement bm, int index) {
 		this.bm = bm;
@@ -36,6 +37,9 @@ public class BasicMovementWrapper {
 	public void incTotalHandeledFragments() {
 		this.totalHandeledFragments++;
 	}
+	public void decTotalHandeledFragments() {
+		this.totalHandeledFragments--;
+	}
 
 	public void resetTotalHandeledFragments() {
 		this.totalHandeledFragments = 0;
@@ -44,4 +48,13 @@ public class BasicMovementWrapper {
 	public boolean isUnused() {
 		return totalFragments != totalHandeledFragments;
 	}
+
+	public boolean isDiscarded() {
+		return discarded;
+	}
+
+	public void setDiscarded(boolean discarded) {
+		this.discarded = discarded;
+	}
+	
 }
