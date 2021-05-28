@@ -153,6 +153,21 @@ public class KTableModel {
 		}
 		if (table.getR() > 2 && table.getS() > 2) {
 			handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 4, 4);
+			handle4Corners(table, bmws, minx, maxx, miny, maxy, values, roundings);
+		}
+		if (table.getR() > 2) {
+			handleUpDownRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 1);
+			handleUpDownRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 2);
+			if (table.getS() > 2) {
+				handleUpDownRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 4);
+			}
+		}
+		if (table.getS() > 2) {
+			handleLeftRightRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 1);
+			handleLeftRightRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 2);
+			if (table.getR() > 2) {
+				handleLeftRightRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 4);
+			}
 		}
 
 		System.out.println("Vrijednosti");
@@ -166,6 +181,141 @@ public class KTableModel {
 		roundings.forEach(x -> System.out.println(x.getP1() + " " + x.getP2()));
 	}
 
+	private void handleLeftRightRoundings(KTable table, List<BasicMovementWrapper> bmws, double minx, double maxx,
+			double miny, double maxy, int[][] values, List<Rounding> roundings, int rSize) {
+		maxy += (rSize - 1) * table.getAvgHeight();
+
+		for (int r = 0; r < table.getR() - rSize + 1; r++) {
+			List<BasicMovementWrapper> list1 = new ArrayList<>();
+			List<BasicMovementWrapper> list2 = new ArrayList<>();
+			for (BasicMovementWrapper bmw : bmws) {
+				if (bmw.isUnused() && !bmw.isDiscarded()) {
+					if (bmw.getBm().isInRect((int) (minx - table.getAvgWidth()), (int) (maxx),
+							(int) (miny + r * table.getAvgHeight()), (int) (maxy + r * table.getAvgHeight()))) {
+						list1.add(bmw);
+					}
+					if (bmw.getBm().isInRect((int) (minx + 3 * table.getAvgWidth()),
+							(int) (maxx + 4 * table.getAvgWidth()), (int) (miny + r * table.getAvgHeight()),
+							(int) (maxy + r * table.getAvgHeight()))) {
+						list2.add(bmw);
+					}
+				}
+			}
+
+			CharacterModel cm1 = getCOfromListWithAngles(checkLeftRightUpDownCharachters(list1, false),
+					-120 + (rSize / 2) * 18, 120 - (rSize / 2) * 18, true);
+			CharacterModel cm2 = getCOfromListWithAngles(checkLeftRightUpDownCharachters(list2, false),
+					60 + (rSize / 2) * 18, -60 - (rSize / 2) * 18, false);
+
+			if (cm1 != null && cm2 != null) {
+				roundings.add(new Rounding(new Point(0, r), new Point(-2, rSize)));
+				cm1.setBmsToUsed();
+				cm2.setBmsToUsed();
+			}
+		}
+	}
+
+	private void handleUpDownRoundings(KTable table, List<BasicMovementWrapper> bmws, double minx, double maxx,
+			double miny, double maxy, int[][] values, List<Rounding> roundings, int sSize) {
+		maxx += (sSize - 1) * table.getAvgWidth();
+		for (int s = 0; s < table.getS() - sSize + 1; s++) {
+			List<BasicMovementWrapper> list1 = new ArrayList<>();
+			List<BasicMovementWrapper> list2 = new ArrayList<>();
+			for (BasicMovementWrapper bmw : bmws) {
+				if (bmw.isUnused() && !bmw.isDiscarded()) {
+					if (bmw.getBm().isInRect((int) (minx + s * table.getAvgWidth()),
+							(int) (maxx + s * table.getAvgWidth()), (int) (miny - table.getAvgHeight()),
+							(int) (maxy))) {
+						list1.add(bmw);
+					}
+					if (bmw.getBm().isInRect((int) (minx + s * table.getAvgWidth()),
+							(int) (maxx + s * table.getAvgWidth()), (int) (miny + 3 * table.getAvgHeight()),
+							(int) (maxy + 4 * table.getAvgHeight()))) {
+						list2.add(bmw);
+					}
+				}
+			}
+
+			CharacterModel cm1 = getCOfromListWithAngles(checkLeftRightUpDownCharachters(list1, true),
+					-30 + (sSize / 2) * 18, -150 - (sSize / 2), false);
+			CharacterModel cm2 = getCOfromListWithAngles(checkLeftRightUpDownCharachters(list2, true),
+					150 + (sSize / 2), 30 - (sSize / 2), false);
+
+			if (cm1 != null && cm2 != null) {
+				roundings.add(new Rounding(new Point(s, 0), new Point(sSize, -2)));
+				cm1.setBmsToUsed();
+				cm2.setBmsToUsed();
+			}
+		}
+	}
+
+	private void handle4Corners(KTable table, List<BasicMovementWrapper> bmws, double minx, double maxx, double miny,
+			double maxy, int[][] values, List<Rounding> roundings) {
+		List<BasicMovementWrapper> list1 = new ArrayList<>();
+		List<BasicMovementWrapper> list2 = new ArrayList<>();
+		List<BasicMovementWrapper> list3 = new ArrayList<>();
+		List<BasicMovementWrapper> list4 = new ArrayList<>();
+//		debugDrawRectangle((int) (minx - table.getAvgWidth()), (int) (maxx), (int) (miny - table.getAvgHeight()),
+//				(int) (maxy));
+//		debugDrawRectangle((int) (minx - table.getAvgWidth()), (int) (maxx), (int) (miny + 3 * table.getAvgHeight()),
+//				(int) (maxy + 4 * table.getAvgHeight()));
+//		debugDrawRectangle((int) (minx + 3 * table.getAvgWidth()), (int) (maxx + 4 * table.getAvgWidth()),
+//				(int) (miny + 3 * table.getAvgHeight()), (int) (maxy + 4 * table.getAvgHeight()));
+//		debugDrawRectangle((int) (minx + 3 * table.getAvgWidth()), (int) (maxx + 4 * table.getAvgWidth()),
+//				(int) (miny - table.getAvgHeight()), (int) (maxy));
+		for (BasicMovementWrapper bmw : bmws) {
+			if (bmw.isUnused() && !bmw.isDiscarded()) {
+				if (bmw.getBm().isInRect((int) (minx - table.getAvgWidth()), (int) (maxx),
+						(int) (miny - table.getAvgHeight()), (int) (maxy))) {
+					list1.add(bmw);
+				}
+				if (bmw.getBm().isInRect((int) (minx - table.getAvgWidth()), (int) (maxx),
+						(int) (miny + 3 * table.getAvgHeight()), (int) (maxy + 4 * table.getAvgHeight()))) {
+					list2.add(bmw);
+				}
+				if (bmw.getBm().isInRect((int) (minx + 3 * table.getAvgWidth()), (int) (maxx + 4 * table.getAvgWidth()),
+						(int) (miny + 3 * table.getAvgHeight()), (int) (maxy + 4 * table.getAvgHeight()))) {
+					list3.add(bmw);
+				}
+				if (bmw.getBm().isInRect((int) (minx + 3 * table.getAvgWidth()), (int) (maxx + 4 * table.getAvgWidth()),
+						(int) (miny - table.getAvgHeight()), (int) (maxy))) {
+					list4.add(bmw);
+				}
+			}
+		}
+
+		CharacterModel cm1 = getCOfromListWithAngles(checkCornerCharacters(list1), -40, 130, true);
+		CharacterModel cm2 = getCOfromListWithAngles(checkCornerCharacters(list2), -130, 40, true);
+		CharacterModel cm3 = getCOfromListWithAngles(checkCornerCharacters(list3), 140, -50, false);
+		CharacterModel cm4 = getCOfromListWithAngles(checkCornerCharacters(list4), 50, -140, false);
+
+		if (cm1 != null && cm2 != null && cm3 != null && cm4 != null) {
+			roundings.add(new Rounding(new Point(0, 0), new Point(-2, -2)));
+			cm1.setBmsToUsed();
+			cm2.setBmsToUsed();
+			cm3.setBmsToUsed();
+			cm4.setBmsToUsed();
+		}
+	}
+
+	private CharacterModel getCOfromListWithAngles(List<CharacterModel> cms, double lessThan, double biggerThan,
+			boolean or) {
+		for (CharacterModel cm : cms) {
+			double angle = cm.getCo().getThetaMaxDistance();
+			if (or) {
+				if (angle <= lessThan || angle >= biggerThan) {
+					return cm;
+				}
+			} else {
+				if (angle <= lessThan && angle >= biggerThan) {
+					return cm;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	private void handleMultiCell(KTable table, List<BasicMovementWrapper> bmws, double minx, double maxx, double miny,
 			double maxy, int[][] values, List<Rounding> roundings, int rSize, int sSize) {
 		maxx += (sSize - 1) * table.getAvgWidth();
@@ -173,8 +323,6 @@ public class KTableModel {
 //		if (rSize == 1 && sSize == 2) {
 //			debugDrawRectangle((int) minx, (int) maxx, (int) miny, (int) maxy);
 //		}
-		System.out.println("Ulaz: " + rSize + " " + sSize);
-
 		for (int r = 0; r < table.getR() - rSize + 1; r++) {
 			for (int s = 0; s < table.getS() - sSize + 1; s++) {
 				List<BasicMovementWrapper> list = new ArrayList<>();
@@ -194,7 +342,7 @@ public class KTableModel {
 
 				List<CharacterModel> characters = checkMultiCellCharacters(list);
 				if (characters.size() == 1) {
-					roundings.add(new Rounding(new Point(r, s), new Point(rSize, sSize)));
+					roundings.add(new Rounding(new Point(r, s), new Point(sSize, rSize)));
 				} else {
 					characters.forEach(new Consumer<CharacterModel>() {
 						@Override
@@ -735,6 +883,66 @@ public class KTableModel {
 		}
 
 		return null;
+	}
+
+	private List<CharacterModel> checkLeftRightUpDownCharachters(List<BasicMovementWrapper> bmws,
+			boolean deltaXDominant) {
+		CharacterModel cm = null;
+		List<CharacterModel> cms = new ArrayList<>();
+
+		for (int i = 0; i < bmws.size(); i++) {
+			if (bmws.get(i).isUnused()) {
+				if (!bmws.get(i).isDiscarded()) {
+					cm = CircularModel.recognizeC(bmws.get(i));
+					if (null != cm) {
+						if (!cm.getCo().isFullCircle()) {
+							if (deltaXDominant) {
+								if (cm.getCo().getDeltaXdominant()) {
+									cms.add(cm);
+								}
+							} else {
+								if (!cm.getCo().getDeltaXdominant()) {
+									cms.add(cm);
+								}
+							}
+						}
+
+						continue;
+					}
+				}
+			}
+
+			bmws.get(i).setDiscarded(true);
+		}
+
+		cms.forEach(x -> x.setBmsToDiscarded());
+		return cms;
+	}
+
+	private List<CharacterModel> checkCornerCharacters(List<BasicMovementWrapper> bmws) {
+		CharacterModel cm = null;
+		List<CharacterModel> cms = new ArrayList<>();
+
+		for (int i = 0; i < bmws.size(); i++) {
+			if (bmws.get(i).isUnused()) {
+				if (!bmws.get(i).isDiscarded()) {
+					cm = CircularModel.recognizeC(bmws.get(i));
+					if (null != cm) {
+						if (!cm.getCo().isFullCircle()) {
+							if (cm.getCo().getStartEndDistanceToTotalLengthRatio() > 0.4) {
+								cms.add(cm);
+							}
+						}
+
+						continue;
+					}
+				}
+			}
+
+			bmws.get(i).setDiscarded(true);
+		}
+
+		return cms;
 	}
 
 	private List<CharacterModel> checkMultiCellCharacters(List<BasicMovementWrapper> bmws) {

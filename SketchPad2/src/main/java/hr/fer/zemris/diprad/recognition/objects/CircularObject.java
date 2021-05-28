@@ -14,10 +14,12 @@ public class CircularObject {
 	private Rectangle boundingBox;
 
 	private boolean fullCircle;
-	double totalAngle;
-	double totalNorm;
+	private double totalAngle;
+	private double totalNorm;
+	private double startEndDistanceToTotalLengthRatio;
 	private BasicMovementWrapper bmw;
 	private int startIndex, endIndex;
+	private boolean deltaXdominant;
 
 	public CircularObject(PointDouble averagePoint, double minMaxRatio, double theta, double thetaMaxDistance,
 			boolean fullCircle, double totalAngle, double totalNorm, BasicMovementWrapper bmw, int startIndex,
@@ -32,6 +34,14 @@ public class CircularObject {
 		this.bmw = bmw;
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
+		this.startEndDistanceToTotalLengthRatio = Math
+				.sqrt(Math.pow(sampledPoints.get(startIndex).x - sampledPoints.get(endIndex).x, 2)
+						+ Math.pow(sampledPoints.get(startIndex).y - sampledPoints.get(endIndex).y, 2))
+				/ totalNorm;
+
+		PointDouble p1 = sampledPoints.get(startIndex);
+		PointDouble p2 = sampledPoints.get(endIndex);
+		deltaXdominant = Math.abs(p1.x - p2.x) > Math.abs(p1.y - p2.y);
 
 		initBoundingBox(sampledPoints);
 	}
@@ -93,4 +103,13 @@ public class CircularObject {
 	public Rectangle getBoundingBox() {
 		return boundingBox;
 	}
+
+	public double getStartEndDistanceToTotalLengthRatio() {
+		return startEndDistanceToTotalLengthRatio;
+	}
+
+	public boolean getDeltaXdominant() {
+		return this.deltaXdominant;
+	}
+
 }

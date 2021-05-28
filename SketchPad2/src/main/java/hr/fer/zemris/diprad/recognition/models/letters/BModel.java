@@ -58,60 +58,60 @@ public class BModel {
 		double avgNorm = (co1.getTotalNorm() + co2.getTotalNorm()) / 2;
 		// Jesu li prošli srednju točku s lijeve strane
 		if (bmw.getBm().getPoints().get(0).x > bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.1) {
-			System.out.println("1");
+			//System.out.println("1");
 			return null;
 		}
 		if (bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x > bmw.getBm().getPoints().get(breakPosition).x
 				+ avgNorm * 0.1) {
-			System.out.println("2");
+			//System.out.println("2");
 			return null;
 		}
 		// Jesu li prošli srednju točku s desne strane
 		if (co1.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.05) {
-			System.out.println("11");
+			//System.out.println("11");
 			return null;
 		}
 		if (co2.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.05) {
-			System.out.println("22");
+			//System.out.println("22");
 			return null;
 		}
 
 		// je li donja točka dalja od gornje, ili jesu li tu negdje
 		if (deltaX - 0.15 * avgNorm > 0) {
-			System.out.println("3. 1 point to far left in comparioson to last");
+			//System.out.println("3. 1 point to far left in comparioson to last");
 			return null;
 		}
 
 		if (!(angleAndMinMaxTest(co1) && angleAndMinMaxTest(co2))) {
-			System.out.println("Wat");
+			//System.out.println("Wat");
 			return null;
 		}
 
 		if (!(co1.getTheta() > 130 || co1.getTheta() < -145)) {
-			System.out.println("Bad opening position: " + co1.getTheta());
+			//System.out.println("Bad opening position: " + co1.getTheta());
 			return null;
 		}
 
 		if (!(co2.getTheta() > 145 || co2.getTheta() < -130)) {
-			System.out.println("Bad opening position: " + co2.getTheta());
+			//System.out.println("Bad opening position: " + co2.getTheta());
 			return null;
 		}
 
 		if (co2.getBoundingBox().getWidth() < co1.getBoundingBox().getWidth() * 0.8) {
-			System.out.println("Upper part too wide");
+			//System.out.println("Upper part too wide");
 			return null;
 		}
 		if (co2.getBoundingBox().getWidth() > co1.getBoundingBox().getWidth() * 2.1) {
 			System.out.println(co2.getBoundingBox().getWidth() / co1.getBoundingBox().getWidth());
-			System.out.println("Lower part too wide");
+			//System.out.println("Lower part too wide");
 			return null;
 		}
 		if (co2.getBoundingBox().getHeight() < co1.getBoundingBox().getHeight() * 0.8) {
-			System.out.println("Upper part too high");
+			//System.out.println("Upper part too high");
 			return null;
 		}
 		if (co2.getBoundingBox().getHeight() > co1.getBoundingBox().getHeight() * 2.1) {
-			System.out.println("Lower part too high");
+			//System.out.println("Lower part too high");
 			return null;
 		}
 		if (co2.getBoundingBox().getP2().x < co1.getBoundingBox().getP2().x - 0.2 * avgNorm) {
@@ -126,11 +126,11 @@ public class BModel {
 
 	private static boolean angleAndMinMaxTest(CircularObject co1) {
 		if (co1.getTotalAngle() < 240 || co1.getTotalAngle() > 305) {
-			System.out.println("invalid angle: " + co1.getTotalAngle());
+			//System.out.println("invalid angle: " + co1.getTotalAngle());
 			return false;
 		}
 		if (co1.getMinMaxRatio() > 0.55 || co1.getMinMaxRatio() < 0.18) {
-			System.out.println("Bad min max:" + co1.getMinMaxRatio());
+			//System.out.println("Bad min max:" + co1.getMinMaxRatio());
 			return false;
 		}
 
@@ -141,7 +141,7 @@ public class BModel {
 			BasicMovementWrapper bmw2) {
 		Line l = LinearModel.recognize(bmw);
 		if (l.getType() != LineType.VERTICAL) {
-			System.out.println("Line not vertical");
+			//System.out.println("Line not vertical");
 			return null;
 		}
 
