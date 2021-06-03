@@ -1,6 +1,8 @@
 package hr.fer.zemris.diprad.drawing.visitors;
 
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Point;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectVisitor;
 import hr.fer.zemris.diprad.drawing.graphical.objects.BasicMovement;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable;
 import hr.fer.zemris.diprad.drawing.graphical.objects.SelectionRectangle;
+import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable.Value;
 
 public class GraphicalObjectPainter implements GraphicalObjectVisitor {
@@ -72,6 +75,23 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 		int height = table.getHeight();
 		a = table.getP();
 		g2d.drawRect(a.x, a.y, width, height);
+		Font f1 = new Font("Courier New", Font.PLAIN, 36);
+		Font f2 = new Font("Courier New", Font.PLAIN, 24);
+		g2d.setFont(f1);
+		g2d.drawString("X", 100, 100);
+		g2d.setFont(f2);
+		g2d.drawString("1", 118, 104);
+		g2d.setFont(f1);
+		g2d.drawString("X", 130, 100);
+		g2d.setFont(f2);
+		g2d.drawString("1", 148, 104);
+		
+		Line l = table.getSeparationLine();
+		System.out.println("Crtam");
+		System.out.println(l);
+		if (l != null) {
+			g2d.drawLine(l.getMinX(), l.getMinY(), a.x, a.y);
+		}
 
 		double avgHeight = table.getHeight() / (table.getNumOfHorisontalLines() - 1);
 		double avgWidth = table.getWidth() / (table.getNumOfVerticalLines() - 1);

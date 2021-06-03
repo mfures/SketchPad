@@ -1,13 +1,19 @@
 package hr.fer.zemris.diprad.drawing.graphical.objects;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObject;
 import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectVisitor;
+import hr.fer.zemris.diprad.recognition.models.VariableModel;
+import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
 import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
+import hr.fer.zemris.diprad.util.Rounding;
 
 public class KTable extends GraphicalObject {
 	private Point p;
@@ -19,6 +25,14 @@ public class KTable extends GraphicalObject {
 	private int s;
 	private Value[][] values;
 	private List<BasicMovementWrapper> bmws;
+	private String functionName;
+	private Line separationLine;
+	private List<String> leftVariables, rightVariables;
+	private Set<String> boolTableVariables;
+	private String leftVariable, rightVariable, topVariable, downVariable;
+	private boolean leftIsCenter = false;
+	private boolean topIsCenter = false;
+	private List<Rounding> roundings;
 
 	public KTable(Point p, int numOfVerticalLines, int numOfHorisontalLines, int width, int height) {
 		this.p = p;
@@ -58,6 +72,34 @@ public class KTable extends GraphicalObject {
 		}
 	}
 
+	public String getLeftVariable() {
+		return leftVariable;
+	}
+
+	public String getRightVariable() {
+		return rightVariable;
+	}
+
+	public String getTopVariable() {
+		return topVariable;
+	}
+
+	public String getDownVariable() {
+		return downVariable;
+	}
+
+	public boolean isLeftIsCenter() {
+		return leftIsCenter;
+	}
+
+	public boolean isTopIsCenter() {
+		return topIsCenter;
+	}
+
+	public Line getSeparationLine() {
+		return this.separationLine;
+	}
+
 	public Point getP() {
 		return p;
 	}
@@ -76,6 +118,10 @@ public class KTable extends GraphicalObject {
 
 	public int getHeight() {
 		return height;
+	}
+
+	public String getFunctionName() {
+		return this.functionName;
 	}
 
 	@Override
@@ -298,4 +344,128 @@ public class KTable extends GraphicalObject {
 	public double getAvgHeight() {
 		return height / (numOfHorisontalLines - 1.0);
 	}
+
+	public void initValues(int[][] values2) {
+		for (int i = 0; i < r; i++) {
+			for (int j = 0; j < s; j++) {
+				values[i][j] = new Value(values2[i][j]);
+			}
+		}
+	}
+
+	public void setFunctionName(List<VariableModel> topVMs) {
+		if (topVMs.size() == 1) {
+			functionName = topVMs.get(0).getVariable();
+			if (!(functionName.startsWith("f") || functionName.startsWith("g") || functionName.startsWith("h"))) {
+				functionName = "f0";
+				throw new RuntimeException("Invalid function name: " + topVMs.get(0).getVariable());
+			}
+		} else if (topVMs.isEmpty()) {
+			functionName = "f0";
+		} else {
+			throw new RuntimeException("Too many variables for function name given (number): " + topVMs.size());
+		}
+	}
+
+	public void setSeparationLine(Line l) {
+		this.separationLine = l;
+	}
+
+	public List<String> getLeftVariables() {
+		return leftVariables;
+	}
+
+	public List<String> getRightVariables() {
+		return rightVariables;
+	}
+
+	public Set<String> getBoolTableVariables() {
+		return boolTableVariables;
+	}
+
+	public void initVariableNames(List<VariableModel> leftVMs, List<VariableModel> rightVMs) {
+		if (leftVMs.size() * 2 != this.r) {
+			throw new RuntimeException("Bad variables left(count): " + leftVMs.size());
+		}
+		if (rightVMs.size() * 2 != this.s) {
+			throw new RuntimeException("Bad variables right(count): " + rightVMs.size());
+		}
+
+		boolTableVariables = new TreeSet<>();
+		for (VariableModel vm : leftVMs) {
+			boolTableVariables.add(vm.getVariable());
+		}
+		for (VariableModel vm : rightVMs) {
+			boolTableVariables.add(vm.getVariable());
+		}
+
+		if (boolTableVariables.size() != leftVMs.size() + rightVMs.size()) {
+			boolTableVariables = null;
+			throw new RuntimeException("Duplicate variable given");
+		}
+
+		leftVariables = new ArrayList<>();
+		for (VariableModel vm : leftVMs) {
+			leftVariables.add(vm.getVariable());
+		}
+
+		rightVariables = new ArrayList<>();
+		for (VariableModel vm : rightVMs) {
+			rightVariables.add(vm.getVariable());
+		}
+	}
+
+	public void initLeftRightVariables(VariableModel vmLeft, VariableModel vmRight) {
+		if (vmRight == null) {
+			if (leftVariables.contains(vmLeft.getVariable())) {
+				leftVariable = vmLeft.getVariable();
+			} else {
+				throw new RuntimeException("Left Variable doesnt match");
+			}
+		} else {
+			if (vmLeft.getVariable().equals(vmRight.getVariable())) {
+				throw new RuntimeException("Left and Right variable are equal");
+			}
+
+			if (leftVariables.contains(vmLeft.getVariable()) && leftVariables.contains(vmRight.getVariable())) {
+				leftVariable = vmLeft.getVariable();
+				rightVariable = vmRight.getVariable();
+				leftIsCenter = vmLeft.isCenter();
+			} else {
+				throw new RuntimeException("Left or Right Variable doesnt match");
+			}
+
+		}
+	}
+
+	public void initTopDownVariables(VariableModel vmTop, VariableModel vmDown) {
+		if (vmDown == null) {
+			if (rightVariables.contains(vmTop.getVariable())) {
+				topVariable = vmTop.getVariable();
+			} else {
+				throw new RuntimeException("Top Variable doesnt match");
+			}
+		} else {
+			if (vmTop.getVariable().equals(vmDown.getVariable())) {
+				throw new RuntimeException("Top and Down variable are equal");
+			}
+
+			if (rightVariables.contains(vmTop.getVariable()) && rightVariables.contains(vmDown.getVariable())) {
+				topVariable = vmTop.getVariable();
+				downVariable = vmDown.getVariable();
+				topIsCenter = vmTop.isCenter();
+			} else {
+				throw new RuntimeException("Top or Down Variable doesnt match");
+			}
+		}
+	}
+
+	public void initRoundings(List<Rounding> roundings) {
+		this.roundings=roundings;
+	}
+
+	public List<Rounding> getRoundings() {
+		return roundings;
+	}
+	
 }

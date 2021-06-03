@@ -90,47 +90,53 @@ public class KTableModel {
 			try {
 				Line l = getLineInCorner(table, bmws);
 				if (l != null) {
-					List<List<VariableModel>> cornerVariables = handleCorner(l, table, bmws);
+					handleCorner(l, table, bmws);
 					List<List<VariableModel>> leftRightVariables = null;
 					List<List<VariableModel>> topDownVariables = null;
 
 					if (table.getR() == 2) {
 						leftRightVariables = initLeftVariable(table, bmws);
 						System.out.println("left variable: " + leftRightVariables.get(0).get(0).getVariable());
+						table.initLeftRightVariables(leftRightVariables.get(0).get(0), null);
 					}
 					if (table.getS() == 2) {
 						topDownVariables = initTopVariable(table, bmws);
 						System.out.println("top variable: " + topDownVariables.get(0).get(0).getVariable());
+						table.initTopDownVariables(topDownVariables.get(0).get(0), null);
 					}
 
 					if (table.getR() == 4) {
 						leftRightVariables = initLeftRightVariables(table, bmws);
 						System.out.println("left variable: " + leftRightVariables.get(0).get(0).getVariable());
 						System.out.println("right variable: " + leftRightVariables.get(1).get(0).getVariable());
+						table.initLeftRightVariables(leftRightVariables.get(0).get(0),
+								leftRightVariables.get(1).get(0));
 					}
 					if (table.getS() == 4) {
 						topDownVariables = initTopDownVariables(table, bmws);
 						System.out.println("top variable: " + topDownVariables.get(0).get(0).getVariable());
 						System.out.println("down variable: " + topDownVariables.get(1).get(0).getVariable());
+						table.initTopDownVariables(topDownVariables.get(0).get(0), topDownVariables.get(1).get(0));
 					}
 
-					getTableValuesAndSingleCellRoundings(table, bmws);
+					getTableValuesAndRoundings(table, bmws);
 				}
 			} catch (Exception e) {
 				System.out.println("Dobio sam iznimku: " + e.getMessage());
 				System.out.println("Crtam tablicu bez varijabli");
 			}
 
-			// debugDrawTable(table);
+			debugDrawTable(table);
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
 			// SketchPad2.debugDraw(new
 			// SelectionRectangle(table.getExpandedBoundingRectangle()));
 
-			// clearBMsModel(table);
 		}
+
+		clearUsed(bmws);
 	}
 
-	private void getTableValuesAndSingleCellRoundings(KTable table, List<BasicMovementWrapper> bmws) {
+	private void getTableValuesAndRoundings(KTable table, List<BasicMovementWrapper> bmws) {
 		Rectangle bb = table.getBoundingRectangle();
 		double minx = bb.getP1().x - 0.25 * table.getAvgWidth();
 		double maxx = bb.getP1().x + 1.25 * table.getAvgWidth();
@@ -140,6 +146,8 @@ public class KTableModel {
 		List<Rounding> roundings = new ArrayList<>();
 
 		handleSingleCell(table, bmws, minx, maxx, miny, maxy, values, roundings);
+		table.initValues(values);
+
 		handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 2, 1);
 		handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 1, 2);
 		handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 2, 2);
@@ -179,6 +187,8 @@ public class KTableModel {
 		}
 		System.out.println("Zaokruženja");
 		roundings.forEach(x -> System.out.println(x.getP1() + " " + x.getP2()));
+
+		table.initRoundings(roundings);
 	}
 
 	private void handleLeftRightRoundings(KTable table, List<BasicMovementWrapper> bmws, double minx, double maxx,
@@ -713,19 +723,19 @@ public class KTableModel {
 		return vms;
 	}
 
-	private List<List<VariableModel>> handleCorner(Line l, KTable table, List<BasicMovementWrapper> bmws) {
+	private void handleCorner(Line l, KTable table, List<BasicMovementWrapper> bmws) {
 		double yDiff = l.getMaxY() - l.getMinY();
 
 		double minX = l.getMinX();
-		double maxX = l.getMaxX() + table.getWidth() * 0.35;
-		double minX2 = l.getMinX() - table.getHeight() * 0.35;
+		double maxX = l.getMaxX() + table.getWidth() * 0.5;
+		double minX2 = l.getMinX() - table.getHeight() * 0.5;
 		double maxX2 = l.getMaxX();
-		double minX3 = l.getMinX() - table.getWidth() * 0.35;
-		double maxX3 = l.getMinX() + table.getWidth() * 0.35;
+		double minX3 = l.getMinX() - table.getWidth() * 0.5;
+		double maxX3 = l.getMinX() + table.getWidth() * 0.5;
 
 		double minY = l.getMinY() - 0.15 * yDiff;
 		double maxY = l.getMaxY() - 0.1 * yDiff;
-		double minY2 = l.getMinY() - 1.6 * yDiff;// Both should be -
+		double minY2 = l.getMinY() - 3 * yDiff;// Both should be -
 		double maxY2 = l.getMaxY() - 1 * yDiff;
 		List<BasicMovementWrapper> leftBmws = new ArrayList<>();
 		List<BasicMovementWrapper> rightBmws = new ArrayList<>();
@@ -808,11 +818,9 @@ public class KTableModel {
 		rightVMs.forEach((x) -> x.setBmwsToUsed());
 		topVMs.forEach((x) -> x.setBmwsToUsed());
 
-		List<List<VariableModel>> variables = new ArrayList<List<VariableModel>>();
-		variables.add(leftVMs);
-		variables.add(rightVMs);
-		variables.add(topVMs);
-		return variables;
+		table.setFunctionName(topVMs);
+		table.setSeparationLine(l);
+		table.initVariableNames(leftVMs, rightVMs);
 	}
 
 	private List<VariableModel> constructVariables(List<CharacterModel> cms) {
@@ -1118,9 +1126,9 @@ public class KTableModel {
 	}
 
 	@SuppressWarnings("unused")
-	private void clearBMsModel(KTable table) {
+	private void clearUsed(List<BasicMovementWrapper> bmws) {
 		DrawingModel model = sP.getModel();
-		for (BasicMovementWrapper bmw : table.getBmws()) {
+		for (BasicMovementWrapper bmw : bmws) {
 			model.remove(bmw.getBm());
 		}
 	}
