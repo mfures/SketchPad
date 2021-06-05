@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import hr.fer.zemris.diprad.SketchPad2;
 import hr.fer.zemris.diprad.drawing.graphical.objects.KTable;
 import hr.fer.zemris.diprad.drawing.graphical.objects.SelectionRectangle;
+import hr.fer.zemris.diprad.drawing.graphical.objects.TruthTable;
 import hr.fer.zemris.diprad.drawing.model.DrawingModel;
 import hr.fer.zemris.diprad.recognition.LineSorter;
 import hr.fer.zemris.diprad.recognition.LineValueSupplier;
@@ -163,6 +164,9 @@ public class KTableModel {
 			handleMultiCell(table, bmws, minx, maxx, miny, maxy, values, roundings, 4, 4);
 			handle4Corners(table, bmws, minx, maxx, miny, maxy, values, roundings);
 		}
+		table.setInnerRoundings(roundings);
+
+		roundings = new ArrayList<>();
 		if (table.getR() > 2) {
 			handleUpDownRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 1);
 			handleUpDownRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 2);
@@ -170,6 +174,9 @@ public class KTableModel {
 				handleUpDownRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 4);
 			}
 		}
+		table.setOuterRoundingsTop(roundings);
+
+		roundings = new ArrayList<>();
 		if (table.getS() > 2) {
 			handleLeftRightRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 1);
 			handleLeftRightRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 2);
@@ -177,6 +184,7 @@ public class KTableModel {
 				handleLeftRightRoundings(table, bmws, minx, maxx, miny, maxy, values, roundings, 4);
 			}
 		}
+		table.setOuterRoundingsLeft(roundings);
 
 		System.out.println("Vrijednosti");
 		for (int i = 0; i < table.getR(); i++) {
@@ -185,10 +193,6 @@ public class KTableModel {
 			}
 			System.out.println();
 		}
-		System.out.println("Zaokruženja");
-		roundings.forEach(x -> System.out.println(x.getP1() + " " + x.getP2()));
-
-		table.initRoundings(roundings);
 	}
 
 	private void handleLeftRightRoundings(KTable table, List<BasicMovementWrapper> bmws, double minx, double maxx,
@@ -300,11 +304,11 @@ public class KTableModel {
 		CharacterModel cm4 = getCOfromListWithAngles(checkCornerCharacters(list4), 50, -140, false);
 
 		if (cm1 != null && cm2 != null && cm3 != null && cm4 != null) {
-			roundings.add(new Rounding(new Point(0, 0), new Point(-2, -2)));
 			cm1.setBmsToUsed();
 			cm2.setBmsToUsed();
 			cm3.setBmsToUsed();
 			cm4.setBmsToUsed();
+			table.setCornersRounding(new Rounding(new Point(0, 0), new Point(-2, -2)));
 		}
 	}
 
@@ -352,7 +356,7 @@ public class KTableModel {
 
 				List<CharacterModel> characters = checkMultiCellCharacters(list);
 				if (characters.size() == 1) {
-					roundings.add(new Rounding(new Point(r, s), new Point(sSize, rSize)));
+					roundings.add(new Rounding(new Point(s, r), new Point(sSize, rSize)));
 				} else {
 					characters.forEach(new Consumer<CharacterModel>() {
 						@Override
@@ -1300,6 +1304,8 @@ public class KTableModel {
 	@SuppressWarnings("unused")
 	private void debugDrawTable(KTable table) {
 		sP.getModel().add(table);
+		sP.getCanvas().repaint();
+		sP.getModel().add(new TruthTable(table));
 		sP.getCanvas().repaint();
 	}
 

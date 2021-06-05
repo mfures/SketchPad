@@ -11,6 +11,7 @@ import hr.fer.zemris.diprad.drawing.graphical.GraphicalObjectVisitor;
 import hr.fer.zemris.diprad.recognition.models.VariableModel;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 import hr.fer.zemris.diprad.recognition.objects.wrappers.BasicMovementWrapper;
+import hr.fer.zemris.diprad.util.ColRow;
 import hr.fer.zemris.diprad.util.PointDouble;
 import hr.fer.zemris.diprad.util.Rectangle;
 import hr.fer.zemris.diprad.util.Rounding;
@@ -25,14 +26,17 @@ public class KTable extends GraphicalObject {
 	private int s;
 	private Value[][] values;
 	private List<BasicMovementWrapper> bmws;
-	private String functionName;
+	private String functionName = "";
 	private Line separationLine;
 	private List<String> leftVariables, rightVariables;
 	private Set<String> boolTableVariables;
-	private String leftVariable, rightVariable, topVariable, downVariable;
+	private String leftVariable = "", rightVariable = "", topVariable = "", downVariable = "";
 	private boolean leftIsCenter = false;
 	private boolean topIsCenter = false;
-	private List<Rounding> roundings;
+	private List<Rounding> innerRoundings;
+	private List<Rounding> outerRoundingsLeft;
+	private List<Rounding> outerRoundingsTop;
+	private Rounding cornersRounding;
 
 	public KTable(Point p, int numOfVerticalLines, int numOfHorisontalLines, int width, int height) {
 		this.p = p;
@@ -40,6 +44,7 @@ public class KTable extends GraphicalObject {
 		s = numOfVerticalLines - 1;
 		this.numOfHorisontalLines = numOfHorisontalLines;
 		r = numOfHorisontalLines - 1;
+
 		this.width = width;
 		this.height = height;
 		values = new Value[r][s];
@@ -70,6 +75,14 @@ public class KTable extends GraphicalObject {
 				}
 			}
 		}
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
 	}
 
 	public String getLeftVariable() {
@@ -152,12 +165,12 @@ public class KTable extends GraphicalObject {
 			if (checkValue(value)) {
 				this.value = value;
 			} else {
-				this.value = MIN_VALUE;
+				this.value = MIN_VALUE - 1;
 			}
 		}
 
 		public static boolean checkValue(int value) {
-			return value >= MIN_VALUE && value <= MAX_VALUE;
+			return value >= MIN_VALUE - 1 && value <= MAX_VALUE;
 		}
 
 		public void incValue() {
@@ -460,12 +473,158 @@ public class KTable extends GraphicalObject {
 		}
 	}
 
-	public void initRoundings(List<Rounding> roundings) {
-		this.roundings=roundings;
+	public List<Rounding> getInnerRoundings() {
+		return innerRoundings;
 	}
 
-	public List<Rounding> getRoundings() {
-		return roundings;
+	public void setInnerRoundings(List<Rounding> innerRoundings) {
+		this.innerRoundings = innerRoundings;
 	}
-	
+
+	public List<Rounding> getOuterRoundingsLeft() {
+		return outerRoundingsLeft;
+	}
+
+	public void setOuterRoundingsLeft(List<Rounding> outerRoundingsLeft) {
+		this.outerRoundingsLeft = outerRoundingsLeft;
+	}
+
+	public Rounding getCornersRounding() {
+		return cornersRounding;
+	}
+
+	public void setCornersRounding(Rounding cornersRounding) {
+		this.cornersRounding = cornersRounding;
+	}
+
+	public List<Rounding> getOuterRoundingsTop() {
+		return outerRoundingsTop;
+	}
+
+	public void setOuterRoundingsTop(List<Rounding> outerRoundingsTop) {
+		this.outerRoundingsTop = outerRoundingsTop;
+	}
+
+	public void writeValues() {
+		for (int i = 0; i < r; i++) {
+			for (int j = 0; j < s; j++) {
+				System.out.print(values[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	public List<ColRow> xRangeYrange(String variable, int val) {
+		List<ColRow> range = new ArrayList<>();
+		if (val == 1) {
+			if (variable.equals(topVariable)) {
+				if (topIsCenter) {
+					range.add(new ColRow(true, 1));
+					range.add(new ColRow(true, 2));
+				} else {
+					if (s == 4) {
+						range.add(new ColRow(true, 2));
+						range.add(new ColRow(true, 3));
+					} else {
+						range.add(new ColRow(true, 1));
+					}
+				}
+			}
+			if (variable.equals(downVariable)) {
+				if (!topIsCenter) {
+					range.add(new ColRow(true, 1));
+					range.add(new ColRow(true, 2));
+				} else {
+					if (s == 4) {
+						range.add(new ColRow(true, 2));
+						range.add(new ColRow(true, 3));
+					} else {
+						range.add(new ColRow(true, 1));
+					}
+				}
+			}
+
+			if (variable.equals(leftVariable)) {
+				if (leftIsCenter) {
+					range.add(new ColRow(false, 1));
+					range.add(new ColRow(false, 2));
+				} else {
+					if (r == 4) {
+						range.add(new ColRow(false, 2));
+						range.add(new ColRow(false, 3));
+					} else {
+						range.add(new ColRow(false, 1));
+					}
+				}
+			}
+			if (variable.equals(rightVariable)) {
+				if (!leftIsCenter) {
+					range.add(new ColRow(false, 1));
+					range.add(new ColRow(false, 2));
+				} else {
+					if (r == 4) {
+						range.add(new ColRow(false, 2));
+						range.add(new ColRow(false, 3));
+					} else {
+						range.add(new ColRow(false, 1));
+					}
+				}
+			}
+		} else {
+			if (variable.equals(topVariable)) {
+				if (topIsCenter) {
+					range.add(new ColRow(true, 0));
+					range.add(new ColRow(true, 3));
+				} else {
+					if (s == 4) {
+						range.add(new ColRow(true, 0));
+						range.add(new ColRow(true, 1));
+					} else {
+						range.add(new ColRow(true, 0));
+					}
+				}
+			}
+			if (variable.equals(downVariable)) {
+				if (!topIsCenter) {
+					range.add(new ColRow(true, 0));
+					range.add(new ColRow(true, 3));
+				} else {
+					if (s == 4) {
+						range.add(new ColRow(true, 0));
+						range.add(new ColRow(true, 1));
+					} else {
+						range.add(new ColRow(true, 0));
+					}
+				}
+			}
+
+			if (variable.equals(leftVariable)) {
+				if (leftIsCenter) {
+					range.add(new ColRow(false, 0));
+					range.add(new ColRow(false, 3));
+				} else {
+					if (r == 4) {
+						range.add(new ColRow(false, 0));
+						range.add(new ColRow(false, 1));
+					} else {
+						range.add(new ColRow(false, 0));
+					}
+				}
+			}
+			if (variable.equals(rightVariable)) {
+				if (!leftIsCenter) {
+					range.add(new ColRow(false, 0));
+					range.add(new ColRow(false, 3));
+				} else {
+					if (r == 4) {
+						range.add(new ColRow(false, 0));
+						range.add(new ColRow(false, 1));
+					} else {
+						range.add(new ColRow(false, 0));
+					}
+				}
+			}
+		}
+		return range;
+	}
 }

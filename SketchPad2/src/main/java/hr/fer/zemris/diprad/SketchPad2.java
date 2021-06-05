@@ -51,6 +51,8 @@ public class SketchPad2 extends JFrame {
 	public SketchPad2() {
 		sP = this;// TODO ONLY FOR DEBUG, REMOVE
 		setSize(1000, 600);
+		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		setVisible(true);
 		setTitle("SketchPad");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
