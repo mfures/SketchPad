@@ -86,6 +86,7 @@ public class KTableModel {
 			return;
 		}
 
+		boolean error = false;
 		System.out.println("Našao sam ovoliko tablica:" + tables.size());
 		for (var table : tables) {
 			try {
@@ -125,16 +126,21 @@ public class KTableModel {
 			} catch (Exception e) {
 				System.out.println("Dobio sam iznimku: " + e.getMessage());
 				System.out.println("Crtam tablicu bez varijabli");
+				error = true;
 			}
 
-			debugDrawTable(table);
+			if (!error) {
+				debugDrawTable(table);
+			}
 			// SketchPad2.debugDraw(new SelectionRectangle(table.getBoundingRectangle()));
 			// SketchPad2.debugDraw(new
 			// SelectionRectangle(table.getExpandedBoundingRectangle()));
 
 		}
 
-		clearUsed(bmws);
+		if (!error) {
+			clearUsed(bmws);
+		}
 	}
 
 	private void getTableValuesAndRoundings(KTable table, List<BasicMovementWrapper> bmws) {

@@ -188,11 +188,11 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 			}
 		}
 
-		int[][] margins = new int[table.getR()][table.getS()];
+		int[][] margins = new int[table.getS()][table.getR()];
 		int cornerDist = 3;
 		for (int r = 0; r < table.getR(); r++) {
 			for (int s = 0; s < table.getS(); s++) {
-				margins[r][s] = 2;
+				margins[s][r] = 2;
 			}
 		}
 
@@ -409,6 +409,9 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 		int maxMargin = 0;
 		for (int i = 0; i < rounding.getP2().x; i++) {
 			for (int j = 0; j < rounding.getP2().y; j++) {
+				System.out.println(rounding.getP1());
+				System.out.println(i);
+				System.out.println(j);
 				maxMargin = Math.max(maxMargin, margins[rounding.getP1().x + i][rounding.getP1().y + j]);
 				margins[rounding.getP1().x + i][rounding.getP1().y + j] += 2;
 			}
@@ -612,7 +615,6 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 			} else {
 				drawPicForTable(i / 2, varHeight, valHeight, b, xOffset, yOffset, i, 0);
 				drawPicForTable(i % 2, varHeight, valHeight, b, xOffset, yOffset, i, 1);
-				drawPicForTable(truthTable.getValueAt(i), varHeight, valHeight, b, xOffset, yOffset, i, 4);
 				drawPicForTable(truthTable.getValueAt((i / 2), i % 2), varHeight, valHeight, b, xOffset, yOffset, i, 2);
 			}
 		}

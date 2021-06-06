@@ -61,12 +61,18 @@ public class TruthTable extends GraphicalObject {
 					if (cols.contains(colRow.i)) {
 						col = colRow.i;
 					} else {
+						if (cols.isEmpty()) {
+							col = colRow.i;
+						}
 						cols.add(colRow.i);
 					}
 				} else {
 					if (rows.contains(colRow.i)) {
 						row = colRow.i;
 					} else {
+						if (rows.isEmpty()) {
+							row = colRow.i;
+						}
 						rows.add(colRow.i);
 					}
 				}
@@ -141,12 +147,18 @@ public class TruthTable extends GraphicalObject {
 					if (cols.contains(colRow.i)) {
 						col = colRow.i;
 					} else {
+						if (cols.isEmpty()) {
+							col = colRow.i;
+						}
 						cols.add(colRow.i);
 					}
 				} else {
 					if (rows.contains(colRow.i)) {
 						row = colRow.i;
 					} else {
+						if (rows.isEmpty()) {
+							row = colRow.i;
+						}
 						rows.add(colRow.i);
 					}
 				}
