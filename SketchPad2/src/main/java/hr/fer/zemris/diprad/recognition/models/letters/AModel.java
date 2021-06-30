@@ -52,7 +52,7 @@ public class AModel {
 
 		Line l01 = lines.get(0);
 		Line l02 = lines.get(1);
-		double maxLengthRatio = 1.7;
+		double maxLengthRatio = 3;
 		double minLengthRatio = 1 / maxLengthRatio;
 		double lengthRatio = l01.length() / l02.length();
 		if (lengthRatio > maxLengthRatio || lengthRatio < minLengthRatio) {
@@ -76,7 +76,7 @@ public class AModel {
 
 		double baseLength = MyVector.norm(new Point(l01.getMinX(), l01.getMaxY()),
 				new Point(l02.getMaxX(), l02.getMaxY()));
-		if (l1.length() / baseLength > 2 || l1.length() / baseLength < 0.5) {
+		if (l1.length() / baseLength > 3 || l1.length() / baseLength < 0.3) {
 			//System.out.println("Bad base length ratio: " + l1.length() / baseLength);
 			return null;
 		}
@@ -93,7 +93,7 @@ public class AModel {
 			//System.out.println("l1 doesnt cross both lines");
 			return null;
 		}
-		if (l1.length() / dist > 3) {
+		if (l1.length() / dist > 4) {
 			//System.out.println("L1 too wide: " + l1.length() / dist);
 			return null;
 		}

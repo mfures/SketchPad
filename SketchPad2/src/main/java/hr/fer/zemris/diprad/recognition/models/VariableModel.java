@@ -33,10 +33,10 @@ public class VariableModel {
 			int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
 
 			if (overlapLength > 0) {
-				if ((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x) > 0.45
-						|| (overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x) > 0.45) {
+				if ((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x) > 0.8
+						|| (overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x) > 0.8) {
 					if (cms[0].getCharacter() != "f" && cms[0].getCharacter() != "g" && cms[0].getCharacter() != "W"
-							&& cms[0].getCharacter() != "Y") {
+							&& cms[0].getCharacter() != "Y" && cms[0].getCharacter() != "X") {
 						System.out.println((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x));
 						System.out.println((overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x));
 						throw new RuntimeException(
@@ -47,7 +47,7 @@ public class VariableModel {
 				double distance = -overlapLength;
 				double minDistanceRatio = Math.min((distance) / (bb1.getIp2().x - bb1.getIp1().x),
 						(distance) / (bb2.getIp2().x - bb2.getIp1().x));
-				if (minDistanceRatio > 0.7) {
+				if (minDistanceRatio > 1) {
 					throw new RuntimeException("Variable and index to far away (ratio):" + minDistanceRatio);
 				}
 			}
@@ -56,7 +56,7 @@ public class VariableModel {
 
 			double height2 = bb2.getIp2().y - bb2.getIp1().y;
 
-			if (height2 / height1 < 0.2 || height2 / height1 > 1.8) {
+			if (height2 / height1 < 0.15 || height2 / height1 > 2.1) {
 				throw new RuntimeException("Bad variable height ration" + height2 / height1);
 			}
 
@@ -159,8 +159,8 @@ public class VariableModel {
 		int overlapLength = (bb1.getIp2().x - bb2.getIp1().x);
 
 		if (overlapLength > 0) {
-			if ((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x) > 0.1
-					|| (overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x) > 0.1) {
+			if ((overlapLength * 1.0) / (bb1.getIp2().x - bb1.getIp1().x) > 0.4
+					|| (overlapLength * 1.0) / (bb2.getIp2().x - bb2.getIp1().x) > 0.4) {
 				throw new RuntimeException("Too overlap beetwen variables");
 
 			}
@@ -168,7 +168,7 @@ public class VariableModel {
 			double distance = -overlapLength;
 			double minDistanceRatio = Math.min((distance) / (bb1.getIp2().x - bb1.getIp1().x),
 					(distance) / (bb2.getIp2().x - bb2.getIp1().x));
-			if (minDistanceRatio > 1.1) {
+			if (minDistanceRatio > 1.5) {
 				throw new RuntimeException("Variables to far away (ratio):" + minDistanceRatio);
 			}
 		}
@@ -176,15 +176,15 @@ public class VariableModel {
 		double height1 = vm1.getCharacherHeight();
 		double height2 = vm2.getCharacherHeight();
 
-		if (height2 / height1 < 0.6 || height2 / height1 > 1.0 / 0.6) {
+		if (height2 / height1 < 0.45 || height2 / height1 > 1.0 / 0.45) {
 			throw new RuntimeException("Bad character variable height ration" + height2 / height1 + " " + vm1.variable
 					+ " " + vm2.variable);
 		}
 
-		if (bb1.getIp1().y + 0.5 * height1 > bb2.getIp2().y) {
+		if (bb1.getIp1().y + 0.35 * height1 > bb2.getIp2().y) {
 			throw new RuntimeException("Variable to high: " + vm2.getVariable());
 		}
-		if (bb2.getIp1().y + 0.5 * height1 > bb1.getIp2().y) {
+		if (bb2.getIp1().y + 0.35 * height1 > bb1.getIp2().y) {
 			throw new RuntimeException("Variable to high: " + vm1.getVariable());
 		}
 

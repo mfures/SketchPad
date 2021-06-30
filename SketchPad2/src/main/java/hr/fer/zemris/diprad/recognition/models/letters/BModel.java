@@ -18,6 +18,7 @@ public class BModel {
 	public static CharacterModel recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
 
 		List<CircularObject> cos = initCOs(bmw1);
+		//System.out.println("cos ==" + cos);
 		if (cos == null) {
 			cos = initCOs(bmw2);
 			if (cos == null) {
@@ -33,8 +34,10 @@ public class BModel {
 
 	private static List<CircularObject> initCOs(BasicMovementWrapper bmw) {
 		int breakPosition = CircularModel.generateBestBreakPoint(bmw);
+		// System.out.println("BP: " + breakPosition + " l: " +
+		// bmw.getBm().getPoints().size());
 		if (breakPosition == -1) {
-			// System.out.println("Bad number of break points: ");
+			//System.out.println("Bad number of break points: ");
 			return null;
 		}
 
@@ -42,12 +45,16 @@ public class BModel {
 		int deltaX;
 		if (bmw.getBm().getPoints().get(0).y < bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).y) {
 			co1 = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPosition, bmw);
-			co2 = CircularModel.recognize(bmw.getBm().getPoints(), breakPosition, bmw.getBm().getPoints().size() - 1, bmw);
-			deltaX = bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x - bmw.getBm().getPoints().get(0).x;
+			co2 = CircularModel.recognize(bmw.getBm().getPoints(), breakPosition, bmw.getBm().getPoints().size() - 1,
+					bmw);
+			deltaX = bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x
+					- bmw.getBm().getPoints().get(0).x;
 		} else {
 			co2 = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPosition, bmw);
-			co1 = CircularModel.recognize(bmw.getBm().getPoints(), breakPosition, bmw.getBm().getPoints().size() - 1, bmw);
-			deltaX = -(bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x - bmw.getBm().getPoints().get(0).x);
+			co1 = CircularModel.recognize(bmw.getBm().getPoints(), breakPosition, bmw.getBm().getPoints().size() - 1,
+					bmw);
+			deltaX = -(bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x
+					- bmw.getBm().getPoints().get(0).x);
 		}
 
 		if (co1 == null || co2 == null) {
@@ -57,27 +64,27 @@ public class BModel {
 
 		double avgNorm = (co1.getTotalNorm() + co2.getTotalNorm()) / 2;
 		// Jesu li prošli srednju točku s lijeve strane
-		if (bmw.getBm().getPoints().get(0).x > bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.1) {
+		if (bmw.getBm().getPoints().get(0).x > bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.25) {
 			//System.out.println("1");
 			return null;
 		}
-		if (bmw.getBm().getPoints().get(bmw.getBm().getPoints().size() - 1).x > bmw.getBm().getPoints().get(breakPosition).x
-				+ avgNorm * 0.1) {
+		if (bmw.getBm().getPoints().get(
+				bmw.getBm().getPoints().size() - 1).x > bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.25) {
 			//System.out.println("2");
 			return null;
 		}
 		// Jesu li prošli srednju točku s desne strane
-		if (co1.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.05) {
+		if (co1.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPosition).x - avgNorm * 0.3) {
 			//System.out.println("11");
 			return null;
 		}
-		if (co2.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPosition).x + avgNorm * 0.05) {
+		if (co2.getBoundingBox().getP2().x < bmw.getBm().getPoints().get(breakPosition).x - avgNorm * 0.3) {
 			//System.out.println("22");
 			return null;
 		}
 
 		// je li donja točka dalja od gornje, ili jesu li tu negdje
-		if (deltaX - 0.15 * avgNorm > 0) {
+		if (deltaX - 0.35 * avgNorm > 0) {
 			//System.out.println("3. 1 point to far left in comparioson to last");
 			return null;
 		}
@@ -87,26 +94,26 @@ public class BModel {
 			return null;
 		}
 
-		if (!(co1.getTheta() > 130 || co1.getTheta() < -145)) {
+		if (!(co1.getTheta() > 115 || co1.getTheta() < -130)) {
 			//System.out.println("Bad opening position: " + co1.getTheta());
 			return null;
 		}
 
-		if (!(co2.getTheta() > 145 || co2.getTheta() < -130)) {
+		if (!(co2.getTheta() > 130 || co2.getTheta() < -115)) {
 			//System.out.println("Bad opening position: " + co2.getTheta());
 			return null;
 		}
 
-		if (co2.getBoundingBox().getWidth() < co1.getBoundingBox().getWidth() * 0.8) {
+		if (co2.getBoundingBox().getWidth() * 2.1 < co1.getBoundingBox().getWidth()) {
 			//System.out.println("Upper part too wide");
 			return null;
 		}
 		if (co2.getBoundingBox().getWidth() > co1.getBoundingBox().getWidth() * 2.1) {
-			System.out.println(co2.getBoundingBox().getWidth() / co1.getBoundingBox().getWidth());
+			//System.out.println(co2.getBoundingBox().getWidth() / co1.getBoundingBox().getWidth());
 			//System.out.println("Lower part too wide");
 			return null;
 		}
-		if (co2.getBoundingBox().getHeight() < co1.getBoundingBox().getHeight() * 0.8) {
+		if (co2.getBoundingBox().getHeight() * 2.1 < co1.getBoundingBox().getHeight()) {
 			//System.out.println("Upper part too high");
 			return null;
 		}
@@ -114,7 +121,8 @@ public class BModel {
 			//System.out.println("Lower part too high");
 			return null;
 		}
-		if (co2.getBoundingBox().getP2().x < co1.getBoundingBox().getP2().x - 0.2 * avgNorm) {
+		if (co2.getBoundingBox().getP2().x < co1.getBoundingBox().getP2().x - 0.4 * avgNorm) {
+			//System.out.println("JAA SAM");
 			return null;
 		}
 
@@ -125,12 +133,12 @@ public class BModel {
 	}
 
 	private static boolean angleAndMinMaxTest(CircularObject co1) {
-		if (co1.getTotalAngle() < 240 || co1.getTotalAngle() > 305) {
-			//System.out.println("invalid angle: " + co1.getTotalAngle());
+		if (co1.getTotalAngle() < 220 || co1.getTotalAngle() > 325) {
+			// System.out.println("invalid angle: " + co1.getTotalAngle());
 			return false;
 		}
-		if (co1.getMinMaxRatio() > 0.55 || co1.getMinMaxRatio() < 0.18) {
-			//System.out.println("Bad min max:" + co1.getMinMaxRatio());
+		if (co1.getMinMaxRatio() > 0.7) {
+			// System.out.println("Bad min max:" + co1.getMinMaxRatio());
 			return false;
 		}
 
@@ -140,6 +148,10 @@ public class BModel {
 	private static CharacterModel testForCircularObjectsAndBMW(List<CircularObject> cos, BasicMovementWrapper bmw,
 			BasicMovementWrapper bmw2) {
 		Line l = LinearModel.recognize(bmw);
+		if(l==null) {
+			return null;
+		}
+		
 		if (l.getType() != LineType.VERTICAL) {
 			//System.out.println("Line not vertical");
 			return null;
@@ -153,18 +165,22 @@ public class BModel {
 		double dist2 = l.distanceFromPointToLine(p2);
 		double dist3 = l.distanceFromPointToLine(p3);
 
-		if (l.length() * 0.9 > Math.abs(p1.y - p3.y)) {
+		if (l.length() * 0.7 > Math.abs(p1.y - p3.y)) {
+			//System.out.println(Math.abs(p1.y - p3.y) / l.length());
+			//System.out.println("12222");
 			return null;
 		}
 
 		double totalNorm = cos.get(0).getTotalNorm() + cos.get(1).getTotalNorm();
 
 		if (dist1 - 0.15 * totalNorm > 0 || dist2 - 0.15 * totalNorm > 0 || dist3 - 0.15 * totalNorm > 0) {
+			//System.out.println("22222");
 			return null;
 		}
 
 		if (p1.x - l.forY(p1.y) - 0.075 * totalNorm > 0 || p2.x - l.forY(p2.y) - 0.075 * totalNorm > 0
 				|| p3.x - l.forY(p3.y) - 0.075 * totalNorm > 0) {
+			//System.out.println("32222");
 			return null;
 		}
 

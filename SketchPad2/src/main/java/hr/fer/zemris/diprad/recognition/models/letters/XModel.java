@@ -63,7 +63,7 @@ public class XModel {
 		}
 
 		double lRatio = l1.length() / l2.length();
-		double lengthTolerance = 0.5;
+		double lengthTolerance = 0.7;
 		if (lRatio > (1 + lengthTolerance) || lRatio < (1 / (1 + lengthTolerance))) {
 			// System.out.println("10");
 			return null;
@@ -86,7 +86,8 @@ public class XModel {
 
 		if (distanceRatioX > maxRatio || distanceRatioY > maxRatio || distanceRatioY < minRatio
 				|| distanceRatioY < minRatio) {
-			// System.out.println("distance ratio x: "+distanceRatioX+" y: "+distanceRatioY);
+			// System.out.println("distance ratio x: "+distanceRatioX+" y:
+			// "+distanceRatioY);
 			return null;
 		}
 

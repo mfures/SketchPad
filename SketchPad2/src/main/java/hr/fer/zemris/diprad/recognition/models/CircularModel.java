@@ -45,7 +45,7 @@ public class CircularModel {
 				endIndex);
 
 		if (!(minMaxRatio > 0.1)) {
-			// System.out.println("Bad max/min ratio:" + minMaxRatio);
+			//System.out.println("Bad max/min ratio:" + minMaxRatio);
 			return null;
 		}
 
@@ -117,8 +117,6 @@ public class CircularModel {
 		double total = positive + negative;
 		positive /= (total);
 		negative /= (total);
-		// System.out.println(positive);
-		// System.out.println(negative);
 		if (positive > 0.775) {
 			return Math.abs(Math.toDegrees(totalAngle));
 		}

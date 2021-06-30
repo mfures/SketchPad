@@ -2,6 +2,7 @@ package hr.fer.zemris.diprad.recognition.models.numbers;
 
 import java.util.List;
 
+import hr.fer.zemris.diprad.recognition.models.BreakPointsUtil;
 import hr.fer.zemris.diprad.recognition.models.CharacterModel;
 import hr.fer.zemris.diprad.recognition.models.CircularModel;
 import hr.fer.zemris.diprad.recognition.models.LinearModel;
@@ -14,21 +15,16 @@ public class TwoModel {
 	private static final String TWO = "2";
 
 	public static CharacterModel recognize(BasicMovementWrapper bmw) {
-		List<Integer> breakPoints = LinearModel.acumulateBreakPointsWhichAreClose(bmw.getBm().getPoints());
-		if (breakPoints.size() < 3) {
-			// System.out.println("Bad bp size");
+		int bp = BreakPointsUtil.calculateBestBreakPoint(bmw.getBm().getPoints());
+		//System.out.println("Našo: " + bp);
+		
+		if(bp<=0||bp>=bmw.getBm().getPoints().size()-1) {
+			//System.out.println("No break pointŁ");
 			return null;
 		}
 
-		int bpSize = breakPoints.size();
-		if (bmw.getBm().getPoints().get(breakPoints.get(bpSize - 2)).x >= bmw.getBm().getPoints()
-				.get(breakPoints.get(bpSize - 1)).x) {
-			// System.out.println("Bad line");
-			return null;
-		}
-
-		Line l = LinearModel.recognize(bmw, breakPoints.get(bpSize - 2), breakPoints.get(bpSize - 1));
-		CircularObject co = CircularModel.recognize(bmw.getBm().getPoints(), 0, breakPoints.get(bpSize - 2), bmw);
+		Line l = LinearModel.recognize(bmw, bp, bmw.getBm().getPoints().size()-1);
+		CircularObject co = CircularModel.recognize(bmw.getBm().getPoints(), 0, bp, bmw);
 		if (co == null || l == null) {
 			// System.out.println("Some are null:" + co + " " + l);
 			return null;
@@ -37,29 +33,29 @@ public class TwoModel {
 			// System.out.println("Line not horizonatl");
 			return null;
 		}
-		if (co.getMinMaxRatio() > 0.55 || co.getMinMaxRatio() < 0.15) {
+		if (co.getMinMaxRatio() > 0.65) {
 			// System.out.println("co minMax: " + co.getMinMaxRatio());
 			return null;
 		}
 
-		if (co.getTotalAngle() < 220 || co.getTotalAngle() > 330) {
+		if (co.getTotalAngle() < 210 || co.getTotalAngle() > 340) {
 			// System.out.println("invalid angle: " + co.getTotalAngle());
 			return null;
 		}
 
-		if (co.getTheta() > 175 || co.getTheta() < 105) {
+		if (co.getTheta() > 185 || co.getTheta() < 95) {
 			// System.out.println("Bad opening position: " + co.getTheta());
 			return null;
 		}
 
 		double heightWidthRatio = co.getBoundingBox().getHeight() / l.getBoundingBox().getWidth();
-		if (heightWidthRatio > 2.5 || heightWidthRatio < 0.7) {
+		if (heightWidthRatio > 3 || heightWidthRatio < 0.5) {
 			// System.out.println("Bad heightWidthRatio: " + heightWidthRatio);
 			return null;
 		}
 
 		double widthWidthRatio = co.getBoundingBox().getWidth() / l.getBoundingBox().getWidth();
-		if (widthWidthRatio > 1.5 || widthWidthRatio < 0.4) {
+		if (widthWidthRatio > 2.1 || widthWidthRatio < 0.2) {
 			// System.out.println("Bad widthWidthRatio: " + widthWidthRatio);
 			return null;
 		}

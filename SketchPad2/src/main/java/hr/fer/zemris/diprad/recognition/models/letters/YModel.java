@@ -13,28 +13,27 @@ public class YModel {
 
 	public static CharacterModel recognize(BasicMovementWrapper bmw1, BasicMovementWrapper bmw2) {
 		if (LinearModel.acumulateBreakPointsWhichAreClose(bmw1.getBm().getPoints()).size() != 2) {
-			// System.out.println("1");
+			//System.out.println("1");
 			return null;
 		}
 		if (LinearModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size() != 2) {
-			// System.out.println("2. breakPoints size: "
-			// +
-			// LineModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size());
+			//System.out.println("2. breakPoints size: "
+			//		+ LinearModel.acumulateBreakPointsWhichAreClose(bmw2.getBm().getPoints()).size());
 			return null;
 		}
 		Line l1 = LinearModel.recognize(bmw1);
 		if (l1 == null) {
-			// System.out.println("3");
+			//System.out.println("3");
 			return null;
 		}
 
 		Line l2 = LinearModel.recognize(bmw2);
 		if (l2 == null) {
-			// System.out.println("4");
+			//System.out.println("4");
 			return null;
 		}
 		if (l1.getSlope() / l2.getSlope() > 0) {
-			// System.out.println("5");
+			//System.out.println("5");
 			return null;
 		}
 
@@ -45,35 +44,35 @@ public class YModel {
 		}
 
 		if (l1.getSlope() > 0) {
-			// System.out.println("Bad orientation");
+			//System.out.println("Bad orientation");
 			return null;
 		}
 
 		if (l1.getType() == LineType.HORIZONTAL && l2.getType() == LineType.VERTICAL) {
-			// System.out.println("6");
+			//System.out.println("6");
 			return null;
 		}
 
 		if (l2.getType() == LineType.HORIZONTAL && l1.getType() == LineType.VERTICAL) {
-			// System.out.println("7");
+			//System.out.println("7");
 			return null;
 		}
 
 		if (!(l1.getSlope() >= (-20) && l1.getSlope() <= -0.3)) {
-			// System.out.println(l1.getSlope());
-			// System.out.println("8");
+			//System.out.println(l1.getSlope());
+			//System.out.println("8");
 			return null;
 		}
 		if (!(l2.getSlope() <= (20) && l2.getSlope() >= 0.3)) {
-			// System.out.println("9");
+			//System.out.println("9");
 			return null;
 		}
 
 		double lRatio = l2.length() / l1.length();
-		double minRatio = 0.25;
-		double maxRatio = 0.6;
+		double minRatio = 0.15;
+		double maxRatio = 0.8;
 		if (lRatio > maxRatio || lRatio < minRatio) {
-			// System.out.println(lRatio + " 10");
+			//System.out.println(lRatio + " 10");
 			return null;
 		}
 
@@ -83,20 +82,20 @@ public class YModel {
 		}
 
 		double dist = l1.distanceFromPointToLine(p);
-		if (dist > l1.length() * 0.10) {
-			// System.out.println("Bad overlap");
+		if (dist > l1.length() * 0.18) {
+			//System.out.println("Bad overlap" + dist / l1.length());
 			return null;
 		}
 		if (l2.getAverageY() > l1.getAverageY()) {
-			// System.out.println("L2 to low");
+			//System.out.println("L2 to low");
 			return null;
 		}
 
 		double minL1y = Math.min(l1.getP1().y, l1.getP2().y);
 		double minL2y = Math.min(l2.getP1().y, l2.getP2().y);
 
-		if (minL2y - minL1y > 0.2 * l2.length()) {
-			// System.out.println("l2 to high");
+		if (minL2y - minL1y > 0.35 * l2.length()) {
+			//System.out.println("l2 to high");
 			return null;
 		}
 

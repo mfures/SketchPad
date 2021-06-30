@@ -409,9 +409,6 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 		int maxMargin = 0;
 		for (int i = 0; i < rounding.getP2().x; i++) {
 			for (int j = 0; j < rounding.getP2().y; j++) {
-				System.out.println(rounding.getP1());
-				System.out.println(i);
-				System.out.println(j);
 				maxMargin = Math.max(maxMargin, margins[rounding.getP1().x + i][rounding.getP1().y + j]);
 				margins[rounding.getP1().x + i][rounding.getP1().y + j] += 2;
 			}
@@ -547,6 +544,23 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 		g2d.drawImage(img, x, y, null);
 	}
 
+	private void drawPicForTruthTable(int value, double avgWidth, double avgHeight, Point a2, double xOffset,
+			double yOffset, int i, int j) {
+		int x = (int) (a2.x + xOffset + j * avgWidth);
+		int y = (int) (a2.y + yOffset + i * avgHeight);
+		Image img = null;
+		if (value == 0) {
+			img = img0;
+		} else if (value == 1) {
+			img = img1;
+		} else if (value == 2) {
+			img = imgx;
+		} else {
+			img = img0;
+		}
+		g2d.drawImage(img, x, y, null);
+	}
+
 	@Override
 	public void visit(TruthTable truthTable) {
 		Point a = truthTable.getP();
@@ -600,26 +614,24 @@ public class GraphicalObjectPainter implements GraphicalObjectVisitor {
 		b.y += varHeight;
 		for (int i = 0; i < valRowCount; i++) {
 			if (valRowCount == 16) {
-				drawPicForTable(i / 8, varHeight, valHeight, b, xOffset, yOffset, i, 0);
-				drawPicForTable((i / 4) % 2, varHeight, valHeight, b, xOffset, yOffset, i, 1);
-				drawPicForTable((i / 2) % 2, varHeight, valHeight, b, xOffset, yOffset, i, 2);
-				drawPicForTable(i % 2, varHeight, valHeight, b, xOffset, yOffset, i, 3);
-				drawPicForTable(truthTable.getValueAt(i / 8, (i / 4) % 2, (i / 2) % 2, i % 2), varHeight, valHeight, b,
+				drawPicForTruthTable(i / 8, varHeight, valHeight, b, xOffset, yOffset, i, 0);
+				drawPicForTruthTable((i / 4) % 2, varHeight, valHeight, b, xOffset, yOffset, i, 1);
+				drawPicForTruthTable((i / 2) % 2, varHeight, valHeight, b, xOffset, yOffset, i, 2);
+				drawPicForTruthTable(i % 2, varHeight, valHeight, b, xOffset, yOffset, i, 3);
+				drawPicForTruthTable(truthTable.getValueAt(i / 8, (i / 4) % 2, (i / 2) % 2, i % 2), varHeight, valHeight, b,
 						xOffset, yOffset, i, 4);
 			} else if (valRowCount == 8) {
-				drawPicForTable(i / 4, varHeight, valHeight, b, xOffset, yOffset, i, 0);
-				drawPicForTable((i / 2) % 2, varHeight, valHeight, b, xOffset, yOffset, i, 1);
-				drawPicForTable(i % 2, varHeight, valHeight, b, xOffset, yOffset, i, 2);
-				drawPicForTable(truthTable.getValueAt((i / 4), (i / 2) % 2, i % 2), varHeight, valHeight, b, xOffset,
+				drawPicForTruthTable(i / 4, varHeight, valHeight, b, xOffset, yOffset, i, 0);
+				drawPicForTruthTable((i / 2) % 2, varHeight, valHeight, b, xOffset, yOffset, i, 1);
+				drawPicForTruthTable(i % 2, varHeight, valHeight, b, xOffset, yOffset, i, 2);
+				drawPicForTruthTable(truthTable.getValueAt((i / 4), (i / 2) % 2, i % 2), varHeight, valHeight, b, xOffset,
 						yOffset, i, 3);
 			} else {
-				drawPicForTable(i / 2, varHeight, valHeight, b, xOffset, yOffset, i, 0);
-				drawPicForTable(i % 2, varHeight, valHeight, b, xOffset, yOffset, i, 1);
-				drawPicForTable(truthTable.getValueAt((i / 2), i % 2), varHeight, valHeight, b, xOffset, yOffset, i, 2);
+				drawPicForTruthTable(i / 2, varHeight, valHeight, b, xOffset, yOffset, i, 0);
+				drawPicForTruthTable(i % 2, varHeight, valHeight, b, xOffset, yOffset, i, 1);
+				drawPicForTruthTable(truthTable.getValueAt((i / 2), i % 2), varHeight, valHeight, b, xOffset, yOffset, i, 2);
 			}
 		}
-
-		// TODO Auto-generated method stub
 
 	}
 }

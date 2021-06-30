@@ -4,6 +4,7 @@ import hr.fer.zemris.diprad.recognition.Tester;
 import hr.fer.zemris.diprad.recognition.models.KTableModel;
 import hr.fer.zemris.diprad.recognition.objects.Line;
 
+
 public class LineLengthTester implements Tester<Line> {
 	@Override
 	public boolean test(Line l1, Line l2) {
@@ -11,3 +12,7 @@ public class LineLengthTester implements Tester<Line> {
 	}
 
 }
+
+
+
+

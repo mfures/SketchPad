@@ -36,7 +36,7 @@ public class DModel {
 			return null;
 		}
 
-		if (co.getMinMaxRatio() > 0.55 || co.getMinMaxRatio() < 0.15) {
+		if (co.getMinMaxRatio() > 0.7 ) {
 			// System.out.println("co minMax: " + co.getMinMaxRatio());
 			return null;
 		}
@@ -56,12 +56,12 @@ public class DModel {
 			return null;
 		}
 
-		if (co.getTotalAngle() < 220 || co.getTotalAngle() > 305) {
+		if (co.getTotalAngle() < 205 || co.getTotalAngle() > 325) {
 			// System.out.println("invalid angle: " + co.getTotalAngle());
 			return null;
 		}
 
-		if (!(co.getTheta() > 145 || co.getTheta() < -145)) {
+		if (!(co.getTheta() > 130 || co.getTheta() < -130)) {
 			// System.out.println("Bad opening position: " + co.getTheta());
 			return null;
 		}
@@ -71,27 +71,27 @@ public class DModel {
 
 		double dist1 = l.distanceFromPointToLine(p1);
 		double dist2 = l.distanceFromPointToLine(p2);
-		if (l.length() * 0.9 > Math.abs(p1.y - p2.y)) {
+		if (l.length() * 0.75 > Math.abs(p1.y - p2.y)) {
 			return null;
 		}
 
 		// System.out.println(dist1 + " " + dist2);
 		// System.out.println(co.getTotalNorm());
 
-		if (dist1 - 0.15 * co.getTotalNorm() > 0 || dist2 - 0.15 * co.getTotalNorm() > 0) {
+		if (dist1 - 0.35 * co.getTotalNorm() > 0 || dist2 - 0.35 * co.getTotalNorm() > 0) {
 			return null;
 		}
 
 		// System.out.println(p1.x + " " + co.getTotalNorm() + " " + l.forY(p1.y));
 		// System.out.println(p2.x + " " + co.getTotalNorm() + " " + l.forY(p2.y));
 
-		if (p1.x - l.forY(p1.y) - 0.075 * co.getTotalNorm() > 0
-				|| p2.x - l.forY(p2.y) - 0.075 * co.getTotalNorm() > 0) {
+		if (p1.x - l.forY(p1.y) - 0.2 * co.getTotalNorm() > 0
+				|| p2.x - l.forY(p2.y) - 0.2 * co.getTotalNorm() > 0) {
 			return null;
 		}
 
 		double widthHeightRatio = co.getBoundingBox().getWidth() / co.getBoundingBox().getHeight();
-		if (widthHeightRatio > 1.05 || widthHeightRatio < 0.3) {
+		if (widthHeightRatio > 2 || widthHeightRatio < 0.2) {
 			return null;
 		}
 

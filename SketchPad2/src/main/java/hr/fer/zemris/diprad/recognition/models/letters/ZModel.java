@@ -31,7 +31,7 @@ public class ZModel {
 			return null;
 		}
 
-		if (!(l2.getSlope() >= (-5) && l2.getSlope() <= -0.3)) {
+		if (!(l2.getSlope() >= (-6) && l2.getSlope() <= -0.3)) {
 			return null;
 		}
 
@@ -40,7 +40,7 @@ public class ZModel {
 		}
 
 		double l13ratio = l1.length() / l3.length();
-		double lengthTolerance = 0.5;
+		double lengthTolerance = 1.5;
 		if (l13ratio > (1 + lengthTolerance) || l13ratio < (1 / (1 + lengthTolerance))) {
 			return null;
 		}

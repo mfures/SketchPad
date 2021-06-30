@@ -37,10 +37,6 @@ public class FModel {
 			// System.out.println("2.Null je");
 			return null;
 		}
-		if (co.getMinMaxRatio() < 0.15) {
-			// System.out.println("MinMax: " + co.getMinMaxRatio());
-			return null;
-		}
 
 		Line l2 = LinearModel.recognize(bmw, segmentIndexes.get(0), segmentIndexes.get(1));
 		Line l1 = LinearModel.recognize(bmw, segmentIndexes.get(2), segmentIndexes.get(3));
@@ -68,13 +64,13 @@ public class FModel {
 			// System.out.println("To high");
 			return null;
 		}
-		if (lHorizontal.getAverageY() > l1.getMaxY() - 0.10 * l1.length()) {
+		if (lHorizontal.getAverageY() > l1.getMaxY() - 0.25 * l1.length()) {
 			// System.out.println("To low");
 			return null;
 		}
 
 		double xAtAverageY = l1.forY(lHorizontal.getAverageY());
-		double forcedPassedLength = 0.1 * l1.length();
+		double forcedPassedLength = 0.05 * l1.length();
 		if (lHorizontal.getMinX() + forcedPassedLength > xAtAverageY
 				|| lHorizontal.getMaxX() - forcedPassedLength < xAtAverageY) {
 			// System.out.println("Horisontal line doesnt cross");
@@ -82,7 +78,7 @@ public class FModel {
 		}
 
 		double widthWidthRatio = lHorizontal.length() / bmw.getBm().getBoundingBox().getWidth();
-		if (widthWidthRatio < 0.3 || widthWidthRatio > 3) {
+		if (widthWidthRatio < 0.2 || widthWidthRatio > 4) {
 			// System.out.println("ww:" + widthWidthRatio);
 			return null;
 		}

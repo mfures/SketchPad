@@ -2,6 +2,7 @@ package hr.fer.zemris.diprad.drawing.graphical.objects;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -404,7 +405,26 @@ public class KTable extends GraphicalObject {
 			throw new RuntimeException("Bad variables right(count): " + rightVMs.size());
 		}
 
-		boolTableVariables = new TreeSet<>();
+		boolTableVariables = new TreeSet<>(new Comparator<String>() {
+
+			@Override
+			public int compare(String o1, String o2) {
+				if (o1.length() <= 1 || o2.length() <= 1) {
+					return o1.compareTo(o2);
+				}
+
+				String[] s1 = o1.split("");
+				String[] s2 = o2.split("");
+
+				int r = s1[0].compareTo(s2[0]);
+				if (r == 0) {
+					r = s2[1].compareTo(s1[1]);
+				}
+
+				return r;
+			}
+		});
+
 		for (VariableModel vm : leftVMs) {
 			boolTableVariables.add(vm.getVariable());
 		}

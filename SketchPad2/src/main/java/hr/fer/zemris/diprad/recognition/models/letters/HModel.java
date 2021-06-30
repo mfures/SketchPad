@@ -42,7 +42,7 @@ public class HModel {
 			return null;
 		}
 
-		if (co.getMinMaxRatio() > 0.55 || co.getMinMaxRatio() < 0.15) {
+		if (co.getMinMaxRatio() > 0.65) {
 			// System.out.println("co minMax: " + co.getMinMaxRatio());
 			return null;
 		}
@@ -52,26 +52,26 @@ public class HModel {
 			return null;
 		}
 
-		if (co.getTotalAngle() < 220 || co.getTotalAngle() > 305) {
+		if (co.getTotalAngle() < 205 || co.getTotalAngle() > 325) {
 			// System.out.println("invalid angle: " + co.getTotalAngle());
 			return null;
 		}
 
-		if (co.getTheta() > 125 || co.getTheta() < 55) {
+		if (co.getTheta() > 135 || co.getTheta() < 65) {
 			// System.out.println("Bad opening position: " + co.getTheta());
 			return null;
 		}
-		if (co.getBoundingBox().getWidth() > 0.9 * l.length() || co.getBoundingBox().getWidth() < 0.2 * l.length()) {
+		if (co.getBoundingBox().getWidth() > 1.5 * l.length() || co.getBoundingBox().getWidth() < 0.1 * l.length()) {
 			// System.out.println("bad co width ratio: " + co.getBoundingBox().getWidth() /
 			// l.length());
 		}
-		if (co.getBoundingBox().getHeight() > 0.7 * l.length() || co.getBoundingBox().getHeight() < 0.3 * l.length()) {
+		if (co.getBoundingBox().getHeight() > 1.7 * l.length() || co.getBoundingBox().getHeight() < 0.15 * l.length()) {
 			// System.out.println("bad co height ratio: " + co.getBoundingBox().getHeight()
 			// / l.length());
 		}
 
 		double deltaY = co.getBoundingBox().getP2().y - l.getMaxY();
-		if (Math.abs(deltaY) > 0.30 * l.length()) {
+		if (Math.abs(deltaY) > 0.65 * l.length()) {
 			// System.out.println("Delta y");
 //			System.out.println(Math.abs(deltaY));
 //			System.out.println(0.30 * l.length());

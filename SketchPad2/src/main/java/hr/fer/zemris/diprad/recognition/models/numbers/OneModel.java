@@ -45,13 +45,13 @@ public class OneModel {
 		Line l2 = lines.get(1);
 		// System.out.println(l2.getSlope());
 
-		if (!(l1.getSlope() >= (-4.5) && l1.getSlope() <= -0.3 && Math.abs(l2.getSlope()) > 4.5)) {
+		if (!(l1.getSlope() >= (-6) && l1.getSlope() <= -0.15 && Math.abs(l2.getSlope()) > 4.5)) {
 			//System.out.println("1");
 			return null;
 		}
 
 		// System.out.println(l1.length() / l2.length());
-		if (l1.length() / l2.length() > 0.9 || l1.length() / l2.length() < 0.15) {
+		if (l1.length() / l2.length() > 1.1 || l1.length() / l2.length() < 0.1) {
 			//System.out.println("ratio: "+l1.length()/l2.length());
 			return null;
 		}

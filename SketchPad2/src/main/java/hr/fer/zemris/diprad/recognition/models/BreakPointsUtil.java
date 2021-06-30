@@ -53,14 +53,14 @@ public class BreakPointsUtil {
 			cos = MyVector.scalarProduct(vectors.get(i), vectors.get(i + 1))
 					/ (vectors.get(i).norm() * vectors.get(i + 1).norm());
 
-			//System.out.println("i:" + i + " cos:" + cos);
+			//System.out.println("i:" + i + " cos:" + cos+" index:"+ vectors.get(i).i2);
 			if (cos < cosMin) {
 				cosMin = cos;
 				min = vectors.get(i).i2;
 			}
 		}
 
-		//System.out.println(min);
+		// System.out.println(min);
 		return min;
 	}
 }

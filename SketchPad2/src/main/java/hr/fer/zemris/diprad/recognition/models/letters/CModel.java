@@ -14,22 +14,22 @@ public class CModel {
 			//System.out.println("No circular object found");
 			return null;
 		}
-		if (co.getTotalAngle() < 240 || co.getTotalAngle() > 305) {
+		if (co.getTotalAngle() < 215 || co.getTotalAngle() > 325) {
 			//System.out.println("invalid angle: " + co.getTotalAngle());
 			return null;
 		}
-		if (co.getMinMaxRatio() > 0.55 || co.getMinMaxRatio() < 0.18) {
+		if (co.getMinMaxRatio() > 0.65) {
 			//System.out.println("Bad min max:" + co.getMinMaxRatio());
 			return null;
 		}
 
-		if (co.getTheta() > 35 || co.getTheta() < -35) {
+		if (co.getTheta() > 50 || co.getTheta() < -50) {
 			//System.out.println("Bad opening position: " + co.getTheta());
 			return null;
 		}
 
 		double widthHeightRatio = co.getBoundingBox().getWidth() / co.getBoundingBox().getHeight();
-		if (widthHeightRatio > 1.5 || widthHeightRatio < 0.55) {
+		if (widthHeightRatio > 2.5 || widthHeightRatio < 0.35) {
 			//System.out.println("Bad widthHeight: " + widthHeightRatio);
 			return null;
 		}

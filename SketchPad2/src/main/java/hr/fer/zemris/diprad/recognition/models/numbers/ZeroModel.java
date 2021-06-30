@@ -18,10 +18,10 @@ public class ZeroModel {
 			// System.out.println("Not ful circle");
 			return null;
 		}
-		if (co.getMinMaxRatio() > 0.65 || co.getMinMaxRatio() < 0.25) {
+		if (co.getMinMaxRatio() > 0.8) {
 			// System.out.println("Bad min max:" + co.getMinMaxRatio());
 		}
-		if (Math.abs(co.getThetaMaxDistance()) > 140 || Math.abs(co.getThetaMaxDistance()) < 40) {
+		if (Math.abs(co.getThetaMaxDistance()) > 145 || Math.abs(co.getThetaMaxDistance()) < 35) {
 			// System.out.println("Bad angle:" + co.getThetaMaxDistance());
 			return null;
 		}

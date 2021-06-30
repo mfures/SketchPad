@@ -43,10 +43,6 @@ public class GModel {
 			// System.out.println("2.Null je");
 			return null;
 		}
-		if (co.getMinMaxRatio() < 0.2) {
-			// System.out.println("MinMax: " + co.getMinMaxRatio());
-			return null;
-		}
 
 		Line l1 = LinearModel.recognize(bmw, segmentIndexes.get(0), segmentIndexes.get(1));
 		Line l2 = LinearModel.recognize(bmw, segmentIndexes.get(2), segmentIndexes.get(3));
@@ -72,11 +68,11 @@ public class GModel {
 
 		double widthWidthRatio = co.getBoundingBox().getWidth() / co1.getBoundingBox().getWidth();
 		double heightHeightRatio = co.getBoundingBox().getHeight() / co1.getBoundingBox().getHeight();
-		if (widthWidthRatio < 0.3 || widthWidthRatio > 3) {
+		if (widthWidthRatio < 0.2 || widthWidthRatio > 4.5) {
 			// System.out.println("ww:" + widthWidthRatio);
 			return null;
 		}
-		if (heightHeightRatio < 0.3 || heightHeightRatio > 3) {
+		if (heightHeightRatio < 0.2 || heightHeightRatio > 4.5) {
 			// System.out.println("hh:" + heightHeightRatio);
 			return null;
 		}

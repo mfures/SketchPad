@@ -51,7 +51,7 @@ public class WModel {
 		}
 
 		double averageLength = (l1.length() + l2.length() + l3.length() + l4.length()) / 4;
-		double lenghtTolerance = 0.2;
+		double lenghtTolerance = 0.5;
 		double coefMx = (1 + lenghtTolerance);
 		double coefMn = (1 - lenghtTolerance);
 		for (Line l : lines) {
